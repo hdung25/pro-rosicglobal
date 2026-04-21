@@ -1,0 +1,297 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   GLOBAL BASE STYLES
+   ============================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #ffffff;
+  color: #0d2137;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================
+   TYPOGRAPHY — Vietnamese diacritic fix
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 800;
+  line-height: 1.1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  font-optical-sizing: auto;
+}
+
+/* Force GPU rendering for large hero text to fix Vietnamese glyphs */
+.hero-title {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+  font-variant-ligatures: none;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f0f4f8;
+}
+::-webkit-scrollbar-thumb {
+  background: #0d2137;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1a4480;
+}
+
+/* ============================================
+   DROPDOWN NAVIGATION
+   ============================================ */
+.nav-dropdown {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+  pointer-events: none;
+}
+
+.nav-item:hover .nav-dropdown {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition-delay: 0ms;
+}
+
+.nav-item .nav-dropdown {
+  transition-delay: 100ms;
+}
+
+.nav-sub-item {
+  position: relative;
+}
+
+.nav-sub-item::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #e9c46a;
+  transition: width 0.3s ease;
+}
+
+.nav-sub-item:hover::after {
+  width: 100%;
+}
+
+/* ============================================
+   HERO SLIDER
+   ============================================ */
+.hero-slide {
+  position: absolute;
+  inset: 0;
+}
+
+/* ============================================
+   PRODUCT CARD HOVER
+   ============================================ */
+.product-card {
+  overflow: hidden;
+}
+
+.product-card img {
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.08);
+}
+
+.product-card .overlay {
+  background: linear-gradient(to top, rgba(13,33,55,0.85) 0%, transparent 55%);
+  transition: background 0.3s ease;
+}
+
+/* ============================================
+   BLOG CARD HOVER
+   ============================================ */
+.blog-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(13,33,55,0.12);
+}
+
+/* ============================================
+   FORM LINE INPUT
+   ============================================ */
+.line-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 12px 0;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.line-input::placeholder {
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.line-input:focus {
+  border-bottom-color: #e9c46a;
+}
+
+/* ============================================
+   TESTIMONIAL DOTS
+   ============================================ */
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.dot.active {
+  background-color: #e9c46a;
+  transform: scale(1.3);
+}
+
+/* ============================================
+   BACK TO TOP
+   ============================================ */
+.back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 48px;
+  height: 48px;
+  background: #0d2137;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 999;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(13,33,55,0.45);
+}
+
+.back-to-top:hover {
+  background: #e9c46a;
+  color: #0d2137;
+  transform: translateY(-4px);
+}
+
+/* ============================================
+   SECTION HEADINGS
+   ============================================ */
+.section-label {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #1a4480;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #0d2137;
+}
+
+/* ============================================
+   NEWSLETTER INPUT
+   ============================================ */
+.newsletter-input {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-right: none;
+  color: white;
+  padding: 12px 16px;
+  font-size: 14px;
+  outline: none;
+  flex: 1;
+  font-family: 'Inter', sans-serif;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+.text-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Flash overlay for hero */
+@keyframes heroFlash {
+  0%   { opacity: 0.5; }
+  100% { opacity: 0; }
+}
+
+.hero-flash {
+  animation: heroFlash 0.4s ease-out forwards;
+}
+
+/* ============================================
+   NAVY ACCENT LINE (decorative)
+   ============================================ */
+.accent-bar {
+  display: inline-block;
+  width: 48px;
+  height: 3px;
+  background: linear-gradient(to right, #e9c46a, #0d2137);
+  margin-bottom: 16px;
+}
