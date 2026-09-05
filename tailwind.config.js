@@ -7,28 +7,69 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Navy Blue primary palette
-        'organic-green':  '#0d2137',   // deep navy (was organic green)
-        'organic-mid':    '#1a4480',   // medium navy
-        'organic-light':  '#2d72d9',   // bright blue accent
-        // Accent
-        'accent-yellow':  '#e9c46a',   // warm yellow (unchanged)
-        'accent-gold':    '#f4a261',   // orange-gold
+        // Deep Navy corporate & export credibility
+        'navy-deep':     '#061325',
+        'navy-main':     '#0b1e36',
+        'navy-card':     '#0f2644',
+        'navy-light':    '#173864',
+        'navy-accent':   '#1e477e',
+
+        // Emerald & organic nature green
+        'organic-green': '#1b4332',
+        'organic-emerald':'#2d6a4f',
+        'organic-leaf':  '#40916c',
+        'organic-mint':  '#74c69d',
+        'organic-soft':  '#e9f5ed',
+
+        // Gold & warm accents
+        'accent-yellow': '#e9c46a',
+        'accent-gold':   '#f4a261',
+        'accent-amber':  '#e76f51',
+        'accent-sun':    '#ffb703',
+
         // Dark backgrounds
-        'dark-charcoal':  '#0a1628',   // very deep navy-black
-        'dark-bg':        '#0d1b2a',   // near-black navy
-        'warm-gray':      '#f0f4f8',   // cool light gray
-        'text-muted':     '#6b7280',
-        // Extra navy shades
-        'navy-hover':     '#0a1e3d',
-        'navy-border':    '#1e3a6e',
+        'dark-charcoal': '#07111e',
+        'dark-bg':       '#091524',
+        'warm-gray':     '#f4f7fa',
+        'warm-surface':  '#f8fafc',
+        'text-muted':    '#64748b',
       },
       fontFamily: {
-        'heading': ['Nunito Sans', 'sans-serif'],
-        'body':    ['Inter', 'sans-serif'],
+        'heading': ['"Nunito Sans"', '"Plus Jakarta Sans"', 'sans-serif'],
+        'sans':    ['"Inter"', 'sans-serif'],
+        'body':    ['"Inter"', 'sans-serif'],
+        'display': ['"Plus Jakarta Sans"', '"Nunito Sans"', 'sans-serif'],
       },
-      backgroundImage: {
-        'hero-gradient': 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.2) 100%)',
+      animation: {
+        'marquee': 'marquee 28s linear infinite',
+        'marquee-slow': 'marquee 45s linear infinite',
+        'marquee-reverse': 'marquee-reverse 32s linear infinite',
+        'float': 'float 4s ease-in-out infinite',
+        'pulse-glow': 'pulseGlow 2.5s ease-in-out infinite',
+      },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        'marquee-reverse': {
+          '0%': { transform: 'translateX(-50%)' },
+          '100%': { transform: 'translateX(0%)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        pulseGlow: {
+          '0%, 100%': { opacity: 0.8, transform: 'scale(1)' },
+          '50%': { opacity: 1, transform: 'scale(1.05)' },
+        },
+      },
+      boxShadow: {
+        'gold-glow': '0 0 25px rgba(233, 196, 106, 0.35)',
+        'emerald-glow': '0 0 25px rgba(45, 106, 79, 0.35)',
+        'card-hover': '0 20px 40px -15px rgba(11, 30, 54, 0.15)',
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
       },
     },
   },
