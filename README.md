@@ -1,16 +1,31 @@
-# React + Vite
+# Hồng Tâm Rosic Global
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Vite + React landing page, redesigned around the supplied HTP brand mark, a light ivory/gold palette, and local agricultural imagery. Existing section anchors are preserved.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `npm install`
+- `npm run dev`
+- `npm run lint`
+- `npm run build`
+- `npx playwright test`
 
-## React Compiler
+## Business contacts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Set `VITE_CONTACT_EMAIL`, `VITE_CONTACT_PHONE`, and `VITE_CONTACT_ZALO` to verified business channels before building. These are public client-side values, not secrets. See `.env.example`.
 
-## Expanding the ESLint configuration
+Without a verified email, the form creates a reviewable local request with download/copy. With one, the review also offers a mailto link. The visitor completes sending in their own email application. There is no backend submission or false sent confirmation.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Publishing
+
+The existing `.vercel` link targets `pro-rosicglobal`. Deploy with `vercel deploy --prod --yes` after build and browser checks. Public URL: https://pro-rosicglobal.vercel.app/.
+
+## Content and design
+
+- `src/data.js`: product catalogue, journey and complete editorial articles.
+- `src/components/Contact.jsx`: validated local quote draft flow.
+- `src/contact-config.js`: public contact configuration.
+- `docs/assets.md`: image provenance, prompts and limitations.
+- `docs/redesign.md`: original audit and release checks.
+
+Motion and Radix Dialog supply animation and accessible modal behavior; Lucide supplies icons. Fonts are served locally with Fontsource. Generated/stock images illustrate subjects rather than prove company ownership of facilities or a particular product batch. Unsupported certification, statistics, testimonials and business contact placeholders from the previous implementation were removed.

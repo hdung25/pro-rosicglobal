@@ -1,0 +1,7 @@
+artifacts
+playwright-report
+test-results
+tests
+playwright.config.js
+docs
+README.md

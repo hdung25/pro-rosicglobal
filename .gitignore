@@ -42,3 +42,8 @@ Thumbs.db
 .env.production.local
 
 .vercel
+
+# Browser verification output
+artifacts/
+playwright-report/
+test-results/
