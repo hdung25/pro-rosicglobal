@@ -121,8 +121,8 @@ export const JOURNEY = [
     title: "Chăm chút cách đóng gói",
     description:
       "Thống nhất cách sơ chế, quy cách bao bì và điều kiện bảo quản theo từng loại nông sản.",
-    image: "/images/vegetables.webp",
-    alt: "Rau củ với nhiều hình dáng và màu sắc khác nhau",
+    image: "/images/agri-processing-line.webp",
+    alt: "Dây chuyền phân loại và đóng gói nông sản trong không gian sáng",
     caption: "Hiểu sản phẩm để chăm chút đúng cách.",
   },
   {
@@ -165,8 +165,8 @@ export const ARTICLES = [
     title: "Một hành trình tốt cần cách gói phù hợp.",
     category: "Góc nhìn sản phẩm",
     readTime: 2,
-    image: "/images/logistics.webp",
-    alt: "Khu vực lưu trữ và chuẩn bị hàng hóa trong nhà kho",
+    image: "/images/agri-processing-line.webp",
+    alt: "Dây chuyền phân loại và đóng gói nông sản trong không gian sáng",
     excerpt:
       "Bao bì và kế hoạch giao nhận là những chi tiết nên được trao đổi cùng sản phẩm ngay từ đầu.",
     sections: [

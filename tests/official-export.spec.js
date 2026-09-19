@@ -42,7 +42,7 @@ test.describe("official export catalogue", () => {
     await page.getByRole("button", { name: "Mở menu" }).click();
     await page.locator(".mobile-language select").selectOption("ar");
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-    await page.locator(".mobile-menu button").click();
+    await page.locator(".mobile-menu .icon-button").click();
     await page.locator("#export-catalog").scrollIntoViewIfNeeded();
     await expect(page.locator(".official-export-card").first()).toBeVisible();
     const dimensions = await page.evaluate(() => ({

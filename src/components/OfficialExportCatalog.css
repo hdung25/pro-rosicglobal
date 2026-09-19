@@ -9,7 +9,9 @@
   --export-shadow: rgba(48, 54, 42, 0.12);
   position: relative;
   isolation: isolate;
+  /* Keep the decorative halo from becoming a horizontal scroll area in RTL mobile layouts. */
   overflow: hidden;
+  overflow: clip;
   padding: clamp(74px, 10vw, 148px) 0;
   color: var(--export-ink);
   background: var(--export-paper);
@@ -362,7 +364,7 @@
 .official-export-dialog__visual { position: relative; min-height: 100%; background: #ebeee4; }
 .official-export-dialog__visual img { display: block; width: 100%; min-height: 620px; height: 100%; object-fit: cover; }
 .official-export-dialog__visual::after { position: absolute; inset: 0; content: ""; background: linear-gradient(180deg, transparent 45%, rgba(31, 40, 29, 0.28)); pointer-events: none; }
-.official-export-dialog__visual span {
+.official-export-dialog__number {
   position: absolute;
   z-index: 1;
   inset-inline-start: 28px;
@@ -504,7 +506,7 @@
   .official-export-dialog__content { width: calc(100vw - 20px); border-radius: 14px; }
   .official-export-dialog__scroll { max-height: calc(100dvh - 20px); }
   .official-export-dialog__visual img { min-height: 210px; max-height: 255px; }
-  .official-export-dialog__visual span { inset-inline-start: 19px; bottom: 12px; font-size: 50px; }
+  .official-export-dialog__number { inset-inline-start: 19px; bottom: 12px; font-size: 50px; }
   .official-export-dialog__body { padding: 26px 20px; }
   .official-export-dialog__body > h2 { font-size: 35px; }
   .official-export-dialog__groups dl > div { grid-template-columns: 1fr; gap: 3px; }

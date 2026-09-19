@@ -32,9 +32,19 @@ import Feedback from "./components/Feedback";
 import CatalogDemo from "./components/CatalogDemo";
 import OfficialExportCatalog from "./components/OfficialExportCatalog";
 import { LanguagePicker } from "./components/LanguagePicker";
+import { ProductImageBrand } from "./components/ProductImageBrand";
+import { ThemeToggle } from "./components/ThemeToggle";
 import { useSiteLanguage } from "./language";
+import { useSiteTheme } from "./theme";
 import { PRODUCTS, CATEGORIES, ARTICLES, JOURNEY } from "./data";
 import { EXPORT_CATEGORIES } from "./export-catalog";
+import { localizeExportCategory } from "./export-catalog-l10n";
+import { localizeProducts } from "./product-l10n";
+import {
+  localizeArticle,
+  localizeJourneyItem,
+  siteCopyFor,
+} from "./site-copy";
 
 const NAV = [
   { key: "home", label: "Trang chủ", href: "#home" },
@@ -45,68 +55,6 @@ const NAV = [
   { key: "journal", label: "Tin tức", href: "#blog" },
   { key: "contact", label: "Liên hệ", href: "#contact" },
 ];
-
-const SITE_UI_COPY = {
-  vi: {
-    skip: "Đến nội dung chính",
-    nav: { home: "Trang chủ", about: "Về chúng tôi", journey: "Hành trình", products: "Sản phẩm", partners: "Đối tác", journal: "Tin tức", contact: "Liên hệ" },
-    exportCatalog: "Danh mục xuất khẩu",
-    language: "Chọn ngôn ngữ",
-    openMenu: "Mở menu",
-    closeMenu: "Đóng menu",
-    primaryNavigation: "Điều hướng chính",
-    mobileMenuTitle: "Điều hướng",
-    productNavigation: "Sản phẩm và kết nối",
-    hero: { eyebrow: "TỪ TÂM VIỆT, VƯƠN TẦM THẾ GIỚI", start: "Tinh hoa từ đất.", accent: "Trao gửi bằng tâm.", first: "Kết nối nông sản Việt với thế giới.", second: "Chăm chút từng mùa vụ, vun đắp những mối quan hệ bền lâu.", cta: "Khám phá danh mục xuất khẩu", origin: "Nông sản Việt Nam", caption: "Gieo giá trị. Gặt niềm tin." },
-    marquee: ["Trái cây tươi", "Rau củ theo mùa", "Hạt & ngũ cốc", "Nông sản chế biến"],
-    marqueeLabel: "Các nhóm nông sản",
-    marqueeHelp: "Chạm hoặc nhấn Enter để dừng hay tiếp tục chuyển động.",
-    catalog: { eyebrow: "TỪ THIÊN NHIÊN VIỆT NAM", title: "Mỗi mùa, một thức quà.", body: "Khám phá danh mục nông sản và cùng chúng tôi lựa chọn sản phẩm phù hợp với nhu cầu của bạn.", filter: "Lọc nhóm sản phẩm", search: "Tìm sản phẩm", detail: "Xem chi tiết", noResultTitle: "Chưa tìm thấy sản phẩm phù hợp", noResultBody: "Thử tên ngắn hơn hoặc xem lại toàn bộ danh mục.", reset: "Xem tất cả sản phẩm", note: "Danh mục giới thiệu. Mùa vụ, quy cách và khả năng cung ứng được xác nhận khi trao đổi đơn hàng." },
-    tabs: { all: "Tất cả", fruit: "Trái cây tươi", vegetables: "Rau củ theo mùa", nuts: "Hạt & ngũ cốc", processed: "Nông sản chế biến" },
-    footer: { tagline: ["Gieo giá trị từ tâm.", "Kết nối những mùa xanh."], explore: "Khám phá", products: "Sản phẩm", invitation: "Bắt đầu một kết nối tốt đẹp.", greeting: "Chào Hồng Tâm", social: "Kết nối nhanh", privacy: "Thông tin & quyền riêng tư", backTop: "Về đầu trang" },
-    dialog: { close: "Đóng chi tiết", productGroup: "Nhóm sản phẩm", format: "Quy cách", formatValue: "Trao đổi theo nhu cầu", imageNote: "Hình ảnh minh họa sản phẩm. Xuất xứ, mùa vụ và thông số được xác nhận theo lô hàng.", request: "Yêu cầu sản phẩm này", policyTitle: "Thông tin & quyền riêng tư", policyLead: "Cách sử dụng nội dung và biểu mẫu trên website." },
-  },
-  en: {
-    skip: "Skip to main content",
-    nav: { home: "Home", about: "About", journey: "Journey", products: "Products", partners: "Partners", journal: "Journal", contact: "Contact" },
-    exportCatalog: "Export catalogue",
-    language: "Choose language",
-    openMenu: "Open menu",
-    closeMenu: "Close menu",
-    primaryNavigation: "Primary navigation",
-    productNavigation: "Products and contact",
-    hero: { eyebrow: "FROM VIETNAM, FOR THE WORLD", start: "Grown with care.", accent: "Shared with purpose.", first: "Connecting Vietnamese agricultural products with the world.", second: "Caring for every season and building lasting partnerships.", cta: "Explore export catalogue", origin: "Vietnamese agriculture", caption: "Grow value. Earn trust." },
-    marquee: ["Fresh fruit", "Seasonal vegetables", "Nuts & grains", "Processed agriculture"],
-    marqueeLabel: "Agricultural categories",
-    marqueeHelp: "Touch or press Enter to pause or resume the movement.",
-    catalog: { eyebrow: "FROM VIETNAMESE NATURE", title: "A gift from every season.", body: "Explore our agricultural selection and find the right product for your needs.", filter: "Filter product groups", search: "Search products", detail: "View details", noResultTitle: "No matching product found", noResultBody: "Try a shorter term or return to the full catalogue.", reset: "View all products", note: "This is an introductory catalogue. Seasonality, packing and availability are confirmed for each enquiry." },
-    tabs: { all: "All", fruit: "Fresh fruit", vegetables: "Seasonal vegetables", nuts: "Nuts & grains", processed: "Processed products" },
-    footer: { tagline: ["Growing value with care.", "Connecting greener seasons."], explore: "Explore", products: "Products", invitation: "Start a meaningful connection.", greeting: "Hello, Hồng Tâm", social: "Quick links", privacy: "Information & privacy", backTop: "Back to top" },
-    dialog: { close: "Close details", productGroup: "Product group", format: "Format", formatValue: "Discussed to suit your requirement", imageNote: "Product image for illustration. Origin, seasonality and specifications are confirmed by batch.", request: "Request this product", policyTitle: "Information & privacy", policyLead: "How website content and enquiry forms are used." },
-  },
-  zh: {
-    skip: "跳到主要内容", nav: { home: "首页", about: "关于我们", journey: "流程", products: "产品", partners: "合作伙伴", journal: "资讯", contact: "联系" }, exportCatalog: "出口目录", language: "选择语言", openMenu: "打开菜单", closeMenu: "关闭菜单", primaryNavigation: "主导航", productNavigation: "产品与联系", hero: { eyebrow: "源自越南，走向世界", start: "源于土地的精华。", accent: "以真心分享。", first: "连接越南农产品与世界。", second: "珍视每一个产季，建立长期合作。", cta: "查看出口目录", origin: "越南农产品", caption: "播种价值，收获信任。" }, marquee: ["新鲜水果", "时令蔬菜", "坚果与谷物", "加工农产品"], marqueeLabel: "农产品类别", marqueeHelp: "点击或按 Enter 暂停或继续滚动。", catalog: { eyebrow: "来自越南自然", title: "每个季节都有一份礼物。", body: "浏览农产品目录，为您的需求选择合适的产品。", filter: "筛选产品类别", search: "搜索产品", detail: "查看详情", noResultTitle: "未找到匹配产品", noResultBody: "请尝试更短的关键词或查看全部目录。", reset: "查看全部产品", note: "此目录用于介绍。季节、包装和供应情况以每次询盘确认为准。" }, tabs: { all: "全部", fruit: "新鲜水果", vegetables: "时令蔬菜", nuts: "坚果与谷物", processed: "加工农产品" }, footer: { tagline: ["用心创造价值。", "连接丰收的季节。"], explore: "探索", products: "产品", invitation: "开启美好的连接。", greeting: "您好，Hồng Tâm", social: "快捷链接", privacy: "信息与隐私", backTop: "返回顶部" }, dialog: { close: "关闭详情", productGroup: "产品类别", format: "规格", formatValue: "根据需求沟通确认", imageNote: "产品图片仅供展示。原产地、季节和规格按批次确认。", request: "询问此产品", policyTitle: "信息与隐私", policyLead: "网站内容和询盘表单的使用方式。" },
-  },
-  ko: {
-    skip: "본문으로 건너뛰기", nav: { home: "홈", about: "회사 소개", journey: "과정", products: "제품", partners: "파트너", journal: "소식", contact: "문의" }, exportCatalog: "수출 카탈로그", language: "언어 선택", openMenu: "메뉴 열기", closeMenu: "메뉴 닫기", primaryNavigation: "주요 탐색", productNavigation: "제품 및 문의", hero: { eyebrow: "베트남에서 세계로", start: "땅에서 온 정성.", accent: "마음으로 전합니다.", first: "베트남 농산물과 세계를 연결합니다.", second: "매 시즌을 세심하게 돌보고 오래가는 관계를 만듭니다.", cta: "수출 카탈로그 보기", origin: "베트남 농산물", caption: "가치를 키우고 신뢰를 얻습니다." }, marquee: ["신선 과일", "제철 채소", "견과류와 곡물", "가공 농산물"], marqueeLabel: "농산물 카테고리", marqueeHelp: "터치하거나 Enter를 눌러 이동을 멈추거나 다시 시작하세요.", catalog: { eyebrow: "베트남 자연에서", title: "계절마다 특별한 선물.", body: "농산물 컬렉션을 살펴보고 필요에 맞는 제품을 찾아보세요.", filter: "제품군 필터", search: "제품 검색", detail: "상세 보기", noResultTitle: "일치하는 제품이 없습니다", noResultBody: "더 짧은 검색어를 사용하거나 전체 카탈로그를 확인하세요.", reset: "모든 제품 보기", note: "소개용 카탈로그입니다. 계절, 포장 및 공급 가능 여부는 문의별로 확인됩니다." }, tabs: { all: "전체", fruit: "신선 과일", vegetables: "제철 채소", nuts: "견과류와 곡물", processed: "가공 농산물" }, footer: { tagline: ["정성으로 가치를 키웁니다.", "푸른 계절을 연결합니다."], explore: "둘러보기", products: "제품", invitation: "좋은 연결을 시작하세요.", greeting: "Hồng Tâm에 문의", social: "빠른 연결", privacy: "정보 및 개인정보", backTop: "맨 위로" }, dialog: { close: "상세 닫기", productGroup: "제품군", format: "형태", formatValue: "요구사항에 맞춰 협의", imageNote: "제품 이미지는 참고용입니다. 원산지, 시즌 및 사양은 로트별로 확인됩니다.", request: "이 제품 문의", policyTitle: "정보 및 개인정보", policyLead: "웹사이트 내용 및 문의 양식의 사용 방식입니다." },
-  },
-  ja: {
-    skip: "本文へ移動", nav: { home: "ホーム", about: "私たちについて", journey: "プロセス", products: "商品", partners: "パートナー", journal: "お知らせ", contact: "お問い合わせ" }, exportCatalog: "輸出カタログ", language: "言語を選択", openMenu: "メニューを開く", closeMenu: "メニューを閉じる", primaryNavigation: "メインナビゲーション", productNavigation: "商品とお問い合わせ", hero: { eyebrow: "ベトナムから世界へ", start: "大地からの恵み。", accent: "心を込めて届けます。", first: "ベトナムの農産品を世界へつなぎます。", second: "一つひとつの季節を大切にし、長い関係を育てます。", cta: "輸出カタログを見る", origin: "ベトナムの農産品", caption: "価値を育て、信頼を得る。" }, marquee: ["生鮮果物", "季節の野菜", "ナッツと穀物", "加工農産品"], marqueeLabel: "農産品カテゴリー", marqueeHelp: "タップまたは Enter キーで動きを一時停止・再開できます。", catalog: { eyebrow: "ベトナムの自然から", title: "季節ごとの贈りもの。", body: "農産品のラインアップを見て、用途に合う商品をお選びください。", filter: "商品グループを絞り込む", search: "商品を検索", detail: "詳細を見る", noResultTitle: "該当する商品がありません", noResultBody: "短い検索語を試すか、全カタログをご覧ください。", reset: "すべての商品を見る", note: "紹介用カタログです。季節、梱包、供給可否はお問い合わせごとに確認します。" }, tabs: { all: "すべて", fruit: "生鮮果物", vegetables: "季節の野菜", nuts: "ナッツと穀物", processed: "加工農産品" }, footer: { tagline: ["心で価値を育てます。", "豊かな季節をつなぎます。"], explore: "見る", products: "商品", invitation: "よいご縁を始めましょう。", greeting: "Hồng Tâmに相談", social: "クイックリンク", privacy: "情報とプライバシー", backTop: "ページ上部へ" }, dialog: { close: "詳細を閉じる", productGroup: "商品グループ", format: "形態", formatValue: "ご要望に合わせてご相談", imageNote: "商品画像はイメージです。原産地、季節、仕様はロットごとに確認されます。", request: "この商品を問い合わせる", policyTitle: "情報とプライバシー", policyLead: "ウェブサイトの内容とお問い合わせフォームの利用方法。" },
-  },
-  ar: {
-    skip: "انتقل إلى المحتوى الرئيسي", nav: { home: "الرئيسية", about: "من نحن", journey: "رحلتنا", products: "المنتجات", partners: "الشركاء", journal: "المجلة", contact: "اتصل بنا" }, exportCatalog: "كتالوج التصدير", language: "اختر اللغة", openMenu: "فتح القائمة", closeMenu: "إغلاق القائمة", primaryNavigation: "التنقل الرئيسي", productNavigation: "المنتجات والتواصل", hero: { eyebrow: "من فيتنام إلى العالم", start: "خلاصة الأرض.", accent: "نقدمها بإخلاص.", first: "نصل المنتجات الزراعية الفيتنامية بالعالم.", second: "نعتني بكل موسم ونبني شراكات طويلة الأمد.", cta: "استكشف كتالوج التصدير", origin: "الزراعة الفيتنامية", caption: "نزرع القيمة ونحصد الثقة." }, marquee: ["فواكه طازجة", "خضروات موسمية", "مكسرات وحبوب", "منتجات زراعية مصنّعة"], marqueeLabel: "فئات المنتجات الزراعية", marqueeHelp: "المس أو اضغط Enter لإيقاف الحركة أو استئنافها.", catalog: { eyebrow: "من طبيعة فيتنام", title: "هدية من كل موسم.", body: "استكشف مجموعتنا الزراعية واختر المنتج المناسب لاحتياجاتك.", filter: "تصفية مجموعات المنتجات", search: "ابحث عن منتجات", detail: "عرض التفاصيل", noResultTitle: "لم يتم العثور على منتج مطابق", noResultBody: "جرّب مصطلحًا أقصر أو عد إلى الكتالوج الكامل.", reset: "عرض كل المنتجات", note: "هذا كتالوج تعريفي. يتم تأكيد الموسم والتعبئة والتوافر لكل استفسار." }, tabs: { all: "الكل", fruit: "فواكه طازجة", vegetables: "خضروات موسمية", nuts: "مكسرات وحبوب", processed: "منتجات مصنّعة" }, footer: { tagline: ["ننمي القيمة بعناية.", "نصل المواسم الخضراء."], explore: "استكشف", products: "المنتجات", invitation: "ابدأ تواصلاً مثمرًا.", greeting: "تواصل مع Hồng Tâm", social: "روابط سريعة", privacy: "المعلومات والخصوصية", backTop: "العودة للأعلى" }, dialog: { close: "إغلاق التفاصيل", productGroup: "مجموعة المنتجات", format: "الشكل", formatValue: "يتم الاتفاق وفق احتياجكم", imageNote: "صورة المنتج للتوضيح. يتم تأكيد المنشأ والموسم والمواصفات لكل دفعة.", request: "اطلب هذا المنتج", policyTitle: "المعلومات والخصوصية", policyLead: "كيفية استخدام محتوى الموقع ونماذج الاستفسار." },
-  },
-  fr: {
-    skip: "Aller au contenu principal", nav: { home: "Accueil", about: "À propos", journey: "Parcours", products: "Produits", partners: "Partenaires", journal: "Actualités", contact: "Contact" }, exportCatalog: "Catalogue export", language: "Choisir la langue", openMenu: "Ouvrir le menu", closeMenu: "Fermer le menu", primaryNavigation: "Navigation principale", productNavigation: "Produits et contact", hero: { eyebrow: "DU VIETNAM VERS LE MONDE", start: "L'essence de la terre.", accent: "Partagée avec cœur.", first: "Nous relions les produits agricoles vietnamiens au monde.", second: "Nous prenons soin de chaque saison et construisons des relations durables.", cta: "Voir le catalogue export", origin: "Agriculture vietnamienne", caption: "Cultiver la valeur. Gagner la confiance." }, marquee: ["Fruits frais", "Légumes de saison", "Noix et céréales", "Produits transformés"], marqueeLabel: "Catégories agricoles", marqueeHelp: "Touchez ou appuyez sur Entrée pour arrêter ou reprendre le mouvement.", catalog: { eyebrow: "DE LA NATURE VIETNAMIENNE", title: "Un cadeau à chaque saison.", body: "Découvrez notre sélection agricole et trouvez le produit adapté à vos besoins.", filter: "Filtrer les familles de produits", search: "Rechercher des produits", detail: "Voir les détails", noResultTitle: "Aucun produit correspondant", noResultBody: "Essayez un terme plus court ou consultez le catalogue complet.", reset: "Voir tous les produits", note: "Catalogue de présentation. Saisonnalité, conditionnement et disponibilité sont confirmés pour chaque demande." }, tabs: { all: "Tous", fruit: "Fruits frais", vegetables: "Légumes de saison", nuts: "Noix et céréales", processed: "Produits transformés" }, footer: { tagline: ["Cultiver la valeur avec soin.", "Relier les saisons vertes."], explore: "Découvrir", products: "Produits", invitation: "Créons un beau lien.", greeting: "Bonjour, Hồng Tâm", social: "Liens rapides", privacy: "Informations et confidentialité", backTop: "Haut de page" }, dialog: { close: "Fermer les détails", productGroup: "Famille de produits", format: "Format", formatValue: "À définir selon votre besoin", imageNote: "Image produit à titre illustratif. Origine, saisonnalité et spécifications sont confirmées par lot.", request: "Demander ce produit", policyTitle: "Informations et confidentialité", policyLead: "Utilisation du contenu du site et des formulaires de demande." },
-  },
-  de: {
-    skip: "Zum Hauptinhalt", nav: { home: "Startseite", about: "Über uns", journey: "Ablauf", products: "Produkte", partners: "Partner", journal: "Journal", contact: "Kontakt" }, exportCatalog: "Exportkatalog", language: "Sprache wählen", openMenu: "Menü öffnen", closeMenu: "Menü schließen", primaryNavigation: "Hauptnavigation", productNavigation: "Produkte und Kontakt", hero: { eyebrow: "AUS VIETNAM FÜR DIE WELT", start: "Essenz der Erde.", accent: "Mit Herz weitergegeben.", first: "Wir verbinden vietnamesische Agrarprodukte mit der Welt.", second: "Wir pflegen jede Saison und schaffen langfristige Partnerschaften.", cta: "Exportkatalog entdecken", origin: "Vietnamesische Landwirtschaft", caption: "Werte wachsen lassen. Vertrauen gewinnen." }, marquee: ["Frisches Obst", "Saisongemüse", "Nüsse & Getreide", "Verarbeitete Agrarprodukte"], marqueeLabel: "Agrarproduktgruppen", marqueeHelp: "Berühren oder Enter drücken, um die Bewegung anzuhalten oder fortzusetzen.", catalog: { eyebrow: "AUS VIETNAMS NATUR", title: "Ein Geschenk jeder Saison.", body: "Entdecken Sie unsere Agrarauswahl und finden Sie das passende Produkt für Ihren Bedarf.", filter: "Produktgruppen filtern", search: "Produkte suchen", detail: "Details ansehen", noResultTitle: "Kein passendes Produkt gefunden", noResultBody: "Versuchen Sie einen kürzeren Begriff oder öffnen Sie den Gesamtkatalog.", reset: "Alle Produkte ansehen", note: "Einführungskatalog. Saison, Verpackung und Verfügbarkeit werden je Anfrage bestätigt." }, tabs: { all: "Alle", fruit: "Frisches Obst", vegetables: "Saisongemüse", nuts: "Nüsse & Getreide", processed: "Verarbeitete Produkte" }, footer: { tagline: ["Werte mit Sorgfalt entwickeln.", "Grüne Jahreszeiten verbinden."], explore: "Entdecken", products: "Produkte", invitation: "Beginnen wir eine gute Verbindung.", greeting: "Hallo, Hồng Tâm", social: "Schnellzugriff", privacy: "Informationen & Datenschutz", backTop: "Nach oben" }, dialog: { close: "Details schließen", productGroup: "Produktgruppe", format: "Format", formatValue: "Nach Ihrem Bedarf abstimmen", imageNote: "Produktbild zur Illustration. Herkunft, Saison und Spezifikationen werden je Charge bestätigt.", request: "Dieses Produkt anfragen", policyTitle: "Informationen & Datenschutz", policyLead: "Wie Website-Inhalte und Anfrageformulare verwendet werden." },
-  },
-};
-
-function siteCopyFor(language) {
-  return SITE_UI_COPY[language] ?? SITE_UI_COPY.en;
-}
 
 // Keep the public site in a calm, branded holding state while the new release is reviewed.
 const MAINTENANCE_MODE = false;
@@ -194,17 +142,18 @@ const MAINTENANCE_COPY = {
   },
 };
 
-function Brand({ footer = false }) {
+function Brand({ footer = false, copy }) {
+  const brandCopy = copy?.brand;
   return (
     <a
       className={`brand ${footer ? "brand-footer" : ""}`}
       href="#home"
-      aria-label="Hồng Tâm Rosic Global, trang chủ"
+      aria-label={brandCopy?.homeLabel ?? "Hồng Tâm Rosic Global, trang chủ"}
     >
       <img
         className="brand-mark"
         src="/brand-mark.svg"
-        alt="Biểu trưng Hồng Tâm"
+        alt={brandCopy?.logoAlt ?? "Biểu trưng Hồng Tâm"}
         width="445"
         height="159"
       />
@@ -282,7 +231,7 @@ function Reveal({ children, className = "", delay = 0 }) {
     </Motion.div>
   );
 }
-function Header({ onFilter, language, onLanguage, copy }) {
+function Header({ onFilter, language, onLanguage, theme, onThemeChange, copy }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("home");
   useEffect(() => {
@@ -302,7 +251,7 @@ function Header({ onFilter, language, onLanguage, copy }) {
   return (
     <>
       <div className="topbar">
-        Manufacturing with Heart, Trading with Vision
+        {copy.brand.topbar}
       </div>
       <header className="site-header">
         <div className="nav-shell container">
@@ -319,7 +268,7 @@ function Header({ onFilter, language, onLanguage, copy }) {
               </a>
             ))}
           </nav>
-          <Brand />
+          <Brand copy={copy} />
           <nav className="nav-right" aria-label={copy.productNavigation}>
             <div className="nav-dropdown">
               <a
@@ -362,6 +311,12 @@ function Header({ onFilter, language, onLanguage, copy }) {
               onChange={onLanguage}
               label={copy.language}
             />
+            <ThemeToggle
+              className="header-theme"
+              theme={theme}
+              onThemeChange={onThemeChange}
+              labels={copy.theme}
+            />
           </nav>
           <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger asChild>
@@ -374,10 +329,10 @@ function Header({ onFilter, language, onLanguage, copy }) {
               <Dialog.Content className="mobile-menu">
                 <Dialog.Title className="sr-only">{copy.mobileMenuTitle ?? copy.primaryNavigation}</Dialog.Title>
                 <Dialog.Description className="sr-only">
-                  Khám phá Hồng Tâm Rosic Global
+                  {copy.brand.mobileDescription}
                 </Dialog.Description>
                 <div className="mobile-menu-top">
-                  <Brand />
+                  <Brand copy={copy} />
                   <Dialog.Close asChild>
                     <button className="icon-button" aria-label={copy.closeMenu}>
                       <X />
@@ -408,10 +363,14 @@ function Header({ onFilter, language, onLanguage, copy }) {
                   onChange={onLanguage}
                   label={copy.language}
                 />
+                <ThemeToggle
+                  className="mobile-theme"
+                  theme={theme}
+                  onThemeChange={onThemeChange}
+                  labels={copy.theme}
+                />
                 <p>
-                  Manufacturing with Heart,
-                  <br />
-                  Trading with Vision.
+                  {copy.brand.topbar}
                 </p>
               </Dialog.Content>
             </Dialog.Portal>
@@ -538,14 +497,14 @@ function Marquee({ copy }) {
     </section>
   );
 }
-function About() {
+function About({ copy }) {
   return (
     <section id="about" className="about-section section-pad">
       <div className="container about-grid">
         <Reveal className="about-photo">
           <img
             src="/images/produce.webp"
-            alt="Xoài, thanh long ruột đỏ, dưa lưới, bơ, hạt điều và cà phê trên nền sáng"
+            alt={copy.about.alt}
             loading="lazy"
             width="1536"
             height="1024"
@@ -553,56 +512,44 @@ function About() {
           <div className="photo-border" aria-hidden="true" />
         </Reveal>
         <Reveal className="about-copy">
-          <p className="eyebrow">CÂU CHUYỆN HỒNG TÂM</p>
+          <p className="eyebrow">{copy.about.eyebrow}</p>
           <h2 className="section-heading">
-            Gốc rễ Việt Nam.
+            {copy.about.title[0]}
             <br />
-            Tầm nhìn toàn cầu.
+            {copy.about.title[1]}
           </h2>
-          <p>
-            Chúng tôi tin rằng giá trị của nông sản bắt đầu từ sự tận tâm với
-            đất, với người trồng và với từng sản phẩm.
-          </p>
-          <p>
-            Hồng Tâm Rosic Global kết nối nguồn nông sản Việt với nhu cầu của
-            đối tác trong nước và quốc tế. Mỗi cuộc hợp tác bắt đầu bằng việc
-            hiểu đúng nhu cầu, trao đổi rõ ràng và cùng xây dựng một hướng đi
-            lâu dài.
-          </p>
+          <p>{copy.about.first}</p>
+          <p>{copy.about.second}</p>
           <a className="text-link" href="#journey">
-            Khám phá hành trình của chúng tôi <ArrowUpRight size={18} />
+            {copy.about.link} <ArrowUpRight size={18} />
           </a>
           <div className="about-signature">
             <span>Hồng Tâm</span>
-            <p>
-              Manufacturing with Heart,
-              <br />
-              Trading with Vision.
-            </p>
+            <p>{copy.brand.topbar}</p>
           </div>
         </Reveal>
       </div>
       <Reveal className="container values-band">
         <div>
           <Sprout />
-          <h3>Từ nguồn trồng</h3>
-          <p>Quan tâm đến xuất xứ.</p>
+          <h3>{copy.about.values[0].title}</h3>
+          <p>{copy.about.values[0].body}</p>
         </div>
         <div>
           <PackageCheck />
-          <h3>Đến từng sản phẩm</h3>
-          <p>Chăm chút khâu lựa chọn.</p>
+          <h3>{copy.about.values[1].title}</h3>
+          <p>{copy.about.values[1].body}</p>
         </div>
         <div>
           <Globe2 />
-          <h3>Qua mỗi kết nối</h3>
-          <p>Hướng đến hợp tác dài lâu.</p>
+          <h3>{copy.about.values[2].title}</h3>
+          <p>{copy.about.values[2].body}</p>
         </div>
       </Reveal>
     </section>
   );
 }
-function Catalog({ category, setCategory, onProduct, copy }) {
+function Catalog({ category, setCategory, onProduct, copy, products }) {
   const [query, setQuery] = useState("");
   const normalize = (value) =>
     value
@@ -610,7 +557,7 @@ function Catalog({ category, setCategory, onProduct, copy }) {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/đ/g, "d");
-  const visible = PRODUCTS.filter(
+  const visible = products.filter(
     (product) =>
       (category === "all" || category === product.category) &&
       normalize(product.title).includes(normalize(query.trim())),
@@ -648,7 +595,7 @@ function Catalog({ category, setCategory, onProduct, copy }) {
           </label>
         </div>
         <p className="sr-only" role="status">
-          {visible.length} sản phẩm
+          {copy.catalog.resultCount(visible.length)}
         </p>
         <Motion.div layout className="product-grid">
           <AnimatePresence mode="popLayout">
@@ -657,7 +604,7 @@ function Catalog({ category, setCategory, onProduct, copy }) {
                 layout
                 className="product-card"
                 key={product.id}
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.35, delay: index * 0.035 }}
@@ -665,7 +612,7 @@ function Catalog({ category, setCategory, onProduct, copy }) {
                 <button
                   className="product-open"
                   onClick={() => onProduct(product)}
-                  aria-label={`Xem ${product.title}`}
+                  aria-label={copy.catalog.viewProduct(product.title)}
                 >
                   <div className="product-image">
                     <img
@@ -675,6 +622,7 @@ function Catalog({ category, setCategory, onProduct, copy }) {
                       width="640"
                       height="640"
                     />
+                    <ProductImageBrand />
                     <span className="product-detail-tab">
                       {copy.catalog.detail} <ArrowUpRight size={17} />
                     </span>
@@ -682,7 +630,7 @@ function Catalog({ category, setCategory, onProduct, copy }) {
                   <div className="product-meta">
                     <span>{product.group}</span>
                     <span>
-                      {String(PRODUCTS.indexOf(product) + 1).padStart(2, "0")}
+                      {String(products.findIndex((item) => item.id === product.id) + 1).padStart(2, "0")}
                     </span>
                   </div>
                   <h3>{product.title}</h3>
@@ -715,26 +663,26 @@ function Catalog({ category, setCategory, onProduct, copy }) {
     </section>
   );
 }
-function Journey() {
+function Journey({ copy, language }) {
   const [step, setStep] = useState(0);
-  const current = JOURNEY[step];
+  const steps = JOURNEY.map((item, index) =>
+    localizeJourneyItem(item, index, language),
+  );
+  const current = steps[step];
   return (
     <section id="journey" className="journey-section section-pad">
       <div className="container">
         <Reveal className="section-intro">
           <h2 className="section-heading">
-            Một hành trình.
+            {copy.journey.title[0]}
             <br />
-            Vẹn nguyên sự tận tâm.
+            {copy.journey.title[1]}
           </h2>
-          <p>
-            Từ lựa chọn nguồn hàng đến trao gửi sản phẩm, mỗi bước đều cần sự
-            thấu hiểu và phối hợp.
-          </p>
+          <p>{copy.journey.lead}</p>
         </Reveal>
         <div className="journey-layout">
-          <div className="journey-steps" aria-label="Các bước trong hành trình">
-            {JOURNEY.map((item, index) => (
+          <div className="journey-steps" aria-label={copy.journey.label}>
+            {steps.map((item, index) => (
               <button
                 key={item.title}
                 className={`journey-step ${step === index ? "active" : ""}`}
@@ -787,61 +735,52 @@ function Journey() {
     </section>
   );
 }
-function Partners() {
+function Partners({ copy, language }) {
   return (
     <section id="testimonials" className="partners-section section-pad">
       <div className="container">
         <Reveal className="partners-statement">
           <Globe2 size={38} strokeWidth={1} />
           <h2>
-            Đi xa hơn,
+            {copy.partners.title[0]}
             <br />
-            khi đi <span>cùng nhau.</span>
+            <span>{copy.partners.title[1]}</span>
           </h2>
-          <p>
-            Từ nhà phân phối, đơn vị bán lẻ đến đối tác nhập khẩu, chúng tôi
-            luôn trân trọng những kết nối cùng chung giá trị.
-          </p>
+          <p>{copy.partners.lead}</p>
           <a href="#contact" className="text-link">
-            Trao đổi cơ hội hợp tác <ArrowUpRight size={18} />
+            {copy.partners.link} <ArrowUpRight size={18} />
           </a>
         </Reveal>
       </div>
-      <Feedback />
+      <Feedback language={language} />
       <div className="container">
         <div id="stats" className="partner-types">
-          <span>Nhà phân phối</span>
-          <span>Bán lẻ & thực phẩm</span>
-          <span>Đối tác nhập khẩu</span>
-          <span>Đơn vị sản xuất</span>
+          {copy.partners.types.map((type) => (
+            <span key={type}>{type}</span>
+          ))}
         </div>
         <div id="certifications" className="quality-note">
           <PackageCheck size={22} />
           <div>
-            <h3>Rõ ràng ngay từ đầu</h3>
-            <p>
-              Xuất xứ, quy cách, hồ sơ chất lượng và điều kiện giao hàng cần
-              được đối chiếu cho từng sản phẩm và từng đơn hàng.
-            </p>
+            <h3>{copy.partners.qualityTitle}</h3>
+            <p>{copy.partners.qualityBody}</p>
           </div>
         </div>
       </div>
     </section>
   );
 }
-function Journal({ onArticle }) {
+function Journal({ onArticle, copy, language }) {
+  const articles = ARTICLES.map((article) => localizeArticle(article, language));
   return (
     <section id="blog" className="journal-section section-pad">
       <div className="container">
         <Reveal className="section-intro">
-          <h2 className="section-heading">Chuyện từ những mùa xanh.</h2>
-          <p>
-            Những góc nhìn về sản phẩm, nguồn trồng và cách bắt đầu một cuộc hợp
-            tác.
-          </p>
+          <h2 className="section-heading">{copy.journal.title}</h2>
+          <p>{copy.journal.lead}</p>
         </Reveal>
         <div className="journal-grid">
-          {ARTICLES.map((article, index) => (
+          {articles.map((article, index) => (
             <Reveal
               key={article.id}
               delay={index * 0.1}
@@ -859,11 +798,11 @@ function Journal({ onArticle }) {
                 </div>
                 <div className="journal-meta">
                   <span>{article.category}</span>
-                  <span>{article.readTime} phút đọc</span>
+                  <span>{copy.journal.minutes(article.readTime)}</span>
                 </div>
                 <h3>{article.title}</h3>
                 <span className="text-link">
-                  Đọc câu chuyện <ArrowUpRight size={18} />
+                  {copy.journal.read} <ArrowUpRight size={18} />
                 </span>
               </button>
             </Reveal>
@@ -873,12 +812,12 @@ function Journal({ onArticle }) {
     </section>
   );
 }
-function Footer({ onPolicy, onFilter, language, onLanguage, copy }) {
+function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange, copy }) {
   return (
     <footer className="site-footer">
       <div className="container footer-main">
         <div>
-          <Brand footer />
+          <Brand footer copy={copy} />
           <p className="footer-tagline">
             {copy.footer.tagline[0]}
             <br />
@@ -911,11 +850,7 @@ function Footer({ onPolicy, onFilter, language, onLanguage, copy }) {
           <a href="#contact">
             {copy.footer.greeting} <ArrowUpRight />
           </a>
-          <p>
-            Manufacturing with Heart,
-            <br />
-            Trading with Vision.
-          </p>
+          <p>{copy.brand.topbar}</p>
           <div className="footer-socials" aria-label={copy.footer.social}>
             <a href="https://wa.me/84962284872" target="_blank" rel="noreferrer" aria-label="WhatsApp"><MessageCircle size={16} /></a>
             <a href="https://vn.linkedin.com/company/hong-tam-rosic-global-manufacturing-trading-joint-stock-company" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Network size={16} /></a>
@@ -927,6 +862,12 @@ function Footer({ onPolicy, onFilter, language, onLanguage, copy }) {
             language={language}
             onChange={onLanguage}
             label={copy.language}
+          />
+          <ThemeToggle
+            className="footer-theme"
+            theme={theme}
+            onThemeChange={onThemeChange}
+            labels={copy.theme}
           />
         </div>
       </div>
@@ -971,11 +912,14 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
           </Dialog.Close>
           {selected?.type === "product" ? (
             <>
-              <img
-                className="detail-image"
-                src={selected.data.image}
-                alt={selected.data.alt}
-              />
+              <div className="detail-image-wrap">
+                <img
+                  className="detail-image"
+                  src={selected.data.image}
+                  alt={selected.data.alt}
+                />
+                <ProductImageBrand />
+              </div>
               <div className="detail-body">
                 <p className="eyebrow">{selected.data.group}</p>
                 <Dialog.Title>{selected.data.title}</Dialog.Title>
@@ -997,7 +941,7 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
                 </p>
                 <button
                   className="button button-primary"
-                  onClick={() => onQuote(selected.data.title)}
+                  onClick={() => onQuote(selected.data.sourceTitle ?? selected.data.title)}
                 >
                   {copy.dialog.request} <ArrowUpRight size={18} />
                 </button>
@@ -1021,7 +965,7 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
                   </div>
                 ))}
                 <a className="text-link" href="#contact" onClick={onClose}>
-                  Cùng trao đổi thêm <ArrowUpRight size={18} />
+                  {copy.dialog.articleCta} <ArrowUpRight size={18} />
                 </a>
               </div>
             </>
@@ -1029,33 +973,12 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
             <div className="detail-body">
               <Dialog.Title>{copy.dialog.policyTitle}</Dialog.Title>
               <Dialog.Description>{copy.dialog.policyLead}</Dialog.Description>
-              <div className="article-section">
-                <h3>Thông tin sản phẩm</h3>
-                <p>
-                  Danh mục và ảnh được dùng để giới thiệu nhóm sản phẩm. Một số
-                  hình ảnh minh họa được tạo bằng công cụ AI. Ảnh không xác nhận
-                  một vùng trồng hay cơ sở thuộc sở hữu doanh nghiệp. Thông số,
-                  nguồn gốc, hồ sơ chất lượng và khả năng cung ứng cần được xác
-                  nhận khi trao đổi.
-                </p>
-              </div>
-              <div className="article-section">
-                <h3>Yêu cầu báo giá</h3>
-                <p>
-                  Biểu mẫu giúp bạn soạn nội dung yêu cầu. Website không tự động
-                  gửi thông tin và không lưu biểu mẫu trên máy chủ. Chỉ khi bạn
-                  chọn gửi trong ứng dụng email hoặc chia sẻ tệp, thông tin mới
-                  rời khỏi thiết bị theo thao tác của bạn.
-                </p>
-              </div>
-              <div className="article-section">
-                <h3>Nội dung tham khảo</h3>
-                <p>
-                  Các bài viết là nội dung giới thiệu và hướng dẫn trao đổi đơn
-                  hàng; không phải hồ sơ chứng nhận hoặc thông báo kết quả kinh
-                  doanh.
-                </p>
-              </div>
+              {copy.dialog.policySections.map((section) => (
+                <div className="article-section" key={section.title}>
+                  <h3>{section.title}</h3>
+                  <p>{section.body}</p>
+                </div>
+              ))}
             </div>
           )}
         </Dialog.Content>
@@ -1065,6 +988,7 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
 }
 function SiteApp() {
   const [language, setLanguage] = useSiteLanguage("vi");
+  const { theme, setTheme } = useSiteTheme();
   const [category, setCategory] = useState("all");
   const [selected, setSelected] = useState(null);
   const [prefilledProduct, setPrefilledProduct] = useState({
@@ -1073,6 +997,10 @@ function SiteApp() {
   });
   const reduced = useReducedMotion();
   const copy = siteCopyFor(language);
+  const localizedProducts = localizeProducts(PRODUCTS, language);
+  const localizedExportCategories = EXPORT_CATEGORIES.map((categoryItem) =>
+    localizeExportCategory(categoryItem, language),
+  );
   useEffect(() => {
     const scrollHome = () => {
       if (window.location.hash === "#home")
@@ -1128,12 +1056,14 @@ function SiteApp() {
         onFilter={setCategory}
         language={language}
         onLanguage={setLanguage}
+        theme={theme}
+        onThemeChange={setTheme}
         copy={copy}
       />
       <main id="main">
         <Hero copy={copy} />
         <Marquee copy={copy} />
-        <About />
+        <About copy={copy} />
         <OfficialExportCatalog
           language={language}
           onRequestQuote={({ sourceTitle, title }) => quote(sourceTitle ?? title)}
@@ -1143,14 +1073,20 @@ function SiteApp() {
           setCategory={setCategory}
           onProduct={(data) => setSelected({ type: "product", data })}
           copy={copy}
+          products={localizedProducts}
         />
-        <Journey />
-        <Partners />
-        <Journal onArticle={(data) => setSelected({ type: "article", data })} />
+        <Journey copy={copy} language={language} />
+        <Partners copy={copy} language={language} />
+        <Journal
+          copy={copy}
+          language={language}
+          onArticle={(data) => setSelected({ type: "article", data })}
+        />
         <Contact
           prefilledProduct={prefilledProduct.title}
           prefillKey={prefilledProduct.id}
-          products={[...PRODUCTS, ...EXPORT_CATEGORIES]}
+          products={[...localizedProducts, ...localizedExportCategories]}
+          language={language}
         />
       </main>
       <Footer
@@ -1158,6 +1094,8 @@ function SiteApp() {
         onFilter={setCategory}
         language={language}
         onLanguage={setLanguage}
+        theme={theme}
+        onThemeChange={setTheme}
         copy={copy}
       />
       <DetailDialog

@@ -17,8 +17,10 @@ import {
   X,
 } from "lucide-react";
 import { EXPORT_CATEGORIES, EXPORT_SPEC_NOTICE } from "../export-catalog";
+import { localizeExportCategory } from "../export-catalog-l10n";
 import { useSiteLanguage } from "../language";
 import { LanguagePicker } from "./LanguagePicker";
+import { ProductImageBrand } from "./ProductImageBrand";
 import "./CatalogDemo.css";
 
 const COMPANY_LINKEDIN =
@@ -339,164 +341,33 @@ const COPY = {
   },
 };
 
-const CATEGORY_NAMES = {
-  en: {
-    "cashew-kernel": "Cashew kernels", cassia: "Cassia cinnamon", "black-pepper": "Black pepper", "star-anise": "Star anise", "coffee-bean": "Coffee beans", "desiccated-coconut": "Desiccated coconut", "dried-fruit": "Dried fruit", "finished-cashew": "Finished cashew",
-  },
-  zh: {
-    "cashew-kernel": "腰果仁", cassia: "肉桂", "black-pepper": "黑胡椒", "star-anise": "八角", "coffee-bean": "咖啡豆", "desiccated-coconut": "椰蓉", "dried-fruit": "水果干", "finished-cashew": "成品腰果",
-  },
-  ko: {
-    "cashew-kernel": "캐슈넛 커널", cassia: "계피", "black-pepper": "흑후추", "star-anise": "팔각", "coffee-bean": "커피 원두", "desiccated-coconut": "건조 코코넛", "dried-fruit": "건과일", "finished-cashew": "가공 캐슈넛",
-  },
-  ja: {
-    "cashew-kernel": "カシューナッツカーネル", cassia: "カシアシナモン", "black-pepper": "黒コショウ", "star-anise": "スターアニス", "coffee-bean": "コーヒー豆", "desiccated-coconut": "乾燥ココナッツ", "dried-fruit": "ドライフルーツ", "finished-cashew": "カシューナッツ製品",
-  },
-  ar: {
-    "cashew-kernel": "أنوية الكاجو", cassia: "قرفة كاسيا", "black-pepper": "فلفل أسود", "star-anise": "يانسون نجمي", "coffee-bean": "حبوب القهوة", "desiccated-coconut": "جوز هند مجفف", "dried-fruit": "فواكه مجففة", "finished-cashew": "كاجو جاهز",
-  },
-  fr: {
-    "cashew-kernel": "Noix de cajou", cassia: "Cannelle cassia", "black-pepper": "Poivre noir", "star-anise": "Badiane", "coffee-bean": "Café en grains", "desiccated-coconut": "Noix de coco séchée", "dried-fruit": "Fruits séchés", "finished-cashew": "Cajou fini",
-  },
-  de: {
-    "cashew-kernel": "Cashewkerne", cassia: "Cassia-Zimt", "black-pepper": "Schwarzer Pfeffer", "star-anise": "Sternanis", "coffee-bean": "Kaffeebohnen", "desiccated-coconut": "Kokosraspel", "dried-fruit": "Trockenfrüchte", "finished-cashew": "Veredeltes Cashew",
-  },
-};
-
 function categoryName(category, language) {
-  return CATEGORY_NAMES[language]?.[category.id] ?? category.title;
+  return localizeExportCategory(category, language).title;
 }
 
-const CATEGORY_LOCALIZATION = {
-  en: {
-    alt: (name) => `Product photograph of ${name}`,
-    description: (name) => `${name} prepared to the agreed grade, format and packing for the target market.`,
-    overview: (name) => `Confirm the format, quality checkpoints and packing for ${name} before the quotation is issued.`,
-    forms: "Format, size and packing selected for the approved application.",
-    checks: ["Grade and appearance", "Lot safety", "Packing and documents"],
-    groups: (name) => [
-      { title: "Product scope", items: [{ label: "Format", value: `${name}: grade, size and processing agreed before quotation.` }] },
-      { title: "Quality framework", items: [{ label: "Checks", value: "Moisture, foreign matter, safety and product-specific checks agreed per lot." }] },
-      { title: "Packing and documents", items: [{ label: "Shipment", value: "Packing, labelling, approved sample and COA confirmed before dispatch." }] },
-    ],
-    notice: "The figures in the Vietnamese view are reference criteria. Final localised specifications are confirmed by contract, approved sample and batch COA.",
-  },
-  zh: {
-    alt: (name) => `${name}产品图片`,
-    description: (name) => `面向目标市场的${name}，可按约定等级、形态和包装交付。`,
-    overview: (name) => `报价前确认${name}的产品形态、质量检查点和包装要求。`,
-    forms: "根据核准用途确认形态、规格与包装。",
-    checks: ["等级与外观", "批次安全", "包装与文件"],
-    groups: (name) => [
-      { title: "产品范围", items: [{ label: "形态", value: `${name}的等级、尺寸和加工方式在报价前确认。` }] },
-      { title: "质量框架", items: [{ label: "检查项", value: "按产品和批次确认水分、杂质、安全指标及专项要求。" }] },
-      { title: "包装与文件", items: [{ label: "发货", value: "发运前确认包装、标签、核准样品和 COA。" }] },
-    ],
-    notice: "越南语视图中的数值仅供询盘参考。最终本地化规格以合同、确认样品和批次 COA 为准。",
-  },
-  ko: {
-    alt: (name) => `${name} 제품 사진`,
-    description: (name) => `목표 시장에 맞춰 등급, 형태와 포장이 합의된 ${name}입니다.`,
-    overview: (name) => `견적 전 ${name}의 제품 형태, 품질 점검 항목과 포장 조건을 확인합니다.`,
-    forms: "승인된 용도에 맞춰 형태, 규격과 포장을 선택합니다.",
-    checks: ["등급 및 외관", "로트 안전성", "포장 및 서류"],
-    groups: (name) => [
-      { title: "제품 범위", items: [{ label: "형태", value: `${name}의 등급, 크기와 가공 방식을 견적 전에 합의합니다.` }] },
-      { title: "품질 기준", items: [{ label: "점검", value: "수분, 이물질, 안전성 및 제품별 점검 항목을 로트별로 확인합니다." }] },
-      { title: "포장 및 서류", items: [{ label: "출고", value: "출고 전 포장, 라벨, 승인 샘플과 COA를 확인합니다." }] },
-    ],
-    notice: "베트남어 보기의 수치는 문의용 참조 기준입니다. 최종 현지화 사양은 계약, 승인 샘플 및 로트 COA로 확정됩니다.",
-  },
-  ja: {
-    alt: (name) => `${name}の商品写真`,
-    description: (name) => `対象市場に合わせ、等級、形状、梱包を合意した${name}です。`,
-    overview: (name) => `見積もり前に、${name}の形状、品質確認項目、梱包条件を確認します。`,
-    forms: "承認済み用途に合わせて形状、規格、梱包を選定します。",
-    checks: ["等級と外観", "ロットの安全性", "梱包と書類"],
-    groups: (name) => [
-      { title: "製品範囲", items: [{ label: "形状", value: `${name}の等級、サイズ、加工方法は見積もり前に合意します。` }] },
-      { title: "品質枠組み", items: [{ label: "確認項目", value: "水分、異物、安全性、製品別の確認項目をロットごとに確認します。" }] },
-      { title: "梱包と書類", items: [{ label: "出荷", value: "出荷前に梱包、ラベル、承認サンプル、COAを確認します。" }] },
-    ],
-    notice: "ベトナム語表示の数値はお問い合わせ時の参考値です。最終仕様は契約、承認サンプル、ロットごとのCOAで確定します。",
-  },
-  ar: {
-    alt: (name) => `صورة المنتج ${name}`,
-    description: (name) => `${name} مُعد وفق الدرجة والشكل والتعبئة المتفق عليها للسوق المستهدف.`,
-    overview: (name) => `يتم تأكيد شكل المنتج ونقاط الجودة والتعبئة الخاصة بـ ${name} قبل إصدار عرض السعر.`,
-    forms: "يُحدد الشكل والمقاس والتعبئة وفق الاستخدام المعتمد.",
-    checks: ["الدرجة والمظهر", "سلامة الدفعة", "التعبئة والمستندات"],
-    groups: (name) => [
-      { title: "نطاق المنتج", items: [{ label: "الشكل", value: `يتم الاتفاق على درجة ${name} وحجمه وطريقة معالجته قبل عرض السعر.` }] },
-      { title: "إطار الجودة", items: [{ label: "الفحوص", value: "تُتفق الرطوبة والشوائب والسلامة والفحوص الخاصة بالمنتج لكل دفعة." }] },
-      { title: "التعبئة والمستندات", items: [{ label: "الشحن", value: "تُؤكد التعبئة والملصق والعينة المعتمدة وCOA قبل الإرسال." }] },
-    ],
-    notice: "القيم في العرض الفيتنامي هي معايير مرجعية للاستفسار. تُؤكد المواصفات المحلية النهائية بالعقد والعينة المعتمدة وCOA لكل دفعة.",
-  },
-  fr: {
-    alt: (name) => `Photographie produit de ${name}`,
-    description: (name) => `${name} préparé selon le grade, le format et le conditionnement convenus pour le marché cible.`,
-    overview: (name) => `Confirmez le format, les contrôles qualité et le conditionnement de ${name} avant le devis.`,
-    forms: "Format, taille et conditionnement choisis pour l'usage approuvé.",
-    checks: ["Grade et apparence", "Sécurité du lot", "Conditionnement et documents"],
-    groups: (name) => [
-      { title: "Périmètre produit", items: [{ label: "Format", value: `Le grade, la taille et la transformation de ${name} sont définis avant le devis.` }] },
-      { title: "Cadre qualité", items: [{ label: "Contrôles", value: "Humidité, corps étrangers, sécurité et contrôles spécifiques sont définis par lot." }] },
-      { title: "Conditionnement et documents", items: [{ label: "Expédition", value: "Conditionnement, étiquetage, échantillon approuvé et COA sont confirmés avant l'envoi." }] },
-    ],
-    notice: "Les chiffres de la vue vietnamienne sont des repères pour la demande. Les spécifications localisées finales sont confirmées par contrat, échantillon approuvé et COA de lot.",
-  },
-  de: {
-    alt: (name) => `Produktfotografie von ${name}`,
-    description: (name) => `${name}, vorbereitet nach vereinbartem Grad, Format und Verpackung für den Zielmarkt.`,
-    overview: (name) => `Format, Qualitätsprüfungen und Verpackung für ${name} werden vor dem Angebot abgestimmt.`,
-    forms: "Format, Größe und Verpackung werden für die freigegebene Anwendung gewählt.",
-    checks: ["Grad und Erscheinungsbild", "Chargensicherheit", "Verpackung und Unterlagen"],
-    groups: (name) => [
-      { title: "Produktumfang", items: [{ label: "Format", value: `Grad, Größe und Verarbeitung von ${name} werden vor dem Angebot vereinbart.` }] },
-      { title: "Qualitätsrahmen", items: [{ label: "Prüfpunkte", value: "Feuchte, Fremdstoffe, Sicherheit und produktspezifische Prüfungen werden je Charge abgestimmt." }] },
-      { title: "Verpackung und Unterlagen", items: [{ label: "Versand", value: "Verpackung, Etikett, freigegebenes Muster und COA werden vor dem Versand bestätigt." }] },
-    ],
-    notice: "Die Werte in der vietnamesischen Ansicht sind Referenzwerte für die Anfrage. Die endgültigen lokalisierten Spezifikationen werden durch Vertrag, Freigabemuster und Chargen-COA bestätigt.",
-  },
-};
+function categoryContent(category, language) {
+  const localized = localizeExportCategory(category, language);
+  return {
+    alt: localized.alt,
+    description: localized.description,
+    overview: localized.overview,
+    forms: localized.forms,
+    checks: localized.checks,
+    groups: localized.specGroups,
+    notice: localized.notice ?? EXPORT_SPEC_NOTICE,
+  };
+}
 
 const ACCESSIBILITY_COPY = {
   vi: { skip: "Đi tới nội dung", navigation: "Điều hướng danh mục", highlights: "Điểm nổi bật của danh mục", rail: "Nguyên tắc danh mục xuất khẩu", closeDetail: "Đóng chi tiết sản phẩm", language: "Chọn ngôn ngữ" },
   en: { skip: "Skip to content", navigation: "Catalogue navigation", highlights: "Catalogue highlights", rail: "Export catalogue principles", closeDetail: "Close product details", language: "Choose language" },
-  zh: { skip: "跳到内容", navigation: "产品目录导航", highlights: "目录亮点", rail: "出口目录原则", closeDetail: "关闭产品详情", language: "选择语言" },
+  zh: { skip: "跳至内容", navigation: "产品目录导航", highlights: "目录重点", rail: "出口目录原则", closeDetail: "关闭产品详情", language: "选择语言" },
   ko: { skip: "본문으로 건너뛰기", navigation: "카탈로그 탐색", highlights: "카탈로그 주요 정보", rail: "수출 카탈로그 원칙", closeDetail: "제품 상세 닫기", language: "언어 선택" },
-  ja: { skip: "本文へ移動", navigation: "カタログナビゲーション", highlights: "カタログの特徴", rail: "輸出カタログの原則", closeDetail: "商品詳細を閉じる", language: "言語を選択" },
+  ja: { skip: "本文へ移動", navigation: "カタログナビゲーション", highlights: "カタログのポイント", rail: "輸出カタログの方針", closeDetail: "商品詳細を閉じる", language: "言語を選択" },
   ar: { skip: "الانتقال إلى المحتوى", navigation: "التنقل في الكتالوج", highlights: "أبرز ما في الكتالوج", rail: "مبادئ كتالوج التصدير", closeDetail: "إغلاق تفاصيل المنتج", language: "اختر اللغة" },
   fr: { skip: "Aller au contenu", navigation: "Navigation du catalogue", highlights: "Points forts du catalogue", rail: "Principes du catalogue export", closeDetail: "Fermer les détails du produit", language: "Choisir la langue" },
   de: { skip: "Zum Inhalt springen", navigation: "Katalognavigation", highlights: "Katalog-Highlights", rail: "Grundsätze des Exportkatalogs", closeDetail: "Produktdetails schließen", language: "Sprache auswählen" },
 };
-
-function categoryContent(category, language) {
-  if (language === "vi") {
-    return {
-      alt: category.alt,
-      description: category.description,
-      overview: category.overview,
-      forms: category.forms,
-      checks: category.checks,
-      groups: category.specGroups,
-      notice: EXPORT_SPEC_NOTICE,
-    };
-  }
-
-  const locale = CATEGORY_LOCALIZATION[language] ?? CATEGORY_LOCALIZATION.en;
-  const name = categoryName(category, language);
-  return {
-    alt: locale.alt(name),
-    description: locale.description(name),
-    overview: locale.overview(name),
-    forms: locale.forms,
-    checks: locale.checks,
-    groups: locale.groups(name),
-    notice: locale.notice,
-  };
-}
 
 function scrollToId(id, reduced) {
   document.querySelector(id)?.scrollIntoView({ behavior: reduced ? "instant" : "smooth", block: "start" });
@@ -607,7 +478,7 @@ function CategoryDetailDialog({ category, content, copy, labels, language, onClo
           <Dialog.Close className="catalog-detail-close" aria-label={labels.closeDetail}><X size={21} /></Dialog.Close>
           {category && (
             <div className="catalog-detail-scroll">
-              <div className="catalog-detail-visual"><img src={category.image} alt={content.alt} width="1200" height="900" /></div>
+              <div className="catalog-detail-visual"><img src={category.image} alt={content.alt} width="1200" height="900" /><ProductImageBrand /></div>
               <div className="catalog-detail-content">
                 <p className="catalog-kicker">{category.number} · {copy.standards}</p>
                 <Dialog.Title>{title}</Dialog.Title>
@@ -685,7 +556,7 @@ export default function CatalogDemo() {
                 </div>
               </Motion.div>
               <Motion.figure className="catalog-hero-image" initial={reduced ? false : { opacity: 0, scale: 0.975 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}>
-                <img src="/images/export-categories-hero-v1.png" alt={language === "vi" ? "Hạt điều, quế, tiêu, hoa hồi, cà phê, dừa và trái cây sấy trong bố cục nông sản xuất khẩu" : `${copy.heroKicker}: ${copy.factOne}`} width="1668" height="936" fetchPriority="high" />
+                <img src="/images/export-categories-hero.webp" alt={language === "vi" ? "Hạt điều, quế, tiêu, hoa hồi, cà phê, dừa và trái cây sấy trong bố cục nông sản xuất khẩu" : `${copy.heroKicker}: ${copy.factOne}`} width="1668" height="939" fetchPriority="high" />
               </Motion.figure>
             </div>
           </section>
@@ -710,6 +581,7 @@ export default function CatalogDemo() {
                       <button type="button" onClick={() => setDetailCategory(category)} aria-label={`${copy.openSpec}: ${categoryName(category, language)}`}>
                         <div className="catalog-category-image">
                           <img src={category.image} alt={content.alt} width="800" height="640" loading="lazy" />
+                          <ProductImageBrand />
                           <span className="catalog-detail-tab">{copy.openSpec}<ArrowUpRight size={16} aria-hidden="true" /></span>
                         </div>
                         <div className="catalog-category-content">

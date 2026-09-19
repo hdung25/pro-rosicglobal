@@ -10,11 +10,31 @@
       href="/apple-touch-icon-rosic.png?v=20260919"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fafaf5" />
+    <script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("rosic-theme");
+          const theme = saved === "dark" || saved === "light"
+            ? saved
+            : window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+          document.querySelector('meta[name="theme-color"]')?.setAttribute(
+            "content",
+            theme === "dark" ? "#151c15" : "#fafaf5",
+          );
+        } catch {
+          /* Keep the light brand presentation when storage is unavailable. */
+        }
+      })();
+    </script>
     <meta
       name="description"
       content="Hồng Tâm Rosic Global kết nối nông sản Việt Nam với đối tác quốc tế qua các nhóm hạt điều, cà phê, hồ tiêu, quế, hoa hồi, cơm dừa, trái cây sấy và nông sản chế biến."
     />
-    <meta name="theme-color" content="#fafaf5" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="https://rosicglobal.com/" />
     <meta

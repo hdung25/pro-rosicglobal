@@ -131,3 +131,113 @@ The export grid needed subject-specific visuals rather than reusing a mixed-prod
 | `desiccated-coconut-export.webp` | `exec-8f067e7e-1765-46fc-aff8-218773cea226.png` | Desiccated coconut |
 
 Generation directory: `C:/Users/Admin/.codex/generated_images/01a07265-c257-7d30-b689-454748c7045f/`.
+
+## Product-image audit and replacement manifest — 2026-09-19
+
+This audit covers every product-facing image that is currently shipped under
+`public/images/` and the image assignments in `src/data.js`,
+`src/products-extra.js`, and `src/export-catalog.js`. It was performed from
+the local final files at their rendered crop, not only from filenames or
+metadata. The goal is to keep an export catalogue visually credible while
+avoiding third-party logos, copied competitor imagery, hidden watermarks, and
+product/description mismatches.
+
+### What can remain
+
+| Asset / use | Audit result | Reason |
+| --- | --- | --- |
+| `cashews.webp` for raw cashew kernels | Keep | Original, bright, close enough to show whole kernels and free of visible text or branding. |
+| `cassia-export.webp` | Keep | Original subject-specific cassia visual; bark, sticks and neutral ground are clearly readable. |
+| `pepper.webp` | Keep | Original subject-specific black pepper visual; whole peppercorns and a pepper spike make the category unambiguous. |
+| `star-anise-export.webp` | Keep | Original subject-specific whole-star-anise visual, without product packaging or third-party marks. |
+| `desiccated-coconut-export.webp` | Keep | Original subject-specific visual, with no visible branding and a clear dried-coconut texture. |
+| `hero.webp`, `produce.webp`, and the fresh-fruit product images | Keep for their present editorial/fresh-produce placements | Their local provenance is recorded above and the subject shown matches the surrounding content. |
+
+### Corrections completed after the audit
+
+| Previous assignment | Reason for replacement | Clean asset now shipped | Placement |
+| --- | --- | --- | --- |
+| `coffee.webp` for export category 05 | A roasted-bean stock photo did not match green-bean grading. | `green-coffee-export.webp`, original and logo-free. | Export category 05; the stock photo stays only with the separate “Cà phê rang” card. |
+| `mango.webp` for export category 07 “Trái cây sấy” | A fresh mango did not represent a dried-fruit SKU. | `dried-fruit-export.webp`, original and logo-free. | Export category 07 and its detail view; the fresh mango stays with the fresh-fruit card. |
+| `cashews.webp` for export category 08 “Điều thành phẩm” | It duplicated the raw-kernel visual for a finished-good category. | `finished-cashew-export.webp`, original roasted cashews beside a blank kraft pouch. | Export category 08 and its detail view. |
+| `vegetables.webp` / `logistics.webp` in packing content | Neither represented food-grade sorting and packing equipment. | `agri-processing-line.webp`, original, bright and logo-free. | The packaging journey step and packing/shipping article. |
+| `export-categories-hero-v1.png` | The legacy 2.36 MB PNG lacked recorded provenance. | `export-categories-hero.webp`, original, 259,106-byte WebP. | Review-only catalogue hero. The untracked-source PNG is removed from the runtime. |
+
+All replacements were visually inspected at card and large-view crops. They
+are illustrative artwork, never evidence of company facilities, inventory,
+certification, a particular batch, or country of origin.
+
+### Requirements for each planned original
+
+1. Generate one image per file, without a reference image, typography, text,
+   label, certification seal, logo, QR code, watermark, or recognisable
+   packaging artwork.
+2. Use an open, bright, neutral presentation that matches the existing warm
+   ivory catalogue surface. Preserve believable crop/food texture and avoid
+   glossy CGI, cinematic darkness, dramatic vignettes, or artificial neon
+   colour.
+3. Inspect the rendered image at desktop-card, mobile-card, and large-dialog
+   crops. Reject it when a crop hides the product, contains malformed food
+   anatomy, text-like artefacts, brand-like markings, or unsafe visual claims.
+4. Save the original generation identifier and exact prompt in this document;
+   encode the accepted result to WebP with dimensions suitable for the largest
+   dialog placement. Mark it as illustrative, never as proof of inventory,
+   certification, facility, origin, or available stock.
+
+### Accepted original replacements — 2026-09-19
+
+The five assets below were created with the built-in image-generation workflow,
+without reference images. They were visually checked for product clarity,
+absence of text/logos/third-party marks and card/dialog crops, then encoded as
+WebP at quality 86 / effort 5. Originals remain in
+`C:/Users/Admin/.codex/generated_images/01a07265-c257-7d30-b689-454748c7045f/`.
+
+| Final file | Dimensions | Bytes | Source generation | Public use |
+| --- | --- | ---: | --- | --- |
+| `agri-processing-line.webp` | 1440 × 960 | 194,446 | `exec-ea4e6832-ff37-49d4-bc4e-ef1aee961fe1.png` | Packing journey and article |
+| `green-coffee-export.webp` | 1254 × 1254 | 155,728 | `exec-bb13b212-8f13-45b1-b893-bc6d22b34014.png` | Green coffee export category |
+| `dried-fruit-export.webp` | 1254 × 1254 | 189,452 | `exec-f71adcaa-74f8-4a2d-8cd2-2e46910b71e1.png` | Dried-fruit export category |
+| `finished-cashew-export.webp` | 1254 × 1254 | 141,696 | `exec-e6fd448f-7746-4693-b91b-5e328fb30f27.png` | Finished-cashew export category |
+| `export-categories-hero.webp` | 1668 × 939 | 259,106 | `exec-477e34c3-4986-4bdf-bfde-8ab6e1e761cf.png` | Review-only catalogue hero |
+
+#### Generation prompts
+
+- **`agri-processing-line.webp`** — “Premium editorial website photograph for a Vietnamese agricultural export company: a bright, clean food-grade agricultural processing and export-packing line in a modern Vietnam-based facility; stainless sorting conveyors and inspection tables, plain kraft cartons and neutral woven sacks, with natural cashew kernels and cinnamon sticks in separate clean trays. No people, hands, screens, text, labels, logos, flags or watermarks. Warm daylight plus neutral industrial light, off-white walls, realistic documentary photography, horizontal 3:2 framing; avoid CGI, dark grading and product claims.”
+- **`green-coffee-export.webp`** — “Premium square export-catalogue product photograph of unroasted pale jade-green Arabica/Robusta beans in a plain ivory grading tray, with a few beans scattered on a warm ivory limestone surface. Bright soft daylight, real bean texture and empty space for a card. No roasted beans, cup, packaging, tools, people, text, barcode, logos, watermark or certification marks; no claim of farm, facility, certification or origin.”
+- **`dried-fruit-export.webp`** — “Premium square export-catalogue photograph of genuinely dried products only: golden dried mango strips, pale banana chips and dried pineapple rings in three unbranded ivory trays. The pieces must visibly read as dry rather than fresh fruit or candy. Bright ivory surface, soft daylight and clean food-grade editorial style. No retail pouch, label, text, logo, watermark, people, utensils, dark grading, CGI or product claims.”
+- **`finished-cashew-export.webp`** — “Premium square finished-product photograph of ready-to-eat lightly toasted cashew kernels in a shallow ivory dish with one completely blank kraft stand-up pouch behind. Natural toasted texture, no spices, coatings or other nuts; warm ivory surface, bright soft daylight. No printed pouch, label, barcode, logo, watermark, people, dark setting, CGI or claims about a company, formula, certification, inventory or origin.”
+- **`export-categories-hero.webp`** — “Wide 16:9 original export-catalogue still life on warm ivory limestone: separate, crop-safe groups of raw cashew kernels, cassia sticks, black pepper with one green spike, whole dried star anise, green coffee beans, desiccated coconut, dried mango strips and toasted cashews. Bright natural magazine photography, plain cream background, real food texture and clear negative space. No bowls with writing, packaging, labels, text, logos, watermark, badges, people, dark filter, CGI or claims of a particular company, farm, factory, certificate or origin.”
+
+### Brand treatment: display layer, not false ownership claim
+
+The requested “HONG TAM ROSIC” watermark or frame should be added by the web
+interface as a small, accessible overlay in each product image wrapper rather
+than baked into the source bitmap. This keeps the original asset traceable,
+does not obscure the product, and avoids suggesting that an external stock
+photograph becomes company-owned simply because a watermark was added.
+
+Recommended treatment:
+
+- a compact `HỒNG TÂM ROSIC GLOBAL` wordmark on a translucent warm-charcoal
+  chip at the image's top-right corner;
+- `aria-hidden="true"` and `pointer-events: none`, so the real image alt text
+  remains the accessible description;
+- opacity/contrast sufficient over both light and dark product photos, with a
+  plain border rather than a large transparent logo across food;
+- the existing hover zoom and only a restrained warm-neutral gradient. Do not
+  apply a heavy colour filter, because it changes buyers' perception of the
+  product's real colour.
+
+In an exportable brochure, add the same frame in the document template. It is
+still a display treatment, not a statement of ownership or a replacement for
+licensing/provenance.
+
+### Source and licensing rule
+
+The preferred replacement source is an original image generated in the project
+workflow or a company-provided photograph with written permission. If a stock
+image is proposed, record the direct source URL, license, author where shown,
+date checked, visible-brand inspection, and every shipped crop before it is
+accepted. Do not use competitor site imagery, social-media reposts, a search
+thumbnail, or a picture merely because a third-party watermark has been
+covered.

@@ -143,25 +143,47 @@ for (const article of ARTICLES) {
   })
 }
 
-test('privacy dialog explains draft handling and closes accessibly', async ({ page }) => {
+test('privacy dialog explains quote routing and closes accessibly', async ({ page }) => {
   const trigger = page.getByRole('button', { name: 'Thông tin & quyền riêng tư', exact: true })
   await trigger.click()
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByRole('heading', { name: 'Thông tin & quyền riêng tư', exact: true })).toBeVisible()
-  await expect(dialog).toContainText('không tự động gửi thông tin')
+  await expect(dialog).toContainText('hệ thống báo giá để phân luồng')
   await dialog.getByRole('button', { name: 'Đóng chi tiết', exact: true }).click()
   await expect(dialog).toHaveCount(0)
   await expect(trigger).toBeFocused()
 })
 
-test('quote form validates, creates a local draft, copies and downloads exact content without sending', async ({ page, context }) => {
+test('quote form validates, sends the complete B2B contract, and reports accepted channels truthfully', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-  const transmissions = []
-  page.on('request', request => {
-    if (['POST', 'PUT', 'PATCH'].includes(request.method())) transmissions.push(request.url())
+  const requests = []
+  await page.route('**/api/quote', async route => {
+    const request = route.request()
+    requests.push({
+      body: JSON.parse(request.postData() || '{}'),
+      idempotencyKey: request.headers()['idempotency-key'],
+    })
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ok: true,
+        status: 'accepted',
+        requestId: 'quote-ui-accepted-01',
+        deliveries: {
+          make: { status: 'sent' },
+          customerEmail: { status: 'queued' },
+          salesEmail: { status: 'queued' },
+        },
+        catalogProfile: {
+          status: 'available',
+          url: 'https://files.example.com/hong-tam-profile.pdf',
+        },
+      }),
+    })
   })
   const form = page.locator('#contact form')
-  const submit = form.getByRole('button', { name: /Tạo yêu cầu báo giá|Soạn email yêu cầu/ })
+  const submit = form.getByRole('button', { name: 'Gửi yêu cầu báo giá', exact: true })
   await submit.click()
   await expect(page.locator('.request-result')).toHaveCount(0)
   await expect(page.getByLabel('Họ và tên')).toBeFocused()
@@ -171,7 +193,7 @@ test('quote form validates, creates a local draft, copies and downloads exact co
   await submit.click()
   await expect(page.locator('.request-result')).toHaveCount(0)
   await expect(page.getByLabel('Số điện thoại / WhatsApp')).toBeFocused()
-  await expect.poll(() => page.getByLabel('Số điện thoại / WhatsApp').evaluate(input => input.validationMessage)).toContain('8–15')
+  await expect.poll(() => page.getByLabel('Số điện thoại / WhatsApp').evaluate(input => input.validationMessage)).toContain('8-15')
   await page.getByLabel('Số điện thoại / WhatsApp').fill('+84 912 345 678')
   await page.getByLabel('Email liên hệ').fill('invalid-email')
   await submit.click()
@@ -179,17 +201,41 @@ test('quote form validates, creates a local draft, copies and downloads exact co
   await expect(page.getByLabel('Email liên hệ')).toBeFocused()
   await page.getByLabel('Email liên hệ').fill('qa@example.com')
   await page.getByLabel('Sản phẩm quan tâm', { exact: true }).selectOption('Hạt điều')
+  await page.getByLabel('Thị trường đích').fill('Đức')
+  await page.getByLabel('Sản lượng dự kiến').fill('1 × 20’ FCL')
+  await page.getByLabel('Thời gian mong muốn').selectOption('Trong 30 ngày')
   await page.getByLabel('Yêu cầu chi tiết').fill('Yêu cầu kiểm tra nội bộ, 200 kg, bao bì 5 kg.\nGiao dự kiến tháng 10.')
+  await page.getByLabel('Tôi đồng ý nhận cập nhật về yêu cầu này qua WhatsApp.').check()
   await submit.click()
-  const result = page.getByRole('region', { name: 'Bản yêu cầu đã sẵn sàng.' })
+  await expect.poll(() => requests.length).toBe(1)
+  expect(requests[0].body).toMatchObject({
+    name: 'QA Kiểm tra',
+    phone: '+84 912 345 678',
+    email: 'qa@example.com',
+    product: 'Hạt điều',
+    market: 'Đức',
+    quantity: '1 × 20’ FCL',
+    timeline: 'Trong 30 ngày',
+    whatsappOptIn: true,
+    honeypot: '',
+  })
+  expect(requests[0].body.productGroup).toBeTruthy()
+  expect(requests[0].body.formStartedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+  expect(requests[0].body.clientSubmissionId).toMatch(/^[A-Za-z0-9._-]{8,128}$/)
+  expect(requests[0].idempotencyKey).toBe(requests[0].body.clientSubmissionId)
+  const result = page.getByRole('region', { name: 'Cảm ơn bạn đã gửi yêu cầu.' })
   await expect(result).toBeVisible()
   await expect(result).toBeFocused()
-  await expect(result).toContainText('Yêu cầu chưa được gửi.')
+  await expect(result).toContainText('Mã yêu cầu: quote-ui-accepted-01')
+  await expect(result).toContainText('Đã chuyển tới kênh này.')
+  await expect(result).toContainText('Đã được nhà cung cấp email tiếp nhận để xử lý.')
+  await expect(result.getByRole('link', { name: 'Download Our Catalog/Profile', exact: true })).toHaveAttribute('href', 'https://files.example.com/hong-tam-profile.pdf')
   const summary = await page.locator('.request-summary').innerText()
   expect(summary).toContain('Sản phẩm quan tâm: Hạt điều')
+  expect(summary).toContain('Thị trường đích: Đức')
   expect(summary).toContain('QA Kiểm tra')
   await result.getByRole('button', { name: 'Sao chép nội dung', exact: true }).click()
-  await expect(result).toContainText('Đã sao chép nội dung yêu cầu.')
+  await expect(result).toContainText('Đã sao chép nội dung')
   expect((await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, '\n')).toBe(summary)
   const [download] = await Promise.all([
     page.waitForEvent('download'),
@@ -198,9 +244,38 @@ test('quote form validates, creates a local draft, copies and downloads exact co
   expect(download.suggestedFilename()).toBe('yeu-cau-bao-gia-hong-tam.txt')
   const downloadPath = await download.path()
   expect((await readFile(downloadPath, 'utf8')).replace(/^\uFEFF/, '')).toBe(summary)
-  expect(transmissions).toEqual([])
   await page.getByLabel('Yêu cầu chi tiết').fill('Nhu cầu đã thay đổi.')
   await expect(result).toHaveCount(0)
+})
+
+test('quote form gives an explicit no-send fallback when delivery is not configured', async ({ page }) => {
+  await page.route('**/api/quote', async route => {
+    await route.fulfill({
+      status: 202,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ok: false,
+        status: 'configuration_required',
+        requestId: 'quote-ui-config-01',
+        deliveries: {
+          make: { status: 'not_configured' },
+          customerEmail: { status: 'not_configured' },
+          salesEmail: { status: 'not_configured' },
+        },
+        catalogProfile: { status: 'placeholder', url: null },
+      }),
+    })
+  })
+  await page.getByLabel('Họ và tên').fill('Nguyễn Thị Ánh')
+  await page.getByLabel('Số điện thoại / WhatsApp').fill('+84962284872')
+  await page.getByLabel('Email liên hệ').fill('anh@example.com')
+  await page.getByRole('button', { name: 'Gửi yêu cầu báo giá', exact: true }).click()
+  const result = page.getByRole('region', { name: 'Kênh gửi trực tuyến đang chờ cấu hình.' })
+  await expect(result).toContainText('Nội dung này chưa được chuyển đến Sales')
+  await expect(result).toContainText('Chưa được cấu hình')
+  await expect(result.getByRole('button', { name: 'Download Our Catalog/Profile', exact: true })).toBeDisabled()
+  await expect(result.getByRole('link', { name: 'Mở ứng dụng email', exact: true })).toHaveAttribute('href', /^mailto:info@rosicglobal\.com/)
+  await expect(result.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveAttribute('href', /^https:\/\/wa\.me\/84962284872/)
 })
 
 for (const width of [360, 390, 768, 1440, 1920, 2560]) {

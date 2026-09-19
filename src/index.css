@@ -85,6 +85,162 @@
   }
 }
 
+/* Quote intake states: all delivery messages are explicit about hand-off,
+   rather than implying a provider has completed a final delivery. */
+.contact-form .field input[aria-invalid="true"],
+.contact-form .field select[aria-invalid="true"],
+.contact-form .field textarea[aria-invalid="true"] {
+  border-bottom-color: #a23b2d;
+  box-shadow: 0 2px 0 -1px #a23b2d;
+}
+.field-error {
+  margin: -3px 0 0;
+  color: #8f3327;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.form-consent {
+  gap: 7px;
+  padding-top: 3px;
+}
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  font-size: 11px;
+  line-height: 1.65;
+  cursor: pointer;
+}
+.checkbox-label > span {
+  min-width: 0;
+  flex: 1 1 0;
+  max-inline-size: calc(100% - 28px);
+  overflow-wrap: anywhere;
+}
+.contact-form .checkbox-label input {
+  width: 18px;
+  max-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--gold);
+  flex: 0 0 auto;
+}
+.form-consent-note {
+  margin: 0 0 0 28px;
+}
+.site-app[dir="rtl"] .form-consent-note {
+  margin: 0 28px 0 0;
+}
+.contact-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.quote-spinner {
+  animation: quote-spin 0.9s linear infinite;
+}
+@keyframes quote-spin {
+  to { transform: rotate(360deg); }
+}
+.request-result {
+  border-inline-start: 3px solid var(--gold);
+}
+.request-result--accepted {
+  border-inline-start-color: #488050;
+}
+.request-result--failed,
+.request-result--network,
+.request-result--rate,
+.request-result--generic {
+  border-inline-start-color: #a55736;
+}
+.request-id {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.delivery-statuses,
+.quote-fallback {
+  margin-top: 19px;
+  padding-top: 17px;
+  border-top: 1px solid var(--line);
+}
+.delivery-statuses h5,
+.quote-fallback h5 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.delivery-status {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 9px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.delivery-status strong {
+  color: #6c654d;
+  text-align: end;
+}
+.delivery-status[data-status="accepted_by_make"] strong,
+.delivery-status[data-status="accepted_by_resend"] strong {
+  color: #33683f;
+}
+.delivery-status[data-status="failed"] strong {
+  color: #8f3327;
+}
+.quote-profile-action {
+  align-items: center;
+}
+.quote-profile-placeholder {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+.quote-profile-help {
+  flex-basis: 100%;
+  margin: 0;
+}
+.quote-fallback > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.75;
+}
+.quote-fallback .request-actions {
+  margin-top: 8px;
+}
+.quote-fallback .form-note {
+  margin-bottom: 0;
+}
+@media (max-width: 600px) {
+  .checkbox-label {
+    font-size: 12px;
+  }
+  .delivery-status {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .delivery-status strong {
+    text-align: start;
+  }
+  .request-result .button {
+    width: 100%;
+    justify-content: center;
+    margin-inline-end: 0;
+  }
+}
+
 /* Official release utilities: the centred brand remains the visual anchor while
    language control is available on every screen size. */
 .header-language {
@@ -107,6 +263,10 @@
 }
 .header-language .language-picker-chevron {
   inset-inline-end: 8px;
+}
+.header-theme {
+  flex: 0 0 auto;
+  margin-inline-start: 1px;
 }
 .mobile-export-link {
   display: flex;
@@ -132,8 +292,36 @@
 .mobile-language {
   margin-top: 22px;
 }
+.mobile-theme {
+  display: flex;
+  margin-top: 14px;
+}
 .footer-language {
   margin-top: 12px;
+}
+.footer-theme {
+  display: flex;
+  margin-top: 12px;
+}
+/* The centred mark needs enough room to remain balanced beside language and
+   theme controls. Switch to the fully featured dialog navigation before the
+   split desktop header becomes cramped. */
+@media (max-width: 1220px) and (min-width: 901px) {
+  .nav-shell {
+    display: flex;
+    position: relative;
+    height: 76px;
+    justify-content: center;
+  }
+  .nav-left,
+  .nav-right {
+    display: none;
+  }
+  .menu-toggle {
+    display: flex;
+    position: absolute;
+    right: 0;
+  }
 }
 .site-app[dir="rtl"] .menu-toggle {
   inset-inline-end: 0;
@@ -1555,6 +1743,11 @@ a[aria-current="location"]:after {
   grid-template-columns: 1fr 1fr;
   align-items: start;
 }
+.detail-image-wrap {
+  position: relative;
+  min-height: 500px;
+  overflow: hidden;
+}
 .detail-image {
   width: 100%;
   height: 100%;
@@ -2236,6 +2429,10 @@ a[aria-current="location"]:after {
     height: 260px;
     min-height: 0;
     object-fit: cover;
+  }
+  .detail-image-wrap {
+    height: 260px;
+    min-height: 0;
   }
   .detail-body {
     padding: 32px 24px;

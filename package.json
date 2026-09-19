@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:quote-api": "node --test tests/quote.validation.node.js"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",

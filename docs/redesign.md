@@ -54,6 +54,17 @@ No verified receiving email, phone or Zalo account was provided. Placeholder con
 
 Post-deployment smoke: 4/4 checks passed on the public alias (images/anchors/runtime errors; repeated product prefill and contact scroll; form validation, clipboard and download without network submission; mobile 390px navigation/modal/overflow).
 
+## Operational update — 2026-09-19
+
+The historical notes above describe the earlier static/draft release. The
+official root is now active, not a maintenance page. `Contact.jsx` posts to
+`/api/quote` and truthfully exposes Make/Resend hand-off state, with a no-send
+fallback when credentials are absent. The current integration contract,
+required provider setup and verification are maintained in
+[`quote-automation.md`](quote-automation.md) and
+[`implementation-log.md`](implementation-log.md); image provenance and the
+2026-09-19 replacement audit are maintained in [`assets.md`](assets.md).
+
 ## Polish release 2026-09-06
 
 Production dpl_DcgwpVYLF5xJm72YZ9XgtSEi6WPi, public alias unchanged. Explicit hero width and centered margins fix the wide-screen aspect-ratio/max-height defect; checked at1920/2560/390. Reading sizes/spacing unified.16 products with8 additional local WebP images.8 clearly labelled sample feedback items in two continuous rails; no fabricated personal portraits or real testimonial claims. Visible pause icons removed per user; tap, hover, focus and keyboard can pause, reduced motion disables drift. Supplied logo deterministically traced into transparent pure-vector brand-mark.svg, reused for SVG/PNG/ICO favicon and touch icon under new URLs to bypass old icon cache. Lint/build, focused motion regression and production smoke passed. Business contact configuration remains pending from the previous release.

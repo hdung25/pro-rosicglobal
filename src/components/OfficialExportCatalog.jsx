@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { EXPORT_CATEGORIES, EXPORT_SPEC_NOTICE } from "../export-catalog";
 import { localizeExportCategory } from "../export-catalog-l10n";
+import { ProductImageBrand } from "./ProductImageBrand";
 import "./OfficialExportCatalog.css";
 
 const SECTION_COPY = {
@@ -108,6 +109,7 @@ export default function OfficialExportCatalog({ onRequestQuote, language = "vi" 
                     width="960"
                     height="640"
                   />
+                  <ProductImageBrand />
                   <span className="official-export-card__number">
                     {category.number}
                   </span>
@@ -167,7 +169,8 @@ function CategoryDialog({ category, copy, onClose, onRequestQuote }) {
             <div className="official-export-dialog__scroll">
               <div className="official-export-dialog__visual">
                 <img src={category.image} alt={category.alt} />
-                <span>{category.number}</span>
+                <ProductImageBrand />
+                <span className="official-export-dialog__number">{category.number}</span>
               </div>
 
               <div className="official-export-dialog__body">

@@ -158,8 +158,8 @@ export const EXPORT_CATEGORIES = [
     number: "05",
     title: "Cà phê hạt",
     shortTitle: "Cà phê",
-    image: "/images/coffee.webp",
-    alt: "Hạt cà phê rang trên nền sáng",
+    image: "/images/green-coffee-export.webp",
+    alt: "Hạt cà phê nhân xanh trong khay gốm sáng màu",
     description:
       "Cà phê hạt theo sàng, phương pháp sơ chế và bộ chỉ tiêu phù hợp với hợp đồng xuất khẩu.",
     overview:
@@ -235,8 +235,8 @@ export const EXPORT_CATEGORIES = [
     number: "07",
     title: "Trái cây sấy",
     shortTitle: "Trái cây sấy",
-    image: "/images/mango.webp",
-    alt: "Xoài chín vàng trên nền sáng",
+    image: "/images/dried-fruit-export.webp",
+    alt: "Xoài sấy, chuối sấy và dứa sấy trong khay gốm sáng",
     description:
       "Dòng chip và dẻo từ xoài, mít, chuối, dứa cùng công thức phù hợp từng kênh bán.",
     overview:
@@ -272,8 +272,8 @@ export const EXPORT_CATEGORIES = [
     number: "08",
     title: "Điều thành phẩm",
     shortTitle: "Điều thành phẩm",
-    image: "/images/cashews.webp",
-    alt: "Hạt điều nhân vàng nhạt trong bát gốm",
+    image: "/images/finished-cashew-export.webp",
+    alt: "Hạt điều rang thành phẩm bên bao bì kraft trơn",
     description:
       "Điều nguyên vị, rang muối và phủ vị dành cho bán lẻ, quà tặng hoặc nhãn riêng.",
     overview:
