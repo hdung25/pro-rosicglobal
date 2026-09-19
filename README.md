@@ -18,7 +18,7 @@ Without a verified email, the form creates a reviewable local request with downl
 
 ## Publishing
 
-The existing `.vercel` link targets `pro-rosicglobal`. Deploy with `vercel deploy --prod --yes` after build and browser checks. Public URL: https://pro-rosicglobal.vercel.app/.
+The existing `.vercel` link targets `pro-rosicglobal`. Deploy with `vercel deploy --prod --yes` after build and browser checks. Production URL: https://rosicglobal.com/. The canonical URL, crawler policy and sitemap are maintained in `index.html`, `public/robots.txt` and `public/sitemap.xml`.
 
 ## Content and design
 

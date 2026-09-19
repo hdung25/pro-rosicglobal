@@ -119,3 +119,15 @@ Use case: photorealistic-natural. Asset type: premium agricultural product catal
 #### pepper.webp
 
 Use case: photorealistic-natural. Asset type: premium agricultural export product catalog photograph. Single square image of a small shallow plain ivory ceramic bowl filled with real dried black peppercorns, a few peppercorns casually scattered close to bowl and one small natural fresh green pepper spike with a single dark green leaf laid gently alongside. Correct botany of black pepper Piper nigrum: tiny wrinkled round black-brown peppercorns, green spike carrying small spherical green berries. Entire composition fully visible and centered with ample breathing room, occupying 60 percent frame. Warm ivory limestone tabletop, simple light creamy background, bright diffused morning window daylight from upper left and soft grounded shadows. Realistic wrinkled peppercorn texture, natural leaf veins, premium editorial food photography on professional 85mm lens, believable scale. No chili peppers, no ground powder, no mixed red/white peppercorn blend, no packaging, labels, text, origin or certification marks, logos, hands, CGI gloss, black background or moody lighting.
+
+## Export-category image correction — 2026-09-19
+
+The export grid needed subject-specific visuals rather than reusing a mixed-product still life. The following original, logo-free imagegen assets were resized to 1280px wide and encoded as WebP at quality 86 / effort 5 for faster delivery while keeping enough detail for the product dialog. They are illustrative only and do not identify Hồng Tâm inventory, farms, certifications, or a product batch.
+
+| Final file | Source generation | Subject |
+| --- | --- | --- |
+| `cassia-export.webp` | `exec-c173349f-6658-4af0-9fe8-5081618d35a4.png` | Cassia sticks and bark |
+| `star-anise-export.webp` | `exec-c6cbb72d-de74-4b0a-a8be-662e6bb7fa1d.png` | Whole dried star anise |
+| `desiccated-coconut-export.webp` | `exec-8f067e7e-1765-46fc-aff8-218773cea226.png` | Desiccated coconut |
+
+Generation directory: `C:/Users/Admin/.codex/generated_images/01a07265-c257-7d30-b689-454748c7045f/`.

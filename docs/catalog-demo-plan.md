@@ -1,9 +1,9 @@
-# Hồng Tâm Rosic Global catalogue demo
+# Hồng Tâm Rosic Global export catalogue plan
 
 ## Scope and safeguards
 
-- Keep the public root in maintenance mode while the new catalogue is reviewed.
-- Publish the catalogue through the `?demo=catalog` preview route. The root route remains the customer-facing maintenance page.
+- The public root is the official customer-facing website at `https://rosicglobal.com/`.
+- The `?demo=catalog` route is retained only as a review aid for comparing layout concepts; no required customer-facing capability may exist only in that route.
 - Use Vdelta only as a layout reference: a category-discovery layer followed by product-level detail and a contact path. No Vdelta wording, images, logos or product assets are used.
 - Use Visimex public product pages only as a research reference for which commercial fields buyers commonly request. Do not claim Visimex certifications, facilities, products or measurements as Hồng Tâm Rosic commitments.
 - Label all displayed values as reference checkpoints. Final product specifications must be confirmed with an approved sample, contract and batch COA.
@@ -55,7 +55,7 @@
 - [x] One motion rail with reduced-motion fallback
 - [x] Valid WhatsApp, LinkedIn and email quick links
 - [x] Exact centered copyright text
-- [x] Eight-language selector with country flags for public maintenance and catalogue demo
+- [x] Eight-language selector with country flags on the official header, mobile menu and footer; export-category overview and detail framework are localized for all requested languages
 - [x] Browser review at desktop, tablet and mobile widths
 - [x] Build, lint and automated accessibility review
-- [ ] Preview deployment and production-maintenance regression check
+- [x] Production launch at `https://rosicglobal.com/`; follow-up releases require public-root regression checks

@@ -17,7 +17,9 @@ test('all rendered images load, internal links resolve, and the page has no runt
   for (const image of await images.all()) {
     await image.scrollIntoViewIfNeeded()
     await expect.poll(() => image.evaluate(node => node.complete && node.naturalWidth > 0)).toBe(true)
-    await expect(image).toHaveAttribute('alt', /.+/)
+    if ((await image.getAttribute('aria-hidden')) !== 'true') {
+      await expect(image).toHaveAttribute('alt', /.+/)
+    }
   }
   const links = await page.locator('a[href]').evaluateAll(anchors => anchors.map(a => a.getAttribute('href')))
   for (const href of links) {
@@ -103,10 +105,10 @@ test('header category dropdown and footer category links apply their filters', a
   await page.keyboard.press('Tab')
   await expect(dropdown.getByRole('link', { name: 'Trái cây tươi', exact: true })).toBeFocused()
   await page.keyboard.press('Enter')
-  await expect(page.locator('.product-card')).toHaveCount(4)
+  await expect(page.locator('.product-card')).toHaveCount(PRODUCTS.filter(product => product.category === 'fruit').length)
   await expect(page.locator('#products')).toBeInViewport()
   await page.locator('.site-footer').getByRole('link', { name: 'Nông sản chế biến', exact: true }).click()
-  await expect(page.locator('.product-card')).toHaveCount(2)
+  await expect(page.locator('.product-card')).toHaveCount(PRODUCTS.filter(product => product.category === 'processed').length)
   await expect(page.locator('.category-tabs button[aria-pressed="true"]')).toHaveText('Nông sản chế biến')
   await expect(page.locator('#products')).toBeInViewport()
 })

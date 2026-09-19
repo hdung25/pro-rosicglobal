@@ -85,6 +85,73 @@
   }
 }
 
+/* Official release utilities: the centred brand remains the visual anchor while
+   language control is available on every screen size. */
+.header-language {
+  flex: 0 0 auto;
+  margin-inline-start: 2px;
+}
+.header-language.language-picker {
+  min-height: 34px;
+}
+.header-language.language-picker select {
+  min-width: 72px;
+  height: 32px;
+  padding-inline: 6px 25px;
+  font-size: 10px;
+}
+.header-language .language-picker-flag {
+  width: 18px;
+  height: 13px;
+  margin-inline-start: 8px;
+}
+.header-language .language-picker-chevron {
+  inset-inline-end: 8px;
+}
+.mobile-export-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  font-family: "Manrope Variable", "Be Vietnam Pro", sans-serif;
+  font-size: 24px;
+  line-height: 1.2;
+  text-decoration: none;
+}
+.mobile-export-link > span {
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.mobile-export-link > svg {
+  margin-inline-start: auto;
+}
+.mobile-language {
+  margin-top: 22px;
+}
+.footer-language {
+  margin-top: 12px;
+}
+.site-app[dir="rtl"] .menu-toggle {
+  inset-inline-end: 0;
+  right: auto;
+}
+.site-app[dir="rtl"] .dropdown-panel {
+  inset-inline-start: auto;
+  inset-inline-end: -20px;
+  left: auto;
+}
+@media (max-width: 1280px) and (min-width: 901px) {
+  .nav-right { gap: 12px; }
+  .header-language.language-picker select { min-width: 64px; }
+}
+@media (max-width: 900px) {
+  .mobile-export-link { font-size: 22px; }
+}
+
 /* Product cards expose their detail action on hover, focus, and touch layouts. */
 .product-detail-tab {
   position: absolute;
@@ -1011,6 +1078,10 @@ a[aria-current="location"]:after {
   color: var(--muted);
   margin-top: 8px;
   line-height: 1.6;
+}
+.catalog-section .product-meta,
+.catalog-section .product-card p {
+  color: #5d6252;
 }
 .catalog-note {
   margin-top: 40px;

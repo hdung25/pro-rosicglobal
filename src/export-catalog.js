@@ -41,8 +41,8 @@ export const EXPORT_CATEGORIES = [
     number: "02",
     title: "Quế cassia",
     shortTitle: "Quế",
-    image: "/images/export-categories-hero-v1.png",
-    alt: "Quế thanh và gia vị nông sản Việt Nam trên bề mặt đá sáng",
+    image: "/images/cassia-export.webp",
+    alt: "Quế cassia thanh và vỏ quế trên bề mặt đá sáng",
     description:
       "Quế thanh, quế cắt và quế bột cho ngành gia vị, đồ uống và thực phẩm.",
     overview:
@@ -119,8 +119,8 @@ export const EXPORT_CATEGORIES = [
     number: "04",
     title: "Hoa hồi",
     shortTitle: "Hoa hồi",
-    image: "/images/export-categories-hero-v1.png",
-    alt: "Hoa hồi, hạt điều và gia vị Việt Nam trên nền sáng",
+    image: "/images/star-anise-export.webp",
+    alt: "Hoa hồi nguyên cánh trên nền đá sáng",
     description:
       "Hoa hồi nguyên cánh, hồi vụ thu, hồi vụ xuân và hồi vỡ cho chuỗi gia vị.",
     overview:
@@ -196,8 +196,8 @@ export const EXPORT_CATEGORIES = [
     number: "06",
     title: "Cơm dừa sấy",
     shortTitle: "Cơm dừa",
-    image: "/images/export-categories-hero-v1.png",
-    alt: "Cơm dừa sấy và nguyên liệu nông sản Việt Nam",
+    image: "/images/desiccated-coconut-export.webp",
+    alt: "Cơm dừa sấy trắng trong bát gốm, cạnh trái dừa bổ đôi",
     description:
       "Cơm dừa sấy mịn hoặc thô, high-fat hoặc low-fat cho thực phẩm và bánh kẹo.",
     overview:
