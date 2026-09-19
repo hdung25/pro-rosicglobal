@@ -45,7 +45,7 @@ const NAV = [
 ];
 
 // Keep the public site in a calm, branded holding state while the new release is reviewed.
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 const MAINTENANCE_COPY = {
   vi: {

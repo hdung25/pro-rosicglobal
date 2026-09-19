@@ -52,7 +52,7 @@ test('category filters, accent-insensitive search, empty state and reset work to
   await expect(page.getByText('Chưa tìm thấy sản phẩm phù hợp', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Xem tất cả sản phẩm', exact: true }).click()
   await expect(search).toHaveValue('')
-  await expect(page.locator('.product-card')).toHaveCount(8)
+  await expect(page.locator('.product-card')).toHaveCount(PRODUCTS.length)
   await expect(page.locator('.category-tabs button[aria-pressed="true"]')).toHaveText('Tất cả')
 })
 
