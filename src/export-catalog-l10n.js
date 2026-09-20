@@ -7,7 +7,8 @@ const NAMES = {
     "coffee-bean": "Coffee beans",
     "desiccated-coconut": "Desiccated coconut",
     "dried-fruit": "Dried fruit",
-    "finished-cashew": "Value-added cashew products",
+    "fresh-fruit": "Fresh fruit",
+    other: "Other",
   },
   zh: {
     "cashew-kernel": "腰果仁",
@@ -17,7 +18,8 @@ const NAMES = {
     "coffee-bean": "咖啡豆",
     "desiccated-coconut": "脱水椰蓉",
     "dried-fruit": "水果干",
-    "finished-cashew": "腰果成品",
+    "fresh-fruit": "新鲜水果",
+    other: "其他",
   },
   ko: {
     "cashew-kernel": "캐슈넛 커널",
@@ -27,7 +29,8 @@ const NAMES = {
     "coffee-bean": "커피 원두",
     "desiccated-coconut": "건조 코코넛 분말",
     "dried-fruit": "건조 과일",
-    "finished-cashew": "가공 캐슈넛 제품",
+    "fresh-fruit": "신선 과일",
+    other: "기타",
   },
   ja: {
     "cashew-kernel": "カシューナッツカーネル",
@@ -37,7 +40,8 @@ const NAMES = {
     "coffee-bean": "コーヒー豆",
     "desiccated-coconut": "乾燥ココナッツ",
     "dried-fruit": "ドライフルーツ",
-    "finished-cashew": "加工カシューナッツ製品",
+    "fresh-fruit": "生鮮果物",
+    other: "その他",
   },
   ar: {
     "cashew-kernel": "لب الكاجو",
@@ -47,7 +51,8 @@ const NAMES = {
     "coffee-bean": "حبوب القهوة",
     "desiccated-coconut": "جوز هند مجفف",
     "dried-fruit": "فواكه مجففة",
-    "finished-cashew": "منتجات كاجو جاهزة",
+    "fresh-fruit": "فواكه طازجة",
+    other: "أخرى",
   },
   fr: {
     "cashew-kernel": "Amandes de cajou",
@@ -57,7 +62,8 @@ const NAMES = {
     "coffee-bean": "Café en grains",
     "desiccated-coconut": "Noix de coco desséchée",
     "dried-fruit": "Fruits séchés",
-    "finished-cashew": "Produits à base de cajou",
+    "fresh-fruit": "Fruits frais",
+    other: "Autres",
   },
   de: {
     "cashew-kernel": "Cashewkerne",
@@ -67,7 +73,8 @@ const NAMES = {
     "coffee-bean": "Kaffeebohnen",
     "desiccated-coconut": "Kokosraspel",
     "dried-fruit": "Trockenfrüchte",
-    "finished-cashew": "Veredelte Cashewprodukte",
+    "fresh-fruit": "Frisches Obst",
+    other: "Weitere",
   },
 };
 
@@ -114,7 +121,8 @@ const TECHNICAL_FACTS = {
     ["lowFatMoisture", "≤ 4.5%"],
   ],
   "dried-fruit": [["shelfLife", "3-6 months"]],
-  "finished-cashew": [],
+  "fresh-fruit": [],
+  other: [],
 };
 
 const FACT_COPY = {
@@ -230,6 +238,7 @@ export function localizeExportCategory(category, language) {
     ...category,
     sourceTitle: category.title,
     title,
+    shortTitle: title,
     alt: locale.alt(title),
     description: locale.description(title),
     overview: locale.overview(title),

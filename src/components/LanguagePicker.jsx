@@ -14,7 +14,7 @@ export function LanguagePicker({ language, onChange, compact = false, className 
       <select id={id} value={language} onChange={(event) => onChange(event.target.value)}>
         {LANGUAGES.map((item) => (
           <option key={item.code} value={item.code}>
-            {item.label}
+            {item.shortLabel}
           </option>
         ))}
       </select>

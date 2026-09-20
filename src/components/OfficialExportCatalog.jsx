@@ -17,7 +17,7 @@ const SECTION_COPY = {
   vi: {
     eyebrow: "DANH MỤC XUẤT KHẨU",
     title: <>Từ vùng nguyên liệu đến<br /><em>quy cách giao thương.</em></>,
-    lead: "Tám nhóm hàng được trình bày theo những thông tin cần chốt trước khi chào giá: dạng hàng, chỉ tiêu tham chiếu và phương án đóng gói.",
+    lead: "Chín nhóm hàng được trình bày theo những thông tin cần chốt trước khi chào giá: dạng hàng, chỉ tiêu tham chiếu và phương án đóng gói.",
     category: "Nhóm hàng xuất khẩu",
     detail: "Xem chi tiết",
     viewSpec: "Xem quy cách",
@@ -31,7 +31,7 @@ const SECTION_COPY = {
   en: {
     eyebrow: "EXPORT CATALOGUE",
     title: <>From growing regions to<br /><em>trade-ready specifications.</em></>,
-    lead: "Eight product families are organised around the points to align before a quotation: formats, reference checks and packing options.",
+    lead: "Nine product families are organised around the points to align before a quotation: formats, reference checks and packing options.",
     category: "Export product family",
     detail: "View details",
     viewSpec: "View specifications",
@@ -42,12 +42,12 @@ const SECTION_COPY = {
     requestSpec: "Request specifications",
     close: "Close product details",
   },
-  zh: { eyebrow: "出口产品目录", title: <>从产区到<br /><em>贸易规格。</em></>, lead: "八大产品类别围绕报价前需要确认的信息组织：产品形态、参考检查项和包装方案。", category: "出口产品类别", detail: "查看详情", viewSpec: "查看规格", notice: "规格说明", quote: "索取报价", productFormat: "产品形态", checks: "重点检查项", requestSpec: "索取规格", close: "关闭产品详情" },
-  ko: { eyebrow: "수출 카탈로그", title: <>원산지부터<br /><em>거래 사양까지.</em></>, lead: "8개 제품군은 견적 전 확인해야 할 제품 형태, 기준 점검 항목, 포장 방법을 중심으로 구성했습니다.", category: "수출 제품군", detail: "상세 보기", viewSpec: "사양 보기", notice: "사양 안내", quote: "견적 요청", productFormat: "제품 형태", checks: "주요 확인 항목", requestSpec: "사양 요청", close: "제품 상세 닫기" },
-  ja: { eyebrow: "輸出カタログ", title: <>産地から<br /><em>取引仕様まで。</em></>, lead: "8つの製品群を、見積もり前に確認する形状、参考確認項目、梱包方法に沿って整理しました。", category: "輸出製品群", detail: "詳細を見る", viewSpec: "仕様を見る", notice: "仕様に関する注記", quote: "見積もりを依頼", productFormat: "製品形態", checks: "確認項目", requestSpec: "仕様を依頼", close: "商品詳細を閉じる" },
-  ar: { eyebrow: "كتالوج التصدير", title: <>من مناطق الزراعة إلى<br /><em>مواصفات التجارة.</em></>, lead: "تنظم ثماني عائلات من المنتجات حول ما يجب تأكيده قبل عرض السعر: الشكل، نقاط الفحص المرجعية وخيارات التعبئة.", category: "فئة منتجات التصدير", detail: "عرض التفاصيل", viewSpec: "عرض المواصفات", notice: "ملاحظة المواصفات", quote: "طلب عرض سعر", productFormat: "شكل المنتج", checks: "نقاط الفحص", requestSpec: "طلب المواصفات", close: "إغلاق تفاصيل المنتج" },
-  fr: { eyebrow: "CATALOGUE EXPORT", title: <>Des régions de culture aux<br /><em>spécifications commerciales.</em></>, lead: "Huit familles de produits structurées autour des points à valider avant un devis : formats, contrôles de référence et conditionnement.", category: "Famille export", detail: "Voir les détails", viewSpec: "Voir les spécifications", notice: "Note de spécification", quote: "Demander un devis", productFormat: "Format produit", checks: "Points de contrôle", requestSpec: "Demander les spécifications", close: "Fermer les détails produit" },
-  de: { eyebrow: "EXPORTKATALOG", title: <>Von Anbaugebieten zu<br /><em>handelstauglichen Spezifikationen.</em></>, lead: "Acht Produktfamilien, geordnet nach den Punkten vor einem Angebot: Format, Referenzprüfungen und Verpackungsoptionen.", category: "Exportproduktgruppe", detail: "Details ansehen", viewSpec: "Spezifikationen ansehen", notice: "Spezifikationshinweis", quote: "Angebot anfragen", productFormat: "Produktformat", checks: "Wichtige Prüfungen", requestSpec: "Spezifikationen anfragen", close: "Produktdetails schließen" },
+  zh: { eyebrow: "出口产品目录", title: <>从产区到<br /><em>贸易规格。</em></>, lead: "九大产品类别围绕报价前需要确认的信息组织：产品形态、参考检查项和包装方案。", category: "出口产品类别", detail: "查看详情", viewSpec: "查看规格", notice: "规格说明", quote: "索取报价", productFormat: "产品形态", checks: "重点检查项", requestSpec: "索取规格", close: "关闭产品详情" },
+  ko: { eyebrow: "수출 카탈로그", title: <>원산지부터<br /><em>거래 사양까지.</em></>, lead: "9개 제품군은 견적 전 확인해야 할 제품 형태, 기준 점검 항목, 포장 방법을 중심으로 구성했습니다.", category: "수출 제품군", detail: "상세 보기", viewSpec: "사양 보기", notice: "사양 안내", quote: "견적 요청", productFormat: "제품 형태", checks: "주요 확인 항목", requestSpec: "사양 요청", close: "제품 상세 닫기" },
+  ja: { eyebrow: "輸出カタログ", title: <>産地から<br /><em>取引仕様まで。</em></>, lead: "9つの製品群を、見積もり前に確認する形状、参考確認項目、梱包方法に沿って整理しました。", category: "輸出製品群", detail: "詳細を見る", viewSpec: "仕様を見る", notice: "仕様に関する注記", quote: "見積もりを依頼", productFormat: "製品形態", checks: "確認項目", requestSpec: "仕様を依頼", close: "商品詳細を閉じる" },
+  ar: { eyebrow: "كتالوج التصدير", title: <>من مناطق الزراعة إلى<br /><em>مواصفات التجارة.</em></>, lead: "تنظم تسع عائلات من المنتجات حول ما يجب تأكيده قبل عرض السعر: الشكل، نقاط الفحص المرجعية وخيارات التعبئة.", category: "فئة منتجات التصدير", detail: "عرض التفاصيل", viewSpec: "عرض المواصفات", notice: "ملاحظة المواصفات", quote: "طلب عرض سعر", productFormat: "شكل المنتج", checks: "نقاط الفحص", requestSpec: "طلب المواصفات", close: "إغلاق تفاصيل المنتج" },
+  fr: { eyebrow: "CATALOGUE EXPORT", title: <>Des régions de culture aux<br /><em>spécifications commerciales.</em></>, lead: "Neuf familles de produits structurées autour des points à valider avant un devis : formats, contrôles de référence et conditionnement.", category: "Famille export", detail: "Voir les détails", viewSpec: "Voir les spécifications", notice: "Note de spécification", quote: "Demander un devis", productFormat: "Format produit", checks: "Points de contrôle", requestSpec: "Demander les spécifications", close: "Fermer les détails produit" },
+  de: { eyebrow: "EXPORTKATALOG", title: <>Von Anbaugebieten zu<br /><em>handelstauglichen Spezifikationen.</em></>, lead: "Neun Produktfamilien, geordnet nach den Punkten vor einem Angebot: Format, Referenzprüfungen und Verpackungsoptionen.", category: "Exportproduktgruppe", detail: "Details ansehen", viewSpec: "Spezifikationen ansehen", notice: "Spezifikationshinweis", quote: "Angebot anfragen", productFormat: "Produktformat", checks: "Wichtige Prüfungen", requestSpec: "Spezifikationen anfragen", close: "Produktdetails schließen" },
 };
 
 /**
@@ -84,6 +84,23 @@ export default function OfficialExportCatalog({ onRequestQuote, language = "vi" 
           </div>
           <p>{copy.lead}</p>
         </header>
+
+        <div className="official-export-thumbnails" aria-label={copy.category}>
+          {categories.map((category) => (
+            <button
+              type="button"
+              key={category.id}
+              onClick={() => setSelectedCategory(category)}
+              aria-label={`${copy.viewSpec}: ${category.title}`}
+            >
+              <span className="official-export-thumbnail__image">
+                <img src={category.image} alt="" loading="lazy" width="180" height="180" />
+                <ProductImageBrand className="official-export-thumbnail__brand" />
+              </span>
+              <span>{category.shortTitle ?? category.title}</span>
+            </button>
+          ))}
+        </div>
 
         <div
           className="official-export-catalog__cards"

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion as Motion,
@@ -27,6 +27,15 @@ import {
   Mail,
   MessageCircle,
 } from "lucide-react";
+import {
+  FaFacebookF,
+  FaLine,
+  FaLinkedinIn,
+  FaWhatsapp,
+  FaWeixin,
+} from "react-icons/fa6";
+import { HiOutlineEnvelope } from "react-icons/hi2";
+import { SiZalo } from "react-icons/si";
 import Contact from "./components/Contact";
 import Feedback from "./components/Feedback";
 import CatalogDemo from "./components/CatalogDemo";
@@ -46,15 +55,30 @@ import {
   siteCopyFor,
 } from "./site-copy";
 
+const AdminPanel = lazy(() => import("./components/AdminPanel"));
+
 const NAV = [
   { key: "home", label: "Trang chủ", href: "#home" },
-  { key: "about", label: "Về chúng tôi", href: "#about" },
-  { key: "journey", label: "Hành trình", href: "#journey" },
   { key: "products", label: "Sản phẩm", href: "#products" },
+  { key: "about", label: "Về chúng tôi", href: "#about" },
   { key: "partners", label: "Đối tác", href: "#testimonials" },
+  { key: "oem", label: "OEM/ODM", href: "#export-catalog" },
+  { key: "journey", label: "Hành trình", href: "#journey" },
   { key: "journal", label: "Tin tức", href: "#blog" },
   { key: "contact", label: "Liên hệ", href: "#contact" },
 ];
+
+const SOCIAL_LINKS = [
+  { label: "LinkedIn", href: "https://vn.linkedin.com/company/hong-tam-rosic-global-manufacturing-trading-joint-stock-company", icon: FaLinkedinIn, external: true },
+  { label: "WhatsApp", href: "https://wa.me/84962284872", icon: FaWhatsapp, external: true },
+  { label: "Email", href: "mailto:info@rosicglobal.com", icon: HiOutlineEnvelope },
+  { label: "Facebook", href: "https://www.facebook.com/rosicglobal", icon: FaFacebookF, external: true },
+  { label: "Zalo", href: "https://zalo.me/84962284872", icon: SiZalo, external: true },
+  { label: "WeChat", href: "#contact", icon: FaWeixin },
+  { label: "LINE", href: "#contact", icon: FaLine },
+];
+
+const navLabel = (copy, item) => copy.nav[item.key] ?? item.label;
 
 // Keep the public site in a calm, branded holding state while the new release is reviewed.
 const MAINTENANCE_MODE = false;
@@ -142,8 +166,9 @@ const MAINTENANCE_COPY = {
   },
 };
 
-function Brand({ footer = false, copy }) {
+function Brand({ footer = false, copy, language = "vi" }) {
   const brandCopy = copy?.brand;
+  const international = language !== "vi";
   return (
     <a
       className={`brand ${footer ? "brand-footer" : ""}`}
@@ -158,7 +183,7 @@ function Brand({ footer = false, copy }) {
         height="159"
       />
       <span className="brand-name">
-        HỒNG TÂM <span>ROSIC GLOBAL</span>
+        {international ? "HONG TAM" : "HỒNG TÂM"} <span>ROSIC</span>
       </span>
     </a>
   );
@@ -251,72 +276,58 @@ function Header({ onFilter, language, onLanguage, theme, onThemeChange, copy }) 
   return (
     <>
       <div className="topbar">
-        {copy.brand.topbar}
+        <div className="topbar-inner container">
+          <ThemeToggle
+            className="topbar-theme"
+            theme={theme}
+            onThemeChange={onThemeChange}
+            labels={copy.theme}
+          />
+          <span className="topbar-message">{copy.brand.topbar}</span>
+          <LanguagePicker
+            compact
+            className="topbar-language"
+            language={language}
+            onChange={onLanguage}
+            label={copy.language}
+          />
+        </div>
       </div>
       <header className="site-header">
         <div className="nav-shell container">
           <nav className="nav-left" aria-label={copy.primaryNavigation}>
-            {NAV.slice(0, 3).map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                aria-current={
-                  active === item.href.slice(1) ? "location" : undefined
-                }
-              >
-                {copy.nav[item.key]}
+            {NAV.slice(0, 4).map((item) => item.key === "products" ? (
+              <div className="nav-dropdown" key={item.href}>
+                <a href={item.href} aria-current={active === "products" ? "location" : undefined}>
+                  {navLabel(copy, item)} <ChevronDown size={12} />
+                </a>
+                <div className="dropdown-panel">
+                  {EXPORT_CATEGORIES.map((category) => (
+                    <a key={category.id} href="#export-catalog">
+                      {localizeExportCategory(category, language).shortTitle ?? localizeExportCategory(category, language).title}
+                      <ArrowUpRight size={14} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <a key={item.href} href={item.href} aria-current={active === item.href.slice(1) ? "location" : undefined}>
+                {navLabel(copy, item)}
               </a>
             ))}
           </nav>
-          <Brand copy={copy} />
+          <Brand copy={copy} language={language} />
           <nav className="nav-right" aria-label={copy.productNavigation}>
-            <div className="nav-dropdown">
+            {NAV.slice(4).map((item) => (
               <a
-                href="#products"
-                aria-current={active === "products" ? "location" : undefined}
+                key={item.href}
+                href={item.href}
+                className={item.key === "contact" ? "nav-contact" : undefined}
+                aria-current={active === item.href.slice(1) ? "location" : undefined}
               >
-                {copy.nav.products} <ChevronDown size={12} />
+                {navLabel(copy, item)} {item.key === "contact" && <ArrowUpRight size={15} />}
               </a>
-              <div className="dropdown-panel">
-                {CATEGORIES.slice(1).map((category) => (
-                  <a
-                    key={category.id}
-                    href="#products"
-                    onClick={() => onFilter(category.id)}
-                  >
-                    {copy.tabs[category.id] ?? category.label}
-                    <ArrowUpRight size={14} />
-                  </a>
-                ))}
-                <a href="#export-catalog">
-                  {copy.exportCatalog}
-                  <ArrowUpRight size={14} />
-                </a>
-              </div>
-            </div>
-            <a href="#testimonials">{copy.nav.partners}</a>
-            <a
-              href="#blog"
-              aria-current={active === "blog" ? "location" : undefined}
-            >
-              {copy.nav.journal}
-            </a>
-            <a href="#contact" className="nav-contact">
-              {copy.nav.contact} <ArrowUpRight size={15} />
-            </a>
-            <LanguagePicker
-              compact
-              className="header-language"
-              language={language}
-              onChange={onLanguage}
-              label={copy.language}
-            />
-            <ThemeToggle
-              className="header-theme"
-              theme={theme}
-              onThemeChange={onThemeChange}
-              labels={copy.theme}
-            />
+            ))}
           </nav>
           <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger asChild>
@@ -332,7 +343,7 @@ function Header({ onFilter, language, onLanguage, theme, onThemeChange, copy }) 
                   {copy.brand.mobileDescription}
                 </Dialog.Description>
                 <div className="mobile-menu-top">
-                  <Brand copy={copy} />
+                  <Brand copy={copy} language={language} />
                   <Dialog.Close asChild>
                     <button className="icon-button" aria-label={copy.closeMenu}>
                       <X />
@@ -347,28 +358,11 @@ function Header({ onFilter, language, onLanguage, theme, onThemeChange, copy }) 
                       onClick={() => setOpen(false)}
                     >
                       <span>0{index + 1}</span>
-                      {copy.nav[item.key]}
+                      {navLabel(copy, item)}
                       <ArrowUpRight />
                     </a>
                   ))}
                 </nav>
-                <a className="mobile-export-link" href="#export-catalog" onClick={() => setOpen(false)}>
-                  <span>08</span>
-                  {copy.exportCatalog}
-                  <ArrowUpRight />
-                </a>
-                <LanguagePicker
-                  className="mobile-language"
-                  language={language}
-                  onChange={onLanguage}
-                  label={copy.language}
-                />
-                <ThemeToggle
-                  className="mobile-theme"
-                  theme={theme}
-                  onThemeChange={onThemeChange}
-                  labels={copy.theme}
-                />
                 <p>
                   {copy.brand.topbar}
                 </p>
@@ -623,18 +617,18 @@ function Catalog({ category, setCategory, onProduct, copy, products }) {
                       height="640"
                     />
                     <ProductImageBrand />
-                    <span className="product-detail-tab">
-                      {copy.catalog.detail} <ArrowUpRight size={17} />
+                    <span className="product-detail-tab product-quick-view">
+                      {copy.catalog.quickView ?? "Quick View Product"} <ArrowUpRight size={17} />
                     </span>
                   </div>
                   <div className="product-meta">
-                    <span>{product.group}</span>
-                    <span>
-                      {String(products.findIndex((item) => item.id === product.id) + 1).padStart(2, "0")}
-                    </span>
+                    <span>{copy.catalog.productCode ?? "Product Code"}</span>
+                    <span>ROS-{String(products.findIndex((item) => item.id === product.id) + 1).padStart(3, "0")}</span>
                   </div>
                   <h3>{product.title}</h3>
-                  <p>{product.short}</p>
+                  <span className="product-view-link">
+                    {copy.catalog.viewLabel ?? "View Product"} <ArrowUpRight size={15} />
+                  </span>
                 </button>
               </Motion.article>
             ))}
@@ -812,12 +806,12 @@ function Journal({ onArticle, copy, language }) {
     </section>
   );
 }
-function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange, copy }) {
+function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange, copy, socialLinks }) {
   return (
     <footer className="site-footer">
       <div className="container footer-main">
         <div>
-          <Brand footer copy={copy} />
+          <Brand footer copy={copy} language={language} />
           <p className="footer-tagline">
             {copy.footer.tagline[0]}
             <br />
@@ -828,7 +822,7 @@ function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange
           <h3>{copy.footer.explore}</h3>
           {NAV.filter((item) => item.href !== "#home").map((item) => (
             <a key={item.href} href={item.href}>
-              {copy.nav[item.key]}
+              {navLabel(copy, item)}
             </a>
           ))}
         </div>
@@ -852,9 +846,20 @@ function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange
           </a>
           <p>{copy.brand.topbar}</p>
           <div className="footer-socials" aria-label={copy.footer.social}>
-            <a href="https://wa.me/84962284872" target="_blank" rel="noreferrer" aria-label="WhatsApp"><MessageCircle size={16} /></a>
-            <a href="https://vn.linkedin.com/company/hong-tam-rosic-global-manufacturing-trading-joint-stock-company" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Network size={16} /></a>
-            <a href="mailto:info@rosicglobal.com" aria-label="Email"><Mail size={16} /></a>
+            {SOCIAL_LINKS.map(({ label, href, icon: Icon, external }) => {
+              const configuredHref = socialLinks?.[label.toLowerCase()] || href;
+              return (
+              <a
+                key={label}
+                href={configuredHref}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noreferrer" : undefined}
+                aria-label={label}
+                title={label}
+              >
+                <Icon size={17} aria-hidden="true" />
+              </a>
+            );})}
           </div>
           <LanguagePicker
             compact
@@ -996,8 +1001,36 @@ function SiteApp() {
     id: 0,
   });
   const reduced = useReducedMotion();
-  const copy = siteCopyFor(language);
-  const localizedProducts = localizeProducts(PRODUCTS, language);
+  const [cms] = useState(() => {
+    try { return JSON.parse(window.localStorage.getItem("rosic-cms-published-v1")); }
+    catch { return null; }
+  });
+  const baseCopy = siteCopyFor(language);
+  const copy = language === "vi" && cms?.content ? {
+    ...baseCopy,
+    brand: { ...baseCopy.brand, topbar: cms.content.topbar || baseCopy.brand.topbar },
+    hero: {
+      ...baseCopy.hero,
+      eyebrow: cms.content.heroEyebrow || baseCopy.hero.eyebrow,
+      start: cms.content.heroStart || baseCopy.hero.start,
+      accent: cms.content.heroAccent || baseCopy.hero.accent,
+      first: cms.content.heroBody || baseCopy.hero.first,
+      second: "",
+      cta: cms.content.heroCta || baseCopy.hero.cta,
+    },
+    about: {
+      ...baseCopy.about,
+      title: [cms.content.aboutTitle || baseCopy.about.title[0], ""],
+      first: cms.content.aboutBody || baseCopy.about.first,
+    },
+    footer: {
+      ...baseCopy.footer,
+      invitation: cms.content.footerTitle || baseCopy.footer.invitation,
+    },
+  } : baseCopy;
+  const localizedProducts = language === "vi" && cms?.products
+    ? cms.products.filter((product) => product.status !== "draft")
+    : localizeProducts(PRODUCTS, language);
   const localizedExportCategories = EXPORT_CATEGORIES.map((categoryItem) =>
     localizeExportCategory(categoryItem, language),
   );
@@ -1097,6 +1130,7 @@ function SiteApp() {
         theme={theme}
         onThemeChange={setTheme}
         copy={copy}
+        socialLinks={cms?.social}
       />
       <DetailDialog
         selected={selected}
@@ -1110,6 +1144,15 @@ function SiteApp() {
 }
 
 export default function App() {
+  const adminView =
+    typeof window !== "undefined" &&
+    (window.location.pathname.replace(/\/$/, "") === "/admin" ||
+      new URLSearchParams(window.location.search).get("admin") === "1");
+  if (adminView) return (
+    <Suspense fallback={<div className="admin-loading">Đang mở ROSIC Content Studio...</div>}>
+      <AdminPanel />
+    </Suspense>
+  );
   const demoView =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("demo")

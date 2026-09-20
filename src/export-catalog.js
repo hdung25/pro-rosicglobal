@@ -268,41 +268,78 @@ export const EXPORT_CATEGORIES = [
     checks: ["Công thức", "Độ ẩm hoặc aw", "Vi sinh", "Hạn dùng", "Bao bì"],
   },
   {
-    id: "finished-cashew",
+    id: "fresh-fruit",
     number: "08",
-    title: "Điều thành phẩm",
-    shortTitle: "Điều thành phẩm",
-    image: "/images/finished-cashew-export.webp",
-    alt: "Hạt điều rang thành phẩm bên bao bì kraft trơn",
+    title: "Trái cây tươi",
+    shortTitle: "Trái cây tươi",
+    image: "/images/produce.webp",
+    alt: "Danh mục trái cây tươi Việt Nam trên nền sáng",
     description:
-      "Điều nguyên vị, rang muối và phủ vị dành cho bán lẻ, quà tặng hoặc nhãn riêng.",
+      "Trái cây nhiệt đới theo mùa cho kênh nhập khẩu, bán lẻ, foodservice và chế biến.",
     overview:
-      "Khác với điều nhân, dòng thành phẩm cần kiểm soát thêm công thức, dị ứng, khối lượng tịnh và artwork.",
-    forms: "Nguyên vị, rang muối, phủ vị hoặc OEM theo dự án.",
+      "Giống, vùng trồng, độ chín, kích cỡ và chuỗi lạnh cần được thống nhất theo thị trường đích.",
+    forms: "Nguyên quả, phân loại theo size hoặc sơ chế theo yêu cầu.",
     specGroups: [
       {
-        title: "Công thức",
+        title: "Danh mục theo mùa",
         items: [
-          { label: "Hương vị", value: "Nguyên vị, rang muối hoặc công thức đã duyệt" },
-          { label: "Dị ứng", value: "Khai báo hạt cây, phụ gia và nguy cơ lây nhiễm chéo" },
+          { label: "Trái cây", value: "Xoài, thanh long, dừa, bơ, dứa, chanh dây và các dòng theo mùa" },
+          { label: "Phân loại", value: "Giống, trọng lượng, độ chín và ngoại quan theo mẫu duyệt" },
         ],
       },
       {
-        title: "An toàn và ổn định",
+        title: "Sau thu hoạch",
         items: [
-          { label: "Kiểm tra", value: "Vi sinh, kim loại và độ ổn định theo quy cách thành phẩm" },
-          { label: "Hạn dùng", value: "Xác nhận riêng theo công thức, bao bì và thị trường" },
+          { label: "Kiểm tra", value: "Dư lượng, dịch hại, truy xuất và hồ sơ vùng trồng theo thị trường" },
+          { label: "Bảo quản", value: "Nhiệt độ và thông gió được chốt theo từng loại quả" },
         ],
       },
       {
-        title: "Bán lẻ hoặc OEM",
+        title: "Đóng gói và giao nhận",
         items: [
-          { label: "Khối lượng tịnh", value: "Theo SKU và kênh phân phối" },
-          { label: "Bao bì", value: "Hộp, túi PE hoặc kraft cùng artwork đã phê duyệt" },
+          { label: "Bao gói", value: "Khay, lưới, thùng carton hoặc quy cách bán lẻ theo hợp đồng" },
+          { label: "Lịch hàng", value: "Kế hoạch thu hoạch, đóng gói và vận chuyển theo cửa sổ mùa vụ" },
         ],
       },
     ],
-    checks: ["Công thức", "Dị ứng", "Vi sinh", "Khối lượng tịnh", "Artwork"],
+    checks: ["Mùa vụ", "Kích cỡ", "Độ chín", "Dư lượng", "Chuỗi lạnh"],
+  },
+  {
+    id: "other",
+    number: "09",
+    title: "Other",
+    shortTitle: "Other",
+    image: "/images/finished-cashew-export.webp",
+    alt: "Sản phẩm nông nghiệp chế biến và đóng gói theo yêu cầu",
+    description:
+      "Nhóm sản phẩm mở cho nguyên liệu, hàng chế biến và dự án nhãn riêng theo yêu cầu riêng.",
+    overview:
+      "Nhóm Other tiếp nhận yêu cầu ngoài danh mục chuẩn, từ lựa chọn nguyên liệu đến phát triển quy cách OEM/ODM.",
+    forms: "Nguyên liệu, bán thành phẩm, thành phẩm hoặc OEM/ODM.",
+    specGroups: [
+      {
+        title: "Phạm vi sản phẩm",
+        items: [
+          { label: "Yêu cầu", value: "Tên hàng, ứng dụng, thị trường đích và khối lượng dự kiến" },
+          { label: "Mẫu", value: "Mẫu tham chiếu hoặc brief kỹ thuật được xác nhận trước báo giá" },
+        ],
+      },
+      {
+        title: "Phát triển quy cách",
+        items: [
+          { label: "Chất lượng", value: "Bộ chỉ tiêu được xây dựng theo sản phẩm và yêu cầu pháp lý" },
+          { label: "OEM/ODM", value: "Công thức, khối lượng tịnh, artwork và bao bì theo dự án" },
+        ],
+      },
+      {
+        title: "Xác nhận trước sản xuất",
+        items: [
+          { label: "Hồ sơ", value: "Mẫu duyệt, nhãn, chứng từ và điều kiện giao hàng" },
+          { label: "Tiến độ", value: "MOQ và lịch sản xuất được xác nhận theo từng yêu cầu" },
+        ],
+      },
+    ],
+    checks: ["Ứng dụng", "Thị trường", "MOQ", "Mẫu duyệt", "Artwork"],
   },
 ];
 
