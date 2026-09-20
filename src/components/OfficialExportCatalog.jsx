@@ -56,10 +56,10 @@ const SECTION_COPY = {
  * `onRequestQuote` lets the shell prefill or focus its contact form without
  * coupling this section to a particular form implementation.
  */
-export default function OfficialExportCatalog({ onRequestQuote, language = "vi" }) {
+export default function OfficialExportCatalog({ onRequestQuote, language = "vi", categoriesData = EXPORT_CATEGORIES }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const copy = SECTION_COPY[language] ?? SECTION_COPY.vi;
-  const categories = EXPORT_CATEGORIES.map((category) => localizeExportCategory(category, language));
+  const categories = categoriesData.map((category) => localizeExportCategory(category, language));
 
   const requestQuote = (category) => {
     setSelectedCategory(null);

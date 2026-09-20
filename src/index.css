@@ -23,6 +23,41 @@
   --radius: 5px;
 }
 
+/* Final header guard: keeps the utility controls inside the topbar even when
+   older responsive rules are loaded later in this stylesheet. */
+.site-app .topbar {
+  position: relative;
+  z-index: 31;
+  display: block;
+  height: 46px;
+  min-height: 46px;
+  overflow: hidden;
+  background: #f1efcf;
+}
+.site-app .topbar-inner {
+  display: grid;
+  height: 100%;
+  grid-template-columns: minmax(64px, 1fr) auto minmax(64px, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+.site-app .topbar-language {
+  width: auto;
+  max-width: 96px;
+  min-height: 34px;
+  justify-self: end;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--paper) 74%, transparent);
+}
+.site-app .topbar-language select { width: 64px; min-width: 64px; height: 32px; }
+.site-app .topbar-language .language-picker-flag { width: 20px; height: 20px; }
+
+@media (max-width: 600px) {
+  .site-app .topbar { height: 42px; min-height: 42px; }
+  .site-app .topbar-inner { grid-template-columns: 1fr 1fr; }
+  .site-app .topbar-message { display: none; }
+}
+
 /* Shared footer utilities for the public release and the reviewed catalogue. */
 .footer-socials {
   display: flex;

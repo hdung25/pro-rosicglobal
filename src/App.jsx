@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { createElement, lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion as Motion,
@@ -256,7 +256,7 @@ function Reveal({ children, className = "", delay = 0 }) {
     </Motion.div>
   );
 }
-function Header({ onFilter, language, onLanguage, theme, onThemeChange, copy }) {
+function Header({ language, onLanguage, theme, onThemeChange, copy, exportCategories = EXPORT_CATEGORIES }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("home");
   useEffect(() => {
@@ -302,7 +302,7 @@ function Header({ onFilter, language, onLanguage, theme, onThemeChange, copy }) 
                   {navLabel(copy, item)} <ChevronDown size={12} />
                 </a>
                 <div className="dropdown-panel">
-                  {EXPORT_CATEGORIES.map((category) => (
+                  {exportCategories.map((category) => (
                     <a key={category.id} href="#export-catalog">
                       {localizeExportCategory(category, language).shortTitle ?? localizeExportCategory(category, language).title}
                       <ArrowUpRight size={14} />
@@ -374,7 +374,7 @@ function Header({ onFilter, language, onLanguage, theme, onThemeChange, copy }) 
     </>
   );
 }
-function Hero({ copy }) {
+function Hero({ copy, image = "/images/hero.webp" }) {
   const ref = useRef(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -435,7 +435,7 @@ function Hero({ copy }) {
       </div>
       <div className="hero-landscape">
         <Motion.img
-          src="/images/hero.webp"
+          src={image}
           alt={copy.hero.origin}
           fetchPriority="high"
           width="1672"
@@ -491,13 +491,13 @@ function Marquee({ copy }) {
     </section>
   );
 }
-function About({ copy }) {
+function About({ copy, image = "/images/produce.webp" }) {
   return (
     <section id="about" className="about-section section-pad">
       <div className="container about-grid">
         <Reveal className="about-photo">
           <img
-            src="/images/produce.webp"
+            src={image}
             alt={copy.about.alt}
             loading="lazy"
             width="1536"
@@ -657,11 +657,12 @@ function Catalog({ category, setCategory, onProduct, copy, products }) {
     </section>
   );
 }
-function Journey({ copy, language }) {
+function Journey({ copy, language, images }) {
   const [step, setStep] = useState(0);
-  const steps = JOURNEY.map((item, index) =>
-    localizeJourneyItem(item, index, language),
-  );
+  const steps = JOURNEY.map((item, index) => ({
+    ...localizeJourneyItem(item, index, language),
+    image: images?.[index] || item.image,
+  }));
   const current = steps[step];
   return (
     <section id="journey" className="journey-section section-pad">
@@ -764,8 +765,8 @@ function Partners({ copy, language }) {
     </section>
   );
 }
-function Journal({ onArticle, copy, language }) {
-  const articles = ARTICLES.map((article) => localizeArticle(article, language));
+function Journal({ onArticle, copy, language, images }) {
+  const articles = ARTICLES.map((article, index) => ({ ...localizeArticle(article, language), image: images?.[index] || article.image }));
   return (
     <section id="blog" className="journal-section section-pad">
       <div className="container">
@@ -857,7 +858,7 @@ function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange
                 aria-label={label}
                 title={label}
               >
-                <Icon size={17} aria-hidden="true" />
+                {createElement(Icon, { size: 17, "aria-hidden": true })}
               </a>
             );})}
           </div>
@@ -991,7 +992,7 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
     </Dialog.Root>
   );
 }
-function SiteApp() {
+function SiteApp({ cms }) {
   const [language, setLanguage] = useSiteLanguage("vi");
   const { theme, setTheme } = useSiteTheme();
   const [category, setCategory] = useState("all");
@@ -1001,10 +1002,6 @@ function SiteApp() {
     id: 0,
   });
   const reduced = useReducedMotion();
-  const [cms] = useState(() => {
-    try { return JSON.parse(window.localStorage.getItem("rosic-cms-published-v1")); }
-    catch { return null; }
-  });
   const baseCopy = siteCopyFor(language);
   const copy = language === "vi" && cms?.content ? {
     ...baseCopy,
@@ -1023,6 +1020,26 @@ function SiteApp() {
       title: [cms.content.aboutTitle || baseCopy.about.title[0], ""],
       first: cms.content.aboutBody || baseCopy.about.first,
     },
+    catalog: {
+      ...baseCopy.catalog,
+      title: cms.content.catalogTitle || baseCopy.catalog.title,
+      body: cms.content.catalogBody || baseCopy.catalog.body,
+    },
+    journey: {
+      ...baseCopy.journey,
+      title: [cms.content.journeyTitleStart || baseCopy.journey.title[0], cms.content.journeyTitleAccent || baseCopy.journey.title[1]],
+      lead: cms.content.journeyLead || baseCopy.journey.lead,
+    },
+    partners: {
+      ...baseCopy.partners,
+      title: [cms.content.partnersTitleStart || baseCopy.partners.title[0], cms.content.partnersTitleAccent || baseCopy.partners.title[1]],
+      lead: cms.content.partnersLead || baseCopy.partners.lead,
+    },
+    journal: {
+      ...baseCopy.journal,
+      title: cms.content.journalTitle || baseCopy.journal.title,
+      lead: cms.content.journalLead || baseCopy.journal.lead,
+    },
     footer: {
       ...baseCopy.footer,
       invitation: cms.content.footerTitle || baseCopy.footer.invitation,
@@ -1031,7 +1048,8 @@ function SiteApp() {
   const localizedProducts = language === "vi" && cms?.products
     ? cms.products.filter((product) => product.status !== "draft")
     : localizeProducts(PRODUCTS, language);
-  const localizedExportCategories = EXPORT_CATEGORIES.map((categoryItem) =>
+  const sourceExportCategories = language === "vi" && cms?.categories?.length ? cms.categories : EXPORT_CATEGORIES;
+  const localizedExportCategories = sourceExportCategories.map((categoryItem) =>
     localizeExportCategory(categoryItem, language),
   );
   useEffect(() => {
@@ -1086,19 +1104,20 @@ function SiteApp() {
         aria-hidden="true"
       />
       <Header
-        onFilter={setCategory}
         language={language}
         onLanguage={setLanguage}
         theme={theme}
         onThemeChange={setTheme}
         copy={copy}
+        exportCategories={sourceExportCategories}
       />
       <main id="main">
-        <Hero copy={copy} />
+        <Hero copy={copy} image={cms?.content?.heroImage} />
         <Marquee copy={copy} />
-        <About copy={copy} />
+        <About copy={copy} image={cms?.content?.aboutImage} />
         <OfficialExportCatalog
           language={language}
+          categoriesData={sourceExportCategories}
           onRequestQuote={({ sourceTitle, title }) => quote(sourceTitle ?? title)}
         />
         <Catalog
@@ -1108,11 +1127,12 @@ function SiteApp() {
           copy={copy}
           products={localizedProducts}
         />
-        <Journey copy={copy} language={language} />
+        <Journey copy={copy} language={language} images={language === "vi" ? cms?.content?.journeyImages : null} />
         <Partners copy={copy} language={language} />
         <Journal
           copy={copy}
           language={language}
+          images={language === "vi" ? cms?.content?.articleImages : null}
           onArticle={(data) => setSelected({ type: "article", data })}
         />
         <Contact
@@ -1143,7 +1163,28 @@ function SiteApp() {
   );
 }
 
+function readPublishedCms() {
+  try { return JSON.parse(window.localStorage.getItem("rosic-cms-published-v1")); }
+  catch { return null; }
+}
+
+function usePublishedCms() {
+  const [cms, setCms] = useState(readPublishedCms);
+  useEffect(() => {
+    const sync = () => setCms(readPublishedCms());
+    window.addEventListener("storage", sync);
+    const channel = "BroadcastChannel" in window ? new BroadcastChannel("rosic-cms") : null;
+    if (channel) channel.onmessage = (event) => setCms(event.data || readPublishedCms());
+    return () => {
+      window.removeEventListener("storage", sync);
+      channel?.close();
+    };
+  }, []);
+  return cms;
+}
+
 export default function App() {
+  const cms = usePublishedCms();
   const adminView =
     typeof window !== "undefined" &&
     (window.location.pathname.replace(/\/$/, "") === "/admin" ||
@@ -1158,5 +1199,5 @@ export default function App() {
       ? new URLSearchParams(window.location.search).get("demo")
       : null;
   if (demoView === "catalog") return <CatalogDemo />;
-  return MAINTENANCE_MODE ? <MaintenancePage /> : <SiteApp />;
+  return MAINTENANCE_MODE || cms?.settings?.maintenanceMode ? <MaintenancePage /> : <SiteApp cms={cms} />;
 }
