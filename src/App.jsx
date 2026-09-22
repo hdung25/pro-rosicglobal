@@ -27,13 +27,7 @@ import {
   Mail,
   MessageCircle,
 } from "lucide-react";
-import {
-  FaFacebookF,
-  FaLine,
-  FaLinkedinIn,
-  FaWhatsapp,
-  FaWeixin,
-} from "react-icons/fa6";
+import { FaLinkedinIn, FaWhatsapp } from "react-icons/fa6";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import { SiZalo } from "react-icons/si";
 import Contact from "./components/Contact";
@@ -69,14 +63,15 @@ const NAV = [
 ];
 
 const SOCIAL_LINKS = [
-  { label: "LinkedIn", href: "https://vn.linkedin.com/company/hong-tam-rosic-global-manufacturing-trading-joint-stock-company", icon: FaLinkedinIn, external: true },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/clairehong-hongtamrosicglobal/", icon: FaLinkedinIn, external: true },
   { label: "WhatsApp", href: "https://wa.me/84962284872", icon: FaWhatsapp, external: true },
   { label: "Email", href: "mailto:info@rosicglobal.com", icon: HiOutlineEnvelope },
-  { label: "Facebook", href: "https://www.facebook.com/rosicglobal", icon: FaFacebookF, external: true },
   { label: "Zalo", href: "https://zalo.me/84962284872", icon: SiZalo, external: true },
-  { label: "WeChat", href: "#contact", icon: FaWeixin },
-  { label: "LINE", href: "#contact", icon: FaLine },
 ];
+
+const DEFAULT_PUBLIC_SOCIAL = Object.fromEntries(
+  SOCIAL_LINKS.map(({ label, href }) => [label.toLowerCase(), href]),
+);
 
 const navLabel = (copy, item) => copy.nav[item.key] ?? item.label;
 
@@ -228,7 +223,7 @@ function MaintenancePage() {
               <p className="maintenance-footer">{copy.slogan}</p>
               <div className="maintenance-socials" aria-label={copy.social}>
                 <a href="https://wa.me/84962284872" target="_blank" rel="noreferrer" aria-label="WhatsApp"><MessageCircle size={17} /></a>
-                <a href="https://vn.linkedin.com/company/hong-tam-rosic-global-manufacturing-trading-joint-stock-company" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Network size={17} /></a>
+                <a href="https://www.linkedin.com/in/clairehong-hongtamrosicglobal/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Network size={17} /></a>
                 <a href="mailto:info@rosicglobal.com" aria-label="Email"><Mail size={17} /></a>
               </div>
             </div>
@@ -1052,6 +1047,9 @@ function SiteApp({ cms }) {
   const localizedExportCategories = sourceExportCategories.map((categoryItem) =>
     localizeExportCategory(categoryItem, language),
   );
+  const socialLinks = cms?.socialConfigVersion === 2
+    ? { ...DEFAULT_PUBLIC_SOCIAL, ...cms.social }
+    : DEFAULT_PUBLIC_SOCIAL;
   useEffect(() => {
     const scrollHome = () => {
       if (window.location.hash === "#home")
@@ -1150,7 +1148,7 @@ function SiteApp({ cms }) {
         theme={theme}
         onThemeChange={setTheme}
         copy={copy}
-        socialLinks={cms?.social}
+        socialLinks={socialLinks}
       />
       <DetailDialog
         selected={selected}

@@ -3,5 +3,5 @@
 export const CONTACT = {
   email: (import.meta.env.VITE_CONTACT_EMAIL || "info@rosicglobal.com").trim(),
   phone: (import.meta.env.VITE_CONTACT_PHONE || "+84962284872").trim(),
-  zalo: (import.meta.env.VITE_CONTACT_ZALO || "").trim(),
+  zalo: (import.meta.env.VITE_CONTACT_ZALO || "https://zalo.me/84962284872").trim(),
 };

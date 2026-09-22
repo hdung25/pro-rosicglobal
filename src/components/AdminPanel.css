@@ -199,6 +199,9 @@
 .admin-field textarea:focus { border-color: #8e742f; box-shadow: 0 0 0 3px rgb(202 165 82 / 0.14); }
 .settings-form,
 .content-form { max-width: 840px; }
+.admin-social-heading { padding-bottom: 3px; }
+.admin-social-heading h2 { margin: 0; font-family: "Manrope Variable", sans-serif; font-size: 20px; letter-spacing: -0.03em; }
+.admin-social-heading p { max-width: 590px; margin-top: 6px; color: var(--admin-muted); font-size: 10px; line-height: 1.6; }
 .admin-image-guide { display: flex; min-width: 0; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid #e0dfcb; border-radius: 10px; color: #765b20; background: #fffceb; }
 .admin-image-guide > span { display: grid; min-width: 0; gap: 2px; }
 .admin-image-guide strong { font-size: 9px; }

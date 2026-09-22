@@ -64,3 +64,19 @@ test("uploads are cropped to locked product and category dimensions", async ({ p
   const categorySize = await page.locator(".category-editor-form .admin-upload-preview img").evaluate((image) => [image.naturalWidth, image.naturalHeight]);
   expect(categorySize).toEqual([800, 800]);
 });
+
+test("shows only the four official social configuration fields", async ({ page }) => {
+  await page.goto("/admin/");
+  await page.getByLabel("Tên đăng nhập").fill("adminrosic");
+  await page.getByLabel("Mật khẩu").fill("hongtamrosicglobal79");
+  await page.getByRole("button", { name: "Đăng nhập Admin" }).click();
+  await page.getByRole("button", { name: "Cài đặt", exact: true }).click();
+
+  await expect(page.getByLabel("WhatsApp · Kênh chính")).toHaveValue("https://wa.me/84962284872");
+  await expect(page.getByLabel("Email doanh nghiệp")).toHaveValue("mailto:info@rosicglobal.com");
+  await expect(page.getByLabel("LinkedIn · Founder & CEO")).toHaveValue("https://www.linkedin.com/in/clairehong-hongtamrosicglobal/");
+  await expect(page.getByLabel("Zalo · Hotline")).toHaveValue("https://zalo.me/84962284872");
+  await expect(page.getByText("Facebook", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("WeChat", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("LINE", { exact: true })).toHaveCount(0);
+});

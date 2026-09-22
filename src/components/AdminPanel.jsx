@@ -64,14 +64,25 @@ const DEFAULT_SETTINGS = {
 };
 
 const DEFAULT_SOCIAL = {
-  linkedin: "https://vn.linkedin.com/company/hong-tam-rosic-global-manufacturing-trading-joint-stock-company",
   whatsapp: "https://wa.me/84962284872",
   email: "mailto:info@rosicglobal.com",
-  facebook: "https://www.facebook.com/rosicglobal",
+  linkedin: "https://www.linkedin.com/in/clairehong-hongtamrosicglobal/",
   zalo: "https://zalo.me/84962284872",
-  wechat: "",
-  line: "",
 };
+
+const SOCIAL_FIELDS = [
+  { key: "whatsapp", label: "WhatsApp · Kênh chính", placeholder: "https://wa.me/84962284872" },
+  { key: "email", label: "Email doanh nghiệp", placeholder: "mailto:info@rosicglobal.com" },
+  { key: "linkedin", label: "LinkedIn · Founder & CEO", placeholder: "https://www.linkedin.com/in/..." },
+  { key: "zalo", label: "Zalo · Hotline", placeholder: "https://zalo.me/84962284872" },
+];
+
+const SOCIAL_CONFIG_VERSION = 2;
+
+function configuredSocial(source, configVersion) {
+  if (configVersion !== SOCIAL_CONFIG_VERSION) return { ...DEFAULT_SOCIAL };
+  return SOCIAL_FIELDS.reduce((result, { key }) => ({ ...result, [key]: source?.[key] || DEFAULT_SOCIAL[key] }), {});
+}
 
 const seedProducts = PRODUCTS.map((product, index) => ({
   ...product,
@@ -106,7 +117,8 @@ function readState() {
         ...saved,
         categories: Array.isArray(saved.categories) ? saved.categories : seedCategories,
         content: { ...DEFAULT_CONTENT, ...saved.content },
-        social: { ...DEFAULT_SOCIAL, ...saved.social },
+        social: configuredSocial(saved.social, saved.socialConfigVersion),
+        socialConfigVersion: SOCIAL_CONFIG_VERSION,
         settings: { ...DEFAULT_SETTINGS, ...saved.settings },
         media: Array.isArray(saved.media) ? saved.media : [],
       };
@@ -114,7 +126,7 @@ function readState() {
   } catch {
     // Corrupt browser data falls back to a safe seed.
   }
-  return { products: seedProducts, categories: seedCategories, content: DEFAULT_CONTENT, social: DEFAULT_SOCIAL, settings: DEFAULT_SETTINGS, media: [], updatedAt: null };
+  return { products: seedProducts, categories: seedCategories, content: DEFAULT_CONTENT, social: DEFAULT_SOCIAL, socialConfigVersion: SOCIAL_CONFIG_VERSION, settings: DEFAULT_SETTINGS, media: [], updatedAt: null };
 }
 
 const NAV_ITEMS = [
@@ -312,7 +324,11 @@ function AdminWorkspace({ onLogout }) {
     try {
       const payload = JSON.parse(await file.text());
       if (!Array.isArray(payload.products) || !payload.content) throw new Error("invalid");
-      setData(payload);
+      setData({
+        ...payload,
+        social: configuredSocial(payload.social, payload.socialConfigVersion),
+        socialConfigVersion: SOCIAL_CONFIG_VERSION,
+      });
       setSelectedId(payload.products[0]?.id ?? null);
       localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
       flash("Đã nhập dữ liệu CMS");
@@ -438,8 +454,8 @@ function AdminWorkspace({ onLogout }) {
                 <div className="admin-section-header"><div><span>Hệ thống</span><h1>Cài đặt website</h1></div></div>
                 <div className="admin-form settings-form">
                   <div className="admin-setting-row"><div><Power size={20} /><span><strong>Chế độ Coming Soon</strong><small>Ẩn giao diện chính và hiển thị trang đang hoàn thiện.</small></span></div><button className={`admin-switch ${data.settings.maintenanceMode ? "active" : ""}`} aria-pressed={data.settings.maintenanceMode} onClick={toggleMaintenance}><span /></button></div>
-                  <h2>Liên kết Social Media</h2>
-                  {Object.entries(data.social).map(([key, value]) => <Field key={key} label={key.toUpperCase()}><input value={value} placeholder="Dán đường dẫn tài khoản" onChange={(e) => updateData((current) => ({ ...current, social: { ...current.social, [key]: e.target.value } }))} /></Field>)}
+                  <div className="admin-social-heading"><div><h2>Liên kết chính thức</h2><p>Chỉ hiển thị bốn kênh đang dùng. Facebook, WeChat và LINE được ẩn để trang quản trị gọn hơn.</p></div></div>
+                  {SOCIAL_FIELDS.map(({ key, label, placeholder }) => <Field key={key} label={label}><input value={data.social[key] || ""} placeholder={placeholder} onChange={(e) => updateData((current) => ({ ...current, social: { ...current.social, [key]: e.target.value } }))} /></Field>)}
                   <div className="admin-backup-actions">
                     <button className="admin-button secondary" onClick={exportJson}><Download size={16} />Xuất bản sao JSON</button>
                     <button className="admin-button secondary" onClick={() => importRef.current?.click()}><Upload size={16} />Nhập dữ liệu JSON</button>

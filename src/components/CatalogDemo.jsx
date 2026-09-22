@@ -24,7 +24,7 @@ import { ProductImageBrand } from "./ProductImageBrand";
 import "./CatalogDemo.css";
 
 const COMPANY_LINKEDIN =
-  "https://vn.linkedin.com/company/hong-tam-rosic-global-manufacturing-trading-joint-stock-company";
+  "https://www.linkedin.com/in/clairehong-hongtamrosicglobal/";
 
 const COPY = {
   vi: {
