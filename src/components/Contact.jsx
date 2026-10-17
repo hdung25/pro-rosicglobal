@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUpRight, Check, Copy, Mail, RotateCcw } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { ArrowUpRight, Check, Mail, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { SiZalo } from "react-icons/si";
 import { mergeText } from "../cms/content-overrides";
@@ -40,6 +41,7 @@ function composeMessage(values, form) {
     [lines.product, values.productLine],
     [lines.quantity, values.quantity],
     [lines.market, values.market],
+    [lines.note, values.note],
   ].filter(([, value]) => value).map(([label, value]) => `- ${label}: ${value}`);
   const contact = [
     [lines.name, values.name],
@@ -50,37 +52,34 @@ function composeMessage(values, form) {
 }
 
 /**
- * One-step quotation request (customer item 19): the visitor fills in their
- * details, the WhatsApp/email message is prepared live in an editable box,
- * and one click on "Send" opens the chosen app with that message.
+ * One-step quotation form (customer items 37–41): the visitor fills in their
+ * details, accepts the privacy policy and presses send. WhatsApp or the email
+ * app opens directly with the prepared message, where it can still be edited.
+ * Zalo cannot be prefilled, so its button copies the message first.
  */
-export default function Contact({
-  sectionId = "contact",
+export function QuoteForm({
   prefillKey = "",
   prefillNonce = 0,
   products = [],
   groups = [],
   language = "vi",
   socialLinks = SOCIAL_DEFAULTS,
-  socialQr,
   textOverrides,
-  compact = false,
+  onPolicy,
+  autoFocus = false,
 }) {
   const copy = mergeText(contactCopyFor(language), textOverrides?.contact);
-  const routing = mergeText(routingCopyFor(language), textOverrides?.routing);
   const form = catalogCopyFor(language).form;
+  const uid = useId().replace(/:/g, "");
   const formRef = useRef(null);
-  const messageRef = useRef(null);
   const validKeys = useMemo(() => new Set([GENERAL, ...products.map((item) => item.id), ...groups.map((group) => `group:${group.id}`)]), [products, groups]);
-  const [values, setValues] = useState({ name: "", phone: "", email: "", quantity: "", market: "", product: validKeys.has(prefillKey) ? prefillKey : GENERAL });
-  const [message, setMessage] = useState("");
-  const [edited, setEdited] = useState(false);
+  const [values, setValues] = useState({ name: "", phone: "", email: "", quantity: "", market: "", note: "", consent: false, product: validKeys.has(prefillKey) ? prefillKey : GENERAL });
   const [status, setStatus] = useState("");
   const [errors, setErrors] = useState({});
   const [startedAt] = useState(() => new Date().toISOString());
 
-  // Prefill the product being viewed (item 20) — also when the visitor
-  // presses "Request a quotation" again for another product on the same page.
+  // Prefill the product being viewed — also when "Request a quotation" is
+  // pressed again for another product on the same page.
   const validKeysRef = useRef(validKeys);
   useEffect(() => { validKeysRef.current = validKeys; }, [validKeys]);
   useEffect(() => {
@@ -90,8 +89,7 @@ export default function Contact({
   }, [prefillKey, prefillNonce]);
 
   const productLine = describeSelection(values.product, products, groups, form.general);
-  const composed = composeMessage({ ...values, productLine }, form);
-  const text = edited ? message : composed;
+  const text = composeMessage({ ...values, productLine }, form);
 
   const configuredEmail = socialLinks.email?.replace(/^mailto:/, "");
   const email = validEmail(configuredEmail || "") ? configuredEmail : validEmail(CONTACT.email) ? CONTACT.email : FALLBACK_EMAIL;
@@ -101,9 +99,10 @@ export default function Contact({
   const whatsapp = whatsappQuoteLink(whatsappBase, text);
   const subject = `${language === "vi" ? "Yêu cầu báo giá" : "Quotation request"} – ${productLine}`;
   const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+  const id = (name) => `quote-${uid}-${name}`;
 
   const update = (field) => (event) => {
-    const value = event.target.value;
+    const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
     setValues((current) => ({ ...current, [field]: value }));
     setStatus("");
     if (errors[field]) setErrors((current) => ({ ...current, [field]: "" }));
@@ -115,6 +114,7 @@ export default function Contact({
     if (!(/^[\p{L}\p{M}][\p{L}\p{M}\p{Zs}.'’-]*$/u.test(name) && Array.from(name).length >= 2)) next.name = copy.validation.name;
     if (!validPhone(values.phone.trim())) next.phone = copy.validation.phone;
     if (values.email.trim() && !validEmail(values.email.trim())) next.email = copy.validation.email;
+    if (!values.consent) next.consent = form.consentError;
     setErrors(next);
     const first = Object.keys(next)[0];
     if (first) formRef.current?.elements.namedItem(first)?.focus();
@@ -126,117 +126,162 @@ export default function Contact({
   function recordLead(channel) {
     if (import.meta.env.VITE_QUOTE_SERVER_ENABLED !== "true") return;
     try {
-      const id = createSubmissionId();
+      const submission = createSubmissionId();
       fetch("/api/quote", {
         method: "POST",
         keepalive: true,
-        headers: { "Content-Type": "application/json", "Idempotency-Key": id },
-        body: JSON.stringify({ name: values.name.trim(), phone: values.phone.trim(), email: values.email.trim(), product: productLine, productGroup: "", market: values.market.trim(), quantity: values.quantity.trim(), timeline: "", message: text, whatsappOptIn: channel === "whatsapp", honeypot: formRef.current?.elements.namedItem("honeypot")?.value || "", formStartedAt: startedAt, clientSubmissionId: id }),
+        headers: { "Content-Type": "application/json", "Idempotency-Key": submission },
+        body: JSON.stringify({ name: values.name.trim(), phone: values.phone.trim(), email: values.email.trim(), product: productLine, productGroup: "", market: values.market.trim(), quantity: values.quantity.trim(), timeline: "", message: text, whatsappOptIn: channel === "whatsapp", honeypot: formRef.current?.elements.namedItem("honeypot")?.value || "", formStartedAt: startedAt, clientSubmissionId: submission }),
       }).catch(() => {});
     } catch { /* The visitor's own channel is the source of truth. */ }
   }
 
-  function send(channel) {
+  async function send(channel) {
     if (!validate()) return;
     if (formRef.current?.elements.namedItem("honeypot")?.value) return;
     recordLead(channel);
     if (channel === "whatsapp" && whatsapp.href) window.open(whatsapp.href, "_blank", "noopener,noreferrer");
     if (channel === "email") window.location.assign(mailto);
+    if (channel === "zalo") {
+      try { await navigator.clipboard.writeText(text); } catch { /* Clipboard may be blocked; Zalo still opens. */ }
+      if (zalo) window.open(zalo, "_blank", "noopener,noreferrer");
+      setStatus(form.zaloCopied);
+      return;
+    }
     setStatus(form.sent);
   }
 
-  async function copyMessage() {
-    try {
-      await navigator.clipboard.writeText(text);
-      setStatus(form.copied);
-    } catch {
-      messageRef.current?.select();
-    }
-  }
-
   const field = (name, label, props = {}) => (
-    <div className={`quote-field${errors[name] ? " has-error" : ""}`}>
-      <label htmlFor={`quote-${name}`}>{label}{props.required && <span aria-hidden="true"> *</span>}</label>
-      <input id={`quote-${name}`} name={name} value={values[name]} onChange={update(name)} aria-invalid={errors[name] ? "true" : undefined} aria-describedby={errors[name] ? `quote-${name}-error` : undefined} {...props} />
-      {errors[name] && <p id={`quote-${name}-error`} className="quote-error">{errors[name]}</p>}
+    <div className={`quote-field${errors[name] ? " has-error" : ""}${props.full ? " quote-field--full" : ""}`}>
+      <label htmlFor={id(name)}>{label}{props.required && <span aria-hidden="true"> *</span>}</label>
+      <input
+        id={id(name)}
+        name={name}
+        value={values[name]}
+        onChange={update(name)}
+        aria-invalid={errors[name] ? "true" : undefined}
+        aria-describedby={errors[name] ? `${id(name)}-error` : undefined}
+        autoComplete="off"
+        required={props.required}
+        type={props.type}
+        inputMode={props.inputMode}
+        maxLength={props.maxLength}
+        autoFocus={props.autoFocus}
+      />
+      {errors[name] && <p id={`${id(name)}-error`} className="quote-error">{errors[name]}</p>}
     </div>
   );
 
   return (
-    <section id={sectionId || undefined} className={`contact-section section-pad${compact ? " contact-section--compact" : ""}`} aria-labelledby={`${sectionId || "contact"}-heading`}>
+    <form ref={formRef} className="quote-form" noValidate onSubmit={(event) => { event.preventDefault(); send("whatsapp"); }}>
+      <div className="quote-grid">
+        {field("name", copy.fields.name.label, { required: true, maxLength: 100, autoFocus })}
+        {field("phone", copy.fields.phone.label, { required: true, type: "tel", inputMode: "tel", maxLength: 25 })}
+        {field("email", copy.fields.email.label, { type: "email", maxLength: 200 })}
+        <div className="quote-field">
+          <label htmlFor={id("product")}>{form.product}</label>
+          <select id={id("product")} name="product" value={values.product} onChange={update("product")}>
+            <option value={GENERAL}>{form.general}</option>
+            {groups.map((group) => {
+              const items = products.filter((item) => item.category === group.id);
+              return (
+                <optgroup key={group.id} label={group.title}>
+                  <option value={`group:${group.id}`}>{group.title}{items.length ? ` (${items.length})` : ""}</option>
+                  {items.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}
+                </optgroup>
+              );
+            })}
+          </select>
+        </div>
+        {field("quantity", form.quantity, { maxLength: 160 })}
+        {field("market", form.market, { maxLength: 160 })}
+        {field("note", form.note, { maxLength: 600, full: true })}
+        <div className={`quote-field quote-field--full quote-consent${errors.consent ? " has-error" : ""}`}>
+          <label className="quote-consent__label" htmlFor={id("consent")}>
+            <input id={id("consent")} name="consent" type="checkbox" checked={values.consent} onChange={update("consent")} aria-invalid={errors.consent ? "true" : undefined} aria-describedby={errors.consent ? `${id("consent")}-error` : undefined} />
+            <span>
+              {form.consent[0]}
+              <button type="button" className="quote-link" onClick={onPolicy}>{form.consent[1]}</button>
+              {form.consent[2]}<span aria-hidden="true"> *</span>
+            </span>
+          </label>
+          {errors.consent && <p id={`${id("consent")}-error`} className="quote-error">{errors.consent}</p>}
+        </div>
+        <div className="contact-honeypot" aria-hidden="true">
+          <label htmlFor={id("website")}>Website</label>
+          <input id={id("website")} name="honeypot" type="text" tabIndex={-1} autoComplete="off" />
+        </div>
+      </div>
+      <div className="quote-actions">
+        <button type="submit" className="button button-primary quote-send quote-send--whatsapp"><FaWhatsapp size={19} aria-hidden="true" />{form.sendWhatsapp}</button>
+        <button type="button" className="button button-outline quote-send" onClick={() => send("email")}><Mail size={18} aria-hidden="true" />{form.sendEmail}</button>
+        {zalo && <button type="button" className="button button-outline quote-send quote-send--zalo" onClick={() => send("zalo")}><SiZalo size={18} aria-hidden="true" />{form.zaloButton}</button>}
+      </div>
+      <p className="quote-status" role="status" aria-live="polite">{status && <><Check size={15} aria-hidden="true" />{status}</>}</p>
+      <p className="form-note">{copy.notes.required}</p>
+    </form>
+  );
+}
+
+/** "Request a quotation" opens the form in place instead of leaving the page. */
+export function QuoteDialog({ open, onOpenChange, title, subtitle, ...formProps }) {
+  const form = catalogCopyFor(formProps.language).form;
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="dialog-overlay quote-overlay" />
+        <Dialog.Content className="quote-dialog">
+          <header className="quote-dialog__head">
+            <div>
+              <Dialog.Title>{title || form.dialogTitle}</Dialog.Title>
+              <Dialog.Description>{subtitle || form.lead}</Dialog.Description>
+            </div>
+            <Dialog.Close className="dialog-close icon-button" aria-label={form.close}><X /></Dialog.Close>
+          </header>
+          <div className="quote-dialog__body">
+            <QuoteForm {...formProps} autoFocus />
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
+export default function Contact({
+  sectionId = "contact",
+  socialLinks = SOCIAL_DEFAULTS,
+  socialQr,
+  textOverrides,
+  language = "vi",
+  ...formProps
+}) {
+  const copy = mergeText(contactCopyFor(language), textOverrides?.contact);
+  const routing = mergeText(routingCopyFor(language), textOverrides?.routing);
+  const form = catalogCopyFor(language).form;
+  const configuredEmail = socialLinks.email?.replace(/^mailto:/, "");
+  const email = validEmail(configuredEmail || "") ? configuredEmail : validEmail(CONTACT.email) ? CONTACT.email : FALLBACK_EMAIL;
+  const phone = validPhone(CONTACT.phone) ? CONTACT.phone : FALLBACK_PHONE;
+  return (
+    <section id={sectionId || undefined} className="contact-section section-pad" aria-labelledby="contact-heading">
       <div className="container contact-grid">
         <div className="contact-intro">
-          <h2 id={`${sectionId || "contact"}-heading`} className="section-heading">{copy.heading}<br /><span>{routing.accent}</span></h2>
+          <h2 id="contact-heading" className="section-heading">{copy.heading}<br /><span>{routing.accent}</span></h2>
           <p>{copy.intro}</p>
-          {!compact && <ul className="contact-points">
+          <ul className="contact-points">
             <li><ArrowUpRight size={20} aria-hidden="true" /><span><strong>{routing.b2b[0]}</strong><br />{routing.b2b[1]}</span></li>
             <li><ArrowUpRight size={20} aria-hidden="true" /><span><strong>{routing.needs[0]}</strong><br />{routing.needs[1]}</span></li>
-          </ul>}
+          </ul>
           <div className="contact-channels">
             <a href={`mailto:${email}`}><Mail size={18} aria-hidden="true" />{email}</a>
             <a href={`tel:${phone.replace(/[^+\d]/g, "")}`}><FaWhatsapp size={17} aria-hidden="true" />{phone}</a>
-            {zalo && <a href={zalo} target="_blank" rel="noopener noreferrer"><SiZalo size={18} aria-hidden="true" />{copy.channels.zalo}</a>}
           </div>
+          <SocialChannels links={socialLinks} qr={socialQr} language={language} className="contact-social" />
           <p className="form-note">{copy.notes.privacy}</p>
-          {!compact && <SocialChannels links={socialLinks} qr={socialQr} language={language} />}
         </div>
-
         <div className="contact-form quote-card">
           <h3>{form.title}</h3>
           <p className="quote-lead">{form.lead}</p>
-          <form ref={formRef} noValidate onSubmit={(event) => { event.preventDefault(); send("whatsapp"); }}>
-            <div className="quote-grid">
-              {field("name", copy.fields.name.label, { required: true, autoComplete: "name", maxLength: 100 })}
-              {field("phone", copy.fields.phone.label, { required: true, type: "tel", inputMode: "tel", autoComplete: "tel", maxLength: 25 })}
-              {field("email", copy.fields.email.label, { type: "email", autoComplete: "email", maxLength: 200 })}
-              <div className="quote-field">
-                <label htmlFor="quote-product">{form.product}</label>
-                <select id="quote-product" name="product" value={values.product} onChange={update("product")}>
-                  <option value={GENERAL}>{form.general}</option>
-                  {groups.map((group) => {
-                    const items = products.filter((item) => item.category === group.id);
-                    return (
-                      <optgroup key={group.id} label={group.title}>
-                        <option value={`group:${group.id}`}>{group.title}{items.length ? ` (${items.length})` : ""}</option>
-                        {items.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}
-                      </optgroup>
-                    );
-                  })}
-                </select>
-              </div>
-              {field("quantity", form.quantity, { maxLength: 160, autoComplete: "off" })}
-              {field("market", form.market, { maxLength: 160, autoComplete: "off" })}
-              <div className="quote-field quote-field--full">
-                <label htmlFor="quote-message">{form.message}</label>
-                <textarea
-                  id="quote-message"
-                  ref={messageRef}
-                  name="message"
-                  rows={9}
-                  maxLength={4000}
-                  value={text}
-                  onChange={(event) => { setEdited(true); setMessage(event.target.value); setStatus(""); }}
-                  aria-describedby="quote-message-help"
-                />
-                <p id="quote-message-help" className="quote-help">
-                  {edited && composed !== message ? form.edited : form.messageHelp}
-                  {edited && <button type="button" className="quote-link" onClick={() => { setEdited(false); setMessage(""); }}><RotateCcw size={13} aria-hidden="true" />{form.resetMessage}</button>}
-                </p>
-              </div>
-              <div className="contact-honeypot" aria-hidden="true">
-                <label htmlFor="contact-website">Website</label>
-                <input id="contact-website" name="honeypot" type="text" tabIndex={-1} autoComplete="off" />
-              </div>
-            </div>
-            <div className="quote-actions">
-              <button type="submit" className="button button-primary quote-send quote-send--whatsapp"><FaWhatsapp size={19} aria-hidden="true" />{form.sendWhatsapp}</button>
-              <button type="button" className="button button-outline quote-send" onClick={() => send("email")}><Mail size={18} aria-hidden="true" />{form.sendEmail}</button>
-              <button type="button" className="button button-outline quote-icon" onClick={copyMessage} aria-label={form.copy} title={form.copy}><Copy size={18} aria-hidden="true" /></button>
-            </div>
-            {zalo && <a className="quote-zalo" href={zalo} target="_blank" rel="noopener noreferrer"><SiZalo size={16} aria-hidden="true" />{form.zalo}</a>}
-            <p className="quote-status" role="status" aria-live="polite">{status && <><Check size={15} aria-hidden="true" />{status}</>}</p>
-            <p className="form-note">{copy.notes.required} {copy.notes.legal}</p>
-          </form>
+          <QuoteForm language={language} socialLinks={socialLinks} textOverrides={textOverrides} {...formProps} />
         </div>
       </div>
     </section>

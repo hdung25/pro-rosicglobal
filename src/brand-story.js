@@ -1,14 +1,14 @@
 export const ROSIC_VALUES = [
   { letter: "R", word: "Reliable", icon: "ShieldCheck", explanation: "Giữ cam kết với từng đơn hàng.", explanationEn: "Dependable commitments for every order." },
-  { letter: "O", word: "Origin-conscious", icon: "Leaf", explanation: "Minh bạch và trân trọng nguồn gốc.", explanationEn: "Care and transparency about origins." },
+  { letter: "O", word: "Origin", icon: "Leaf", explanation: "Minh bạch và trân trọng nguồn gốc.", explanationEn: "Care and transparency about origins." },
   { letter: "S", word: "Standardized", icon: "BadgeCheck", explanation: "Thống nhất quy cách trước giao thương.", explanationEn: "Agreed specifications before trade." },
-  { letter: "I", word: "Integrity-driven", icon: "HeartHandshake", explanation: "Hành động trung thực và có trách nhiệm.", explanationEn: "Honest and responsible in every action." },
-  { letter: "C", word: "Customer-centric", icon: "Users", explanation: "Bắt đầu từ nhu cầu của khách hàng.", explanationEn: "Built around each customer’s needs." },
+  { letter: "I", word: "International", icon: "Globe2", explanation: "Đáp ứng chuẩn mực thị trường quốc tế.", explanationEn: "Meeting international market standards." },
+  { letter: "C", word: "Customer", icon: "Users", explanation: "Bắt đầu từ nhu cầu của khách hàng.", explanationEn: "Built around each customer’s needs." },
 ];
 
 const headings = {
   vi: ["Khởi từ Tâm", "Vươn bằng Tầm"],
-  en: ["Rooted in Heart", "Growing with Vision"],
+  en: ["Manufacturing with Heart", "Trading with Vision"],
   zh: ["始于初心", "以远见致远"],
   ko: ["진심에서 시작하여", "비전으로 성장합니다"],
   ja: ["心を起点に", "ビジョンで未来へ"],

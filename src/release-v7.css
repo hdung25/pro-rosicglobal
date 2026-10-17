@@ -1,0 +1,381 @@
+/* =====================================================================
+   Release v7 — customer review (18 Oct 2026). Loaded after catalog-v6.css.
+   ===================================================================== */
+
+:root {
+  --logo-font: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --tool-h: 36px;
+  --top-h: 120px;
+}
+
+/* ---------------------------------------------------------------------
+   Top: one sticky block (topbar + header) so the display tools and
+   "back to top" stay reachable without floating over content.
+   --------------------------------------------------------------------- */
+.site-top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+.site-app .site-top .site-header { position: relative; top: auto; }
+.site-app :is(section[id], div[id]) { scroll-margin-top: calc(var(--top-h) + 12px); }
+
+/* Light mode: the bar matches the page background (item 4). */
+.site-app .topbar,
+html[data-theme="light"] .site-app .topbar {
+  height: var(--topbar-h);
+  min-height: var(--topbar-h);
+  color: var(--ink);
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+:root[data-theme="dark"] .site-app .topbar { color: var(--ink); background: var(--paper); border-bottom: 1px solid var(--line); }
+.site-app .topbar .topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 100%;
+}
+.site-app .topbar-message { color: var(--muted); font-size: 11px; letter-spacing: 0.06em; }
+
+/* Display tools: theme + language are two equal cells, same height and
+   radius; "back to top" is a third, square cell once the page is scrolled. */
+.top-tools {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(96px, 1fr));
+  align-items: stretch;
+  gap: 6px;
+}
+.top-tools.has-top { grid-template-columns: repeat(2, minmax(96px, 1fr)) var(--tool-h); }
+html[data-theme] :is(.site-app, .mobile-menu) .top-tools .tool-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  height: var(--tool-h);
+  min-height: var(--tool-h);
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: none;
+  font: 600 12px/1 "Be Vietnam Pro", sans-serif;
+  cursor: pointer;
+}
+html[data-theme] :is(.site-app, .mobile-menu) .top-tools .tool-cell:hover { border-color: var(--gold); }
+html[data-theme] :is(.site-app, .mobile-menu) .top-tools .tool-cell svg { color: var(--gold-ink); flex: 0 0 auto; }
+html[data-theme] :is(.site-app, .mobile-menu) .top-tools .language-cell { position: relative; padding: 0 0 0 12px; overflow: hidden; }
+html[data-theme] :is(.site-app, .mobile-menu) .top-tools .language-cell .language-picker-flag { width: 18px; height: 18px; margin: 0; }
+html[data-theme] :is(.site-app, .mobile-menu) .top-tools .language-cell select {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  padding: 0 26px 0 8px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: 600 12px/1 "Be Vietnam Pro", sans-serif;
+}
+html[data-theme] :is(.site-app, .mobile-menu) .top-tools .language-cell .language-picker-chevron { inset-inline-end: 9px; color: var(--gold-ink); }
+[dir="rtl"] .top-tools .language-cell { padding: 0 12px 0 0; }
+html[data-theme] :is(.site-app, .mobile-menu) .top-tools .top-cell { padding: 0; }
+.top-tools .theme-cell[aria-pressed="true"] svg { color: var(--gold-soft); }
+
+/* Header row */
+.site-app .nav-shell { height: 76px; min-height: 76px; }
+
+/* ---------------------------------------------------------------------
+   Mobile menu: two levels only — links, then the product groups.
+   --------------------------------------------------------------------- */
+.mobile-menu .mobile-nav { display: grid; }
+.mobile-menu .mobile-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--ink);
+  background: none;
+  font: 400 clamp(19px, 5vw, 23px)/1.25 "Be Vietnam Pro", sans-serif;
+  text-align: start;
+  cursor: pointer;
+}
+.mobile-menu .mobile-nav__item > span { color: var(--muted); font-size: 10px; }
+.mobile-menu .mobile-nav__item > svg { width: 19px; height: 19px; margin-inline-start: auto; transition: transform 200ms ease; }
+.mobile-menu .mobile-nav__group.is-open .mobile-nav__item > svg { transform: rotate(180deg); }
+.mobile-menu .mobile-nav__sub { display: grid; gap: 4px; padding: 6px 0 12px; border-bottom: 1px solid var(--line); }
+.mobile-menu .mobile-nav__sub[hidden] { display: none; }
+.mobile-menu nav .mobile-nav__sub a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--r);
+  font-size: 15px;
+  line-height: 1.35;
+  animation: none;
+}
+.mobile-menu nav .mobile-nav__sub a:hover { background: var(--soft); }
+.mobile-menu nav .mobile-nav__sub a > svg:first-child { margin: 0; color: var(--gold-ink); width: 20px; }
+.mobile-menu nav .mobile-nav__sub a > svg:last-child { margin-inline-start: auto; width: 16px; color: var(--muted); }
+.mobile-menu .mobile-menu-tools { display: grid; grid-template-columns: 1fr 1fr; width: 100%; margin-top: 24px; }
+.mobile-menu .mobile-menu-tools.has-top { grid-template-columns: 1fr 1fr var(--tool-h); }
+
+/* ---------------------------------------------------------------------
+   Logo face for the slogan, hero title and the brand story (items 16, 26).
+   --------------------------------------------------------------------- */
+.site-app .hero-copy h1,
+.site-app .hero-copy .title-accent {
+  font-family: var(--logo-font);
+  font-weight: 600;
+  font-size: clamp(48px, 6.2vw, 92px);
+  line-height: 1.08;
+  letter-spacing: 0.005em;
+}
+.site-app .hero-copy .title-line { display: block; overflow: visible; }
+.rosic-slogan,
+.rosic-slogan em { font-family: var(--logo-font); font-weight: 600; font-size: clamp(30px, 2.9vw, 44px); line-height: 1.2; }
+.rosic-letter { font-family: var(--logo-font); font-weight: 600; }
+.site-app .about-story-heading .eyebrow { font-family: var(--logo-font); font-weight: 600; font-size: 15px; letter-spacing: 0.2em; color: var(--gold-ink); }
+.site-app .about-story-heading .section-heading { font-family: var(--logo-font); font-weight: 600; font-size: clamp(40px, 4.6vw, 66px); line-height: 1.12; letter-spacing: 0; }
+.site-app .about-pillars h3 { font-family: var(--logo-font); font-weight: 600; font-size: clamp(30px, 2.6vw, 38px); line-height: 1.15; }
+.site-app .about-pillars p { font-family: var(--logo-font); font-weight: 500; font-size: 19px; line-height: 1.65; color: var(--muted); }
+.site-app .about-journey-button { margin-top: 6px; }
+
+/* ROSIC values: five letters on one balanced line at every width (item 15). */
+.rosic-values { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; gap: clamp(6px, 1.4vw, 18px) !important; }
+.rosic-values li { grid-column: auto !important; min-width: 0; }
+.rosic-word { white-space: nowrap; max-width: none; }
+@media (max-width: 600px) {
+  .rosic-letter { font-size: clamp(34px, 11vw, 46px) !important; }
+  .rosic-word { font-size: clamp(8.5px, 2.5vw, 11px) !important; letter-spacing: 0; }
+  .rosic-explanation { display: none; }
+  .rosic-values li svg { width: 18px; height: 18px; }
+}
+
+/* Section heading never clips Vietnamese accents (item 18). */
+.site-app .section-heading { line-height: 1.22; padding-block: 0.06em; overflow: visible; }
+
+/* ---------------------------------------------------------------------
+   Product groups: one strip of round group pictures (items 19–21, 30).
+   --------------------------------------------------------------------- */
+.group-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: clamp(14px, 2vw, 28px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.group-strip .gcard { border: 0; background: none; box-shadow: none; overflow: visible; }
+.group-strip .gcard:hover { box-shadow: none; }
+.gcard__link { display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--ink); text-align: center; }
+html[data-theme] .site-app .group-strip .gcard__media {
+  width: 100%;
+  max-width: 168px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+.gcard__media .product-image-brand__mark { width: 46%; }
+.gcard__media .product-image-brand__name { display: none; }
+.gcard__name { font-size: 15px; font-weight: 600; line-height: 1.35; }
+.gcard__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  color: var(--gold-ink);
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+.gcard__link:hover .gcard__cta,
+.gcard__link:focus-visible .gcard__cta { border-color: var(--gold); background: var(--soft); }
+.gcard__link:hover .media-frame > img { transform: scale(1.05); }
+@media (max-width: 760px) {
+  .group-strip {
+    display: flex;
+    gap: 14px;
+    margin-inline: -20px;
+    padding: 4px 20px 6px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .group-strip::-webkit-scrollbar { display: none; }
+  .group-strip .gcard { flex: 0 0 116px; scroll-snap-align: start; }
+  .gcard__name { font-size: 13px; }
+  .gcard__cta { min-height: 44px; padding: 0 10px; font-size: 11px; }
+}
+
+/* ---------------------------------------------------------------------
+   Quote form and dialog (items 33, 37–41).
+   --------------------------------------------------------------------- */
+.quote-overlay { z-index: 90; }
+.quote-dialog {
+  position: fixed;
+  z-index: 91;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  width: min(760px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+  border-radius: var(--r);
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow-md);
+  transform: translate(-50%, -50%);
+}
+.quote-dialog__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 22px 14px; border-bottom: 1px solid var(--line); }
+.quote-dialog__head h2 { margin: 0; font-size: 22px; font-weight: 600; }
+.quote-dialog__head p { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.quote-dialog .dialog-close { position: static; flex: 0 0 auto; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: var(--r); background: var(--paper); }
+.quote-dialog__body { overflow-y: auto; overscroll-behavior: contain; padding: 18px 22px 22px; }
+.quote-dialog .quote-field :is(input, select) {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  color: var(--ink);
+  background: var(--surface);
+  font: 400 16px/1.4 "Be Vietnam Pro", sans-serif;
+}
+.quote-dialog .quote-field label { color: var(--ink); font-size: 13px; font-weight: 600; }
+.quote-dialog .quote-actions .button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 12px 18px; border: 1px solid var(--line); border-radius: var(--r); color: var(--ink); background: transparent; font: 600 14px/1.3 "Be Vietnam Pro", sans-serif; }
+.quote-dialog .quote-actions .quote-send--whatsapp { border-color: #1f7a4d; color: #fff; background: #1f7a4d; }
+.quote-consent__label { display: flex; align-items: flex-start; gap: 10px; color: var(--ink); font-size: 13px; font-weight: 500 !important; line-height: 1.6; cursor: pointer; }
+.quote-consent__label input { flex: 0 0 auto; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--forest); }
+.quote-consent .quote-link { display: inline; min-height: 0; text-decoration: underline; }
+.quote-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.site-app .contact-form .quote-actions > *, .quote-dialog .quote-actions > * { width: 100%; margin: 0; }
+.quote-send--zalo svg { color: #0068ff; }
+.site-app .contact-social { margin-top: 22px; }
+
+/* ---------------------------------------------------------------------
+   Social channels: icon row, one popup per channel (items 43–44).
+   --------------------------------------------------------------------- */
+.social-icons { display: flex; flex-wrap: wrap; gap: 8px; }
+.social-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  color: var(--ink);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+.social-icon:hover,
+.social-icon:focus-visible { border-color: var(--gold); color: var(--gold-ink); }
+.social-popup { width: min(380px, calc(100vw - 24px)); justify-items: center; text-align: center; border-radius: var(--r); }
+.social-popup h2 { display: inline-flex; align-items: center; gap: 10px; padding: 0; font-size: 18px; }
+.social-popup__icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--r); color: var(--gold-ink); background: var(--soft); }
+.social-popup__qr { display: grid; justify-items: center; gap: 8px; margin: 4px 0 0; }
+.social-popup__code { position: relative; display: block; width: 220px; aspect-ratio: 1; overflow: hidden; border-radius: var(--r); background: #fff; }
+.social-popup__code > img { display: block; width: 100%; }
+.social-popup__qr figcaption { color: var(--muted); font-size: 12px; }
+.social-popup .social-popup__open { width: 100%; text-decoration: none !important; }
+.social-qr-dialog .button-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 18px; border: 1px solid var(--forest); border-radius: var(--r); color: #fafaf5; background: var(--forest); font-weight: 600; }
+:root[data-theme="dark"] .social-qr-dialog .button-primary { border-color: var(--gold-soft); color: var(--forest); background: var(--gold-soft); }
+html[data-theme] .social-qr-close { border-radius: var(--r); }
+
+/* ---------------------------------------------------------------------
+   Footer (items 42–46).
+   --------------------------------------------------------------------- */
+.site-app .site-footer { padding-top: 56px; }
+.site-app .footer-main {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.1fr) minmax(140px, 0.7fr) minmax(200px, 1fr) minmax(240px, 1.1fr);
+  gap: 32px;
+  align-items: start;
+}
+.site-app .footer-main > .footer-column:nth-child(3) { display: grid; grid-template-columns: 1fr; }
+.footer-brand { display: grid; justify-items: start; gap: 14px; }
+.site-app .footer-brand .brand { align-items: center; }
+.site-app .footer-brand .brand-mark { width: 120px; }
+.site-app .footer-brand .brand-name { font-size: 32px; }
+.site-app .footer-tagline { margin: 0; color: var(--muted); font: 600 16px/1.4 var(--logo-font); letter-spacing: 0.02em; }
+.site-app .footer-invitation { display: grid; gap: 14px; padding-inline-start: 0; border: 0; }
+.site-app .footer-invitation > span { color: var(--muted); font-size: 12px; }
+.site-app .footer-invitation .footer-cta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 0 0 12px; border-bottom: 1px solid var(--line); font-size: 24px; }
+.site-app .footer-tools { justify-self: start; }
+.site-app .footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+@media (max-width: 1000px) {
+  .site-app .footer-main { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .site-app .footer-main { grid-template-columns: 1fr; gap: 28px; }
+  .footer-brand { justify-items: center; text-align: center; }
+  .site-app .footer-tools { justify-self: stretch; }
+  .site-app .footer-bottom { justify-content: center; text-align: center; }
+}
+
+/* ---------------------------------------------------------------------
+   Lightbox shows the photo at its own resolution, never upscaled (item 31).
+   --------------------------------------------------------------------- */
+.lightbox-frame > img { width: auto; height: auto; max-width: min(92vw, 100%); image-rendering: auto; }
+
+/* ---------------------------------------------------------------------
+   Phones
+   --------------------------------------------------------------------- */
+@media (max-width: 760px) {
+  :root { --top-h: 112px; --tool-h: 44px; }
+  .site-app .nav-shell { height: 64px; min-height: 64px; }
+  .site-app .topbar .topbar-inner { justify-content: flex-end; }
+  .site-app .topbar .top-tools { width: 100%; grid-template-columns: 1fr 1fr; }
+  .site-app .topbar .top-tools.has-top { grid-template-columns: 1fr 1fr var(--tool-h); }
+  .quote-dialog { width: 100vw; max-height: 100dvh; height: 100dvh; top: 0; left: 0; transform: none; border-radius: 0; }
+}
+@media (pointer: coarse) {
+  :root { --tool-h: 44px; }
+}
+
+/* Fixes after visual review */
+html[data-theme] :is(.site-app, .quote-dialog) .quote-consent__label input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  min-height: 20px;
+  margin: 2px 0 0;
+  padding: 0;
+  border-radius: 4px;
+}
+.quote-consent__label > span { flex: 1 1 auto; min-width: 0; }
+.quote-actions { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.site-app .quote-actions .button, .quote-dialog .quote-actions .button { white-space: nowrap; }
+@media (max-width: 600px) {
+  .rosic-values { gap: 2px !important; }
+  .rosic-word { font-size: min(10px, 2.3vw) !important; letter-spacing: -0.02em; }
+}
+html[data-theme] :is(.site-app, .quote-dialog) .quote-field .quote-consent__label > span { color: var(--ink); }
+html[data-theme] :is(.site-app, .quote-dialog) .quote-field .quote-consent__label > span > span { color: #a23b2d; }
+:root[data-theme="dark"] :is(.site-app, .quote-dialog) .quote-field .quote-consent__label > span > span { color: #f29b8a; }
+.gcard__cta { white-space: nowrap; }
+@media (max-width: 760px) {
+  .group-strip .gcard { flex: 0 0 132px; }
+  .site-app .footer-tools { width: 100%; grid-template-columns: 1fr 1fr; }
+  .site-app .footer-tools.has-top { grid-template-columns: 1fr 1fr var(--tool-h); }
+}

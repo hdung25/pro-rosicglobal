@@ -1,11 +1,10 @@
-import { createElement, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Component, createElement, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion as Motion,
   MotionConfig,
   useReducedMotion,
   useScroll,
-  useTransform,
 } from "motion/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -55,6 +54,7 @@ import "./customer-refinements.css";
 import "./vr5.css";
 import "./mobile-polish.css";
 import "./catalog-v6.css";
+import "./release-v7.css";
 import { mergeText } from "./cms/content-overrides";
 import SocialChannels from "./components/SocialChannels";
 import InstallApp from "./components/InstallApp";
@@ -67,6 +67,10 @@ import { GroupIcon, GroupPage, GroupsSection, NotFound, ProductFinder, ProductPa
 const AdminPanel = lazy(() => import("./components/AdminPanel"));
 const CatalogDemo = lazy(() => import("./components/CatalogDemo"));
 const Contact = lazy(() => import("./components/Contact"));
+const QuoteDialog = lazy(() => import("./components/Contact").then((module) => ({ default: module.QuoteDialog })));
+
+// Bundled photos dominated by blue sky; replaced by on-brand defaults.
+const LEGACY_SKY_IMAGES = new Set(["/images/vietnam-hero-w960-hong-tam-rosic.webp", "/images/hero.webp"]);
 const Feedback = lazy(() => import("./components/Feedback"));
 
 // Four links either side of the centred logo keep the header balanced.
@@ -201,63 +205,60 @@ function Brand({ footer = false, copy, home = true }) {
   );
 }
 
-/** Labelled light/dark switch: two clear options instead of an unlabeled icon. */
-function ThemeSwitch({ theme, onThemeChange, labels, className = "" }) {
-  return (
-    <div className={`theme-switch ${className}`.trim()} role="group" aria-label={labels.label}>
-      <button type="button" aria-pressed={theme !== "dark"} onClick={() => onThemeChange("light")}>
-        <Sun size={14} aria-hidden="true" /><span>{labels.light}</span>
-      </button>
-      <button type="button" aria-pressed={theme === "dark"} onClick={() => onThemeChange("dark")}>
-        <Moon size={14} aria-hidden="true" /><span>{labels.dark}</span>
-      </button>
-    </div>
-  );
-}
-
 /**
- * Back-to-top sits in the bottom corner and steps aside whenever a call to
- * action, the quotation form or the footer is on screen, so it never covers
- * an arrow or a button (customer item 3).
+ * Display tools shared by the top bar, the mobile menu and the footer: the
+ * light/dark toggle and the language picker are two equal cells with the same
+ * height and radius; "back to top" joins the group once the page is scrolled.
  */
-function BackToTop({ label, path }) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    let frame = 0;
-    // The button occupies the bottom ~90px of the viewport; hide it while any
-    // CTA area overlaps that band.
-    const measure = () => {
-      frame = 0;
-      const band = window.innerHeight - 96;
-      const blocked = [...document.querySelectorAll(".contact-form, .site-footer, .private-label__cta, .finder-more, .quote-actions")]
-        .some((node) => {
-          const rect = node.getBoundingClientRect();
-          return rect.top < window.innerHeight && rect.bottom > band;
-        });
-      setVisible(window.scrollY > 700 && !blocked);
-    };
-    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    measure();
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-    };
-  }, [path]);
+function ThemeToggleCell({ theme, onThemeChange, labels }) {
+  const dark = theme === "dark";
+  const action = dark ? labels.switchToLight ?? labels.light : labels.switchToDark ?? labels.dark;
   return (
     <button
       type="button"
-      className={`back-to-top${visible ? " is-visible" : ""}`}
-      aria-label={label}
-      title={label}
-      tabIndex={visible ? 0 : -1}
-      aria-hidden={!visible}
-      onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })}
+      className="tool-cell theme-cell"
+      aria-pressed={dark}
+      aria-label={action}
+      title={action}
+      onClick={() => onThemeChange(dark ? "light" : "dark")}
     >
-      <ArrowUp size={19} aria-hidden="true" />
+      {dark ? <Moon size={15} aria-hidden="true" /> : <Sun size={15} aria-hidden="true" />}
+      <span>{dark ? labels.dark : labels.light}</span>
     </button>
+  );
+}
+
+function useScrolledPast(offset = 480) {
+  const [past, setPast] = useState(false);
+  useEffect(() => {
+    let frame = 0;
+    const measure = () => { frame = 0; setPast(window.scrollY > offset); };
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
+    window.addEventListener("scroll", schedule, { passive: true });
+    measure();
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener("scroll", schedule); };
+  }, [offset]);
+  return past;
+}
+
+function scrollToTop() {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top: 0, behavior: reduce ? "instant" : "smooth" });
+}
+
+function TopTools({ theme, onThemeChange, language, onLanguage, copy, catalogCopy, className = "", alwaysShowTop = false }) {
+  const scrolled = useScrolledPast();
+  const showTop = alwaysShowTop || scrolled;
+  return (
+    <div className={`top-tools${showTop ? " has-top" : ""} ${className}`.trim()}>
+      <ThemeToggleCell theme={theme} onThemeChange={onThemeChange} labels={{ ...copy.theme, ...catalogCopy.theme }} />
+      <LanguagePicker compact className="tool-cell language-cell" language={language} onChange={onLanguage} label={copy.language} />
+      {showTop && (
+        <button type="button" className="tool-cell top-cell" onClick={scrollToTop} aria-label={catalogCopy.backTop} title={catalogCopy.backTop}>
+          <ArrowUp size={16} aria-hidden="true" />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -314,6 +315,29 @@ function MaintenancePage() {
     </MotionConfig>
   );
 }
+/**
+ * Last line of defence: if a page still fails (for example because a browser
+ * extension rewrote the DOM), show a short message with a reload button
+ * instead of a blank screen. Keyed by route so the next page starts clean.
+ */
+class PageBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <section className="v6-notfound container section-pad" role="alert">
+        <h1>{this.props.message}</h1>
+        <button type="button" className="button button-primary" onClick={() => window.location.reload()}>{this.props.action}</button>
+      </section>
+    );
+  }
+}
 function Reveal({ children, className = "", delay = 0 }) {
   const reduce = useReducedMotion();
   return (
@@ -331,12 +355,12 @@ function Reveal({ children, className = "", delay = 0 }) {
 function Header({ language, onLanguage, theme, onThemeChange, copy, catalogCopy, groups, onHome }) {
   const [open, setOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
+  const [mobileProducts, setMobileProducts] = useState(false);
   const dropdownRef = useRef(null);
   const triggerRef = useRef(null);
   const href = (hash) => (onHome ? hash : `/${hash}`);
   // The product menu opens on click and stays open until the visitor picks an
-  // item, clicks elsewhere or presses Escape (customer item 8). It no longer
-  // closes on hover-out or scroll.
+  // item, clicks elsewhere or presses Escape. It never closes on hover-out.
   useEffect(() => {
     if (!productsOpen) return undefined;
     const outside = (event) => { if (!dropdownRef.current?.contains(event.target)) setProductsOpen(false); };
@@ -376,19 +400,13 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, catalogCopy,
       {navLabel(copy, item)}
     </a>
   );
+  const tools = { theme, onThemeChange, language, onLanguage, copy, catalogCopy };
   return (
-    <>
+    <div className="site-top">
       <div className="topbar">
         <div className="topbar-inner container">
-          <ThemeSwitch className="topbar-theme" theme={theme} onThemeChange={onThemeChange} labels={catalogCopy.theme} />
           <span className="topbar-message">{copy.brand.topbar}</span>
-          <LanguagePicker
-            compact
-            className="topbar-language header-language"
-            language={language}
-            onChange={onLanguage}
-            label={copy.language}
-          />
+          <TopTools {...tools} className="topbar-tools" />
         </div>
       </div>
       <header className="site-header">
@@ -418,14 +436,11 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, catalogCopy,
                   <div className="mega-menu__grid">
                     {groups.map((group) => (
                       <a key={group.id} href={groupPath(group.id)} onClick={() => setProductsOpen(false)}>
-                        <span className="mega-menu__icon"><GroupIcon group={group} size={20} /></span>
+                        <span className="mega-menu__icon"><GroupIcon group={group} size={22} /></span>
                         <span className="mega-menu__text"><strong>{group.title}</strong><small>{catalogCopy.groups.count(group.count)}</small></span>
                       </a>
                     ))}
                   </div>
-                  <a className="mega-menu__all" href="/san-pham" onClick={() => setProductsOpen(false)}>
-                    {catalogCopy.nav.allProducts}<ArrowRight size={16} aria-hidden="true" />
-                  </a>
                 </div>
               </div>
             ) : link(item))}
@@ -434,7 +449,7 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, catalogCopy,
           <nav className="nav-right" aria-label={copy.productNavigation}>
             {NAV.slice(4).map(link)}
           </nav>
-          <Dialog.Root open={open} onOpenChange={setOpen}>
+          <Dialog.Root open={open} onOpenChange={(value) => { setOpen(value); if (!value) setMobileProducts(false); }}>
             <Dialog.Trigger asChild>
               <button className="menu-toggle icon-button" aria-label={copy.openMenu}>
                 <Menu size={24} />
@@ -455,175 +470,93 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, catalogCopy,
                     </button>
                   </Dialog.Close>
                 </div>
-                <nav>
-                  {NAV.map((item, index) => (
-                    <a
-                      key={item.key}
-                      href={href(item.href)}
-                      style={{ "--menu-index": index }}
-                      onClick={() => setOpen(false)}
-                    >
+                {/* Two levels only: the same eight links as the desktop header;
+                    "Products" opens the group list, a group opens its page. */}
+                <nav className="mobile-nav">
+                  {NAV.map((item, index) => item.key === "products" ? (
+                    <div key={item.key} className={`mobile-nav__group${mobileProducts ? " is-open" : ""}`}>
+                      <button type="button" className="mobile-nav__item" aria-expanded={mobileProducts} aria-controls="mobile-product-groups" style={{ "--menu-index": index }} onClick={() => setMobileProducts((value) => !value)}>
+                        <span>0{index + 1}</span>
+                        {navLabel(copy, item)}
+                        <ChevronDown aria-hidden="true" />
+                      </button>
+                      <div id="mobile-product-groups" className="mobile-nav__sub" hidden={!mobileProducts}>
+                        {groups.map((group) => (
+                          <a key={group.id} href={groupPath(group.id)} onClick={() => setOpen(false)}>
+                            <GroupIcon group={group} size={20} />
+                            <span>{group.title}</span>
+                            <ArrowUpRight size={16} aria-hidden="true" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <a key={item.key} className="mobile-nav__item" href={href(item.href)} style={{ "--menu-index": index }} onClick={() => setOpen(false)}>
                       <span>0{index + 1}</span>
                       {navLabel(copy, item)}
-                      <ArrowUpRight />
+                      <ArrowUpRight aria-hidden="true" />
                     </a>
                   ))}
                 </nav>
-                <p className="mobile-category-title">{catalogCopy.nav.productsMenu}</p>
-                <div className="mobile-category-menu">
-                  {groups.map((group) => (
-                    <a key={group.id} href={groupPath(group.id)} onClick={() => setOpen(false)}>
-                      <GroupIcon group={group} size={18} />
-                      <span>{group.title}</span>
-                    </a>
-                  ))}
-                </div>
-                <div className="mobile-menu-tools">
-                  <ThemeSwitch theme={theme} onThemeChange={onThemeChange} labels={catalogCopy.theme} />
-                  <LanguagePicker
-                    compact
-                    className="mobile-language"
-                    language={language}
-                    onChange={onLanguage}
-                    label={copy.language}
-                  />
-                </div>
+                <TopTools {...tools} className="mobile-menu-tools" />
               </Dialog.Content>
             </Dialog.Portal>
           </Dialog.Root>
         </div>
       </header>
-    </>
+    </div>
   );
 }
+// The background photo is static and preloaded: no parallax drift and no
+// entrance animation, so it is in place from the first frame (item 13).
 function Hero({ copy, story, image = "/images/rosic-terraces.webp" }) {
-  const ref = useRef(null);
-  const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "16%"]);
   return (
-    <section id="home" className="hero-section" ref={ref}>
+    <section id="home" className="hero-section">
       <div className="hero-copy container">
-        <Motion.p
-          className="eyebrow"
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7 }}
-        >
-          {copy.hero.eyebrow}
-        </Motion.p>
+        <p className="eyebrow">{copy.hero.eyebrow}</p>
         <h1>
-          <span className="title-line">
-            <Motion.span
-              initial={reduce ? false : { y: "105%" }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {story.title[0]}
-            </Motion.span>
-          </span>
-          <span className="title-line title-accent">
-            <Motion.span
-              initial={reduce ? false : { y: "105%" }}
-              animate={{ y: 0 }}
-              transition={{
-                duration: 0.95,
-                delay: 0.12,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-            >
-              {story.title[1]}
-            </Motion.span>
-          </span>
+          <span className="title-line">{story.title[0]}</span>
+          <span className="title-line title-accent">{story.title[1]}</span>
         </h1>
-        <Motion.div
-          initial={reduce ? false : { opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.35 }}
-        >
+        <div>
           <p className="hero-description">
             {copy.hero.first}
-            <br />
-            {copy.hero.second}
+            {copy.hero.second && <><br />{copy.hero.second}</>}
           </p>
           <a className="button hero-about-button" href="#about">
             {copy.hero.aboutCta || copy.nav.about} <ArrowUpRight size={18} />
           </a>
-        </Motion.div>
+        </div>
       </div>
       <div className="hero-landscape">
-        <Motion.img
+        <img
           src={image}
           srcSet={image === "/images/rosic-terraces.webp" ? "/images/rosic-terraces-mobile.webp 960w, /images/rosic-terraces.webp 1920w" : undefined}
           sizes="100vw"
           alt={copy.hero.origin}
           fetchPriority="high"
-          width="2560"
-          height="1440"
-          style={reduce ? undefined : { y }}
+          decoding="sync"
+          width="1920"
+          height="1080"
         />
-        <div className="landscape-caption">
-          <span>{copy.hero.origin}</span>
-          <span>{copy.hero.caption}</span>
-          <Leaf size={22} strokeWidth={1.3} />
-        </div>
-      </div>
-    </section>
-  );
-}
-function Marquee({ copy, categories }) {
-  const [paused, setPaused] = useState(false);
-  const words = categories?.length ? categories : copy.marquee.map((title, index) => ({ id: ["processed", "fruit", "vegetables", "nuts"][index], title }));
-  return (
-    <section
-      className={`marquee-section ${paused ? "is-paused" : ""}`}
-      aria-label={copy.marqueeLabel}
-      aria-description={copy.marqueeHelp}
-      tabIndex={0}
-      onClick={() => setPaused((value) => !value)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          setPaused((value) => !value);
-        }
-      }}
-    >
-      <div className="marquee-track">
-        {[0, 1].map((copy) => (
-          <div
-            className="marquee-group"
-            key={copy}
-            aria-hidden={copy === 1 ? true : undefined}
-          >
-            {words.map((category) => (
-              <span key={category.id || category.title}>
-                {category.shortTitle ?? category.title}
-                <GroupIcon group={category} className="marquee-flower" />
-              </span>
-            ))}
-          </div>
-        ))}
       </div>
     </section>
   );
 }
 function RosicValues({ story, language, values = ROSIC_VALUES }) {
-  const reduce = useReducedMotion();
-  const icons = { ShieldCheck, Leaf, BadgeCheck, HeartHandshake, Users };
+  const icons = { ShieldCheck, Leaf, BadgeCheck, HeartHandshake, Users, Globe2 };
   return (
     <section className="rosic-section" aria-label="ROSIC">
       <div className="container rosic-layout">
         <p className="rosic-slogan">{story.title[0]}<br /><em>{story.title[1]}</em></p>
         <ul className="rosic-values" dir="ltr">
-          {values.map(({ letter, word, icon, explanation, explanationEn }, index) => (
-            <Motion.li key={letter} initial={reduce ? false : { opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.07 }}>
+          {values.map(({ letter, word, icon, explanation, explanationEn }) => (
+            <li key={letter}>
               <span className="rosic-letter">{letter}</span>
-              {createElement(icons[icon], { size: 23, strokeWidth: 1.2, 'aria-hidden': true })}
-              <span className="rosic-word">{word}</span><span className="rosic-explanation">{language === "vi" ? explanation : explanationEn}</span>
-            </Motion.li>
+              {createElement(icons[icon] ?? Globe2, { size: 23, strokeWidth: 1.2, "aria-hidden": true })}
+              <span className="rosic-word">{word}</span>
+              <span className="rosic-explanation">{language === "vi" ? explanation : explanationEn}</span>
+            </li>
           ))}
         </ul>
       </div>
@@ -652,7 +585,7 @@ function About({ copy, story, image = "/images/vietnam-produce-w960-hong-tam-ros
                 </article>
               ))}
             </div>
-            <a className="text-link" href="#journey">{copy.about.link} <ArrowUpRight size={18} /></a>
+            <a className="button button-outline about-journey-button" href="#journey">{copy.about.link} <ArrowUpRight size={18} /></a>
           </Reveal>
         </div>
       </div>
@@ -773,7 +706,7 @@ function Partners({ copy, language, textOverrides }) {
             <span>{copy.partners.title[1]}</span>
           </h2>
           <p>{copy.partners.lead}</p>
-          <a href="#contact" className="text-link">
+          <a href="#contact" className="button button-outline">
             {copy.partners.link} <ArrowUpRight size={18} />
           </a>
         </Reveal>
@@ -838,18 +771,18 @@ function Journal({ onArticle, copy, language, images, text }) {
     </section>
   );
 }
-function Footer({ onPolicy, language, onLanguage, copy, socialLinks, socialQr, groups, onHome }) {
+const BRAND_SLOGAN = "Manufacturing with Heart, Trading with Vision";
+
+function Footer({ onPolicy, language, onLanguage, theme, onThemeChange, copy, catalogCopy, socialLinks, socialQr, groups, onHome }) {
   const href = (hash) => (onHome ? hash : `/${hash}`);
   return (
     <footer className="site-footer">
       <div className="container footer-main">
-        <div>
+        <div className="footer-brand">
           <Brand footer copy={copy} language={language} home={onHome} />
-          <p className="footer-tagline">
-            {copy.footer.tagline[0]}
-            <br />
-            {copy.footer.tagline[1]}
-          </p>
+          {/* The official slogan, identical to the logo lock-up. */}
+          <p className="footer-tagline">{BRAND_SLOGAN}</p>
+          <SocialChannels links={socialLinks} qr={socialQr} language={language} className="footer-social" />
         </div>
         <div className="footer-column">
           <h3>{copy.footer.explore}</h3>
@@ -867,28 +800,17 @@ function Footer({ onPolicy, language, onLanguage, copy, socialLinks, socialQr, g
         </div>
         <div className="footer-invitation">
           <span>{copy.footer.invitation}</span>
-          <a href={href("#contact")}>
+          <a className="footer-cta" href={href("#contact")}>
             {copy.footer.greeting} <ArrowUpRight />
           </a>
-          <p>{copy.brand.topbar}</p>
-          <SocialChannels compact links={socialLinks} qr={socialQr} language={language} />
+          <TopTools theme={theme} onThemeChange={onThemeChange} language={language} onLanguage={onLanguage} copy={copy} catalogCopy={catalogCopy} className="footer-tools" alwaysShowTop />
           <InstallApp language={language} />
-          <LanguagePicker
-            compact
-            className="footer-language"
-            language={language}
-            onChange={onLanguage}
-            label={copy.language}
-          />
         </div>
       </div>
       <div className="container footer-bottom">
         <span className="footer-copyright">Copyright © HONG TAM ROSIC GLOBAL JSC. All rights reserved.</span>
         <div className="footer-bottom-actions">
           <button onClick={onPolicy}>{copy.footer.privacy}</button>
-          <a href={onHome ? "#home" : "/"}>
-            {copy.footer.backTop} <ArrowUp size={14} />
-          </a>
         </div>
       </div>
     </footer>
@@ -981,7 +903,6 @@ function SiteApp({ cms, preview = false }) {
   useLinkInterception();
   useScrollRestoration();
   const [selected, setSelected] = useState(null);
-  const [prefill, setPrefill] = useState({ key: "", nonce: 0 });
   const baseCopy = siteCopyFor(language);
   const catalogCopy = catalogCopyFor(language);
   let copy = language === "vi" && cms?.content ? {
@@ -1073,54 +994,58 @@ function SiteApp({ cms, preview = false }) {
   }, [route.kind, route.hash]);
 
   const { scrollYProgress } = useScroll();
-  const quote = (key) => setPrefill((previous) => ({ key, nonce: previous.nonce + 1 }));
-  const contact = (key, compact = false) => (
-    <Suspense fallback={<section className="deferred-contact" aria-busy="true" />}>
-      <Contact
-        sectionId={onHome ? null : "contact"}
-        prefillKey={prefill.key || key}
-        prefillNonce={prefill.nonce}
-        products={products}
-        groups={groups}
-        language={language}
-        socialLinks={socialLinks}
-        socialQr={socialQr}
-        textOverrides={cms?.textOverrides?.[language]}
-        compact={compact}
-      />
-    </Suspense>
-  );
+  // "Request a quotation" opens the form in a dialog on the current page.
+  const [quoteState, setQuoteState] = useState({ open: false, key: "", nonce: 0 });
+  const quote = (key) => setQuoteState((previous) => ({ open: true, key, nonce: previous.nonce + 1 }));
+  const openPolicy = () => setSelected({ type: "policy" });
+  // Navigation lists only show groups that already have products (item 25);
+  // the page itself stays reachable by direct link.
+  const listedGroups = groups.filter((group) => group.count > 0);
+  const formProps = {
+    products,
+    groups: listedGroups,
+    language,
+    socialLinks,
+    textOverrides: cms?.textOverrides?.[language],
+    onPolicy: openPolicy,
+  };
+  // Earlier bundled photos with a strong blue sky are replaced by on-brand
+  // defaults unless the team uploaded something else (item 22).
+  const brandImage = (src) => (LEGACY_SKY_IMAGES.has(src) ? "/images/rosic-terraces-mobile.webp" : src);
+  const articleImages = (cms?.content?.articleImages ?? ARTICLES.map((item) => item.image)).map(brandImage);
+  const journeyImages = (cms?.content?.journeyImages ?? JOURNEY.map((item) => item.image)).map(brandImage);
 
   let page;
   if (onHome) {
     page = (
       <>
         <Hero copy={copy} story={story} image={cms?.content?.heroImage === "/images/hero.webp" ? undefined : cms?.content?.heroImage} />
-        <Marquee copy={copy} categories={groups} />
         <RosicValues story={story} language={language} values={mergeText(ROSIC_VALUES, cms?.textOverrides?.[language]?.values)} />
         <About copy={copy} story={story} image={cms?.content?.aboutImage === "/images/produce.webp" ? undefined : cms?.content?.aboutImage} />
         <DeferredContent>
-          <GroupsSection groups={groups} products={products} copy={catalogCopy} />
-          <ProductFinder groups={groups} products={products} copy={catalogCopy} />
+          <GroupsSection groups={listedGroups} copy={catalogCopy} />
+          <ProductFinder groups={listedGroups} products={products} copy={catalogCopy} heading={copy.catalog} />
           <PrivateLabel copy={catalogCopy} />
-          <Journey copy={copy} language={language} text={cms?.textOverrides?.[language]?.journey} images={cms?.content?.journeyImages} />
+          <Journey copy={copy} language={language} text={cms?.textOverrides?.[language]?.journey} images={journeyImages} />
           <Partners copy={copy} language={language} textOverrides={cms?.textOverrides?.[language]?.feedback} />
           <Journal
             text={cms?.textOverrides?.[language]?.articles}
             copy={copy}
             language={language}
-            images={cms?.content?.articleImages}
+            images={articleImages}
             onArticle={(data) => setSelected({ type: "article", data })}
           />
-          {contact("")}
+          <Suspense fallback={<section className="deferred-contact" aria-busy="true" />}>
+            <Contact sectionId={null} socialQr={socialQr} {...formProps} />
+          </Suspense>
         </DeferredContent>
       </>
     );
   } else if (route.kind === "group" && activeGroup) {
-    page = <GroupPage key={activeGroup.id} group={activeGroup} groups={groups} products={products} copy={catalogCopy} language={language} onQuote={quote} contact={contact(`group:${activeGroup.id}`, true)} />;
+    page = <GroupPage key={activeGroup.id} group={activeGroup} groups={listedGroups} products={products} copy={catalogCopy} language={language} onQuote={quote} />;
   } else if (product) {
     const related = products.filter((item) => item.category === product.category && item.id !== product.id);
-    page = <ProductPage key={product.id} product={product} group={activeGroup} related={related} copy={catalogCopy} language={language} onQuote={quote} socialLinks={socialLinks} contact={contact(product.id, true)} />;
+    page = <ProductPage key={product.id} product={product} group={activeGroup} related={related} copy={catalogCopy} language={language} onQuote={quote} socialLinks={socialLinks} />;
   } else {
     page = <NotFound copy={catalogCopy} title={route.kind === "product" ? catalogCopy.product.notFound : catalogCopy.group.notFound} />;
   }
@@ -1144,23 +1069,39 @@ function SiteApp({ cms, preview = false }) {
           onThemeChange={setTheme}
           copy={copy}
           catalogCopy={catalogCopy}
-          groups={groups}
+          groups={listedGroups}
           onHome={onHome}
         />
         <main id="main" key={route.path}>
-          {page}
+          <PageBoundary message={language === "vi" ? "Trang chưa hiển thị được." : "This page could not be displayed."} action={language === "vi" ? "Tải lại trang" : "Reload page"}>
+            {page}
+          </PageBoundary>
         </main>
         <Footer
-          groups={groups}
+          groups={listedGroups}
           onHome={onHome}
-          onPolicy={() => setSelected({ type: "policy" })}
+          onPolicy={openPolicy}
           language={language}
           onLanguage={setLanguage}
+          theme={theme}
+          onThemeChange={setTheme}
           copy={copy}
+          catalogCopy={catalogCopy}
           socialLinks={socialLinks}
           socialQr={socialQr}
         />
-        <BackToTop label={catalogCopy.backTop} path={route.path} />
+        {quoteState.nonce > 0 && (
+          <Suspense fallback={null}>
+            <QuoteDialog
+              open={quoteState.open}
+              onOpenChange={(open) => setQuoteState((previous) => ({ ...previous, open }))}
+              prefillKey={quoteState.key}
+              prefillNonce={quoteState.nonce}
+              subtitle={product ? `${product.code} · ${product.title}` : activeGroup?.title}
+              {...formProps}
+            />
+          </Suspense>
+        )}
         <DetailDialog
           selected={selected}
           onClose={() => setSelected(null)}

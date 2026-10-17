@@ -2,6 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { installTranslateGuard } from './translate-guard'
+
+// Keep pages working when the visitor's browser translates them.
+installTranslateGuard()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -1,5 +1,4 @@
 import { createElement, useEffect, useMemo, useRef, useState } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowRight, ArrowUpRight, ChevronRight, FileCheck2, PackageSearch, Search, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { CATEGORY_ICONS, categoryIconKey } from "../category-icons";
@@ -52,83 +51,33 @@ function SectionHead({ eyebrow, title, lead, id }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Home: product groups with Quick View                                */
+/* Home: product groups                                                */
 /* ------------------------------------------------------------------ */
 
-export function GroupsSection({ groups, products, copy }) {
-  const [quickGroup, setQuickGroup] = useState(null);
-  const trigger = useRef(null);
+/**
+ * Home: the single strip of group pictures (items 19–21, 30). Each card shows
+ * only the group's representative image, its name and "View specifications";
+ * the whole card opens the group page. On phones the strip swipes sideways
+ * without a grey scrollbar.
+ */
+export function GroupsSection({ groups, copy }) {
   return (
     <section className="v6-groups section-pad" aria-labelledby="v6-groups-title">
       <div className="container">
         <SectionHead eyebrow={copy.groups.eyebrow} title={copy.groups.title} lead={copy.groups.lead} id="v6-groups-title" />
-        <div className="group-grid">
-          {groups.map((group, index) => (
-            <article className="gcard" key={group.id}>
-              <a className="gcard__media" href={groupPath(group.id)} tabIndex={-1} aria-hidden="true">
-                <ProductMedia src={group.image} alt={group.alt} watermarked={group.imageAsset?.watermarked} sizes="(max-width: 600px) 90vw, 420px" />
-                <span className="gcard__number">{String(index + 1).padStart(2, "0")}</span>
+        <ul className="group-strip">
+          {groups.map((group) => (
+            <li key={group.id} className="gcard">
+              <a className="gcard__link" href={groupPath(group.id)}>
+                <ProductMedia src={group.image} alt={group.alt} watermarked={group.imageAsset?.watermarked} className="gcard__media" sizes="(max-width: 600px) 40vw, 180px" />
+                <span className="gcard__name">{group.title}</span>
+                <span className="gcard__cta">{copy.groups.viewSpec}<ArrowRight size={15} aria-hidden="true" /></span>
               </a>
-              <div className="gcard__body">
-                <span className="gcard__count"><GroupIcon group={group} size={16} />{copy.groups.count(group.count)}</span>
-                <h3><a href={groupPath(group.id)}>{group.title}</a></h3>
-                <p dir="auto">{group.description}</p>
-                <div className="gcard__actions">
-                  <button type="button" className="button button-outline" onClick={(event) => { trigger.current = event.currentTarget; setQuickGroup(group); }} aria-haspopup="dialog">
-                    {copy.groups.quickView}
-                  </button>
-                  <a className="button button-primary" href={groupPath(group.id)}>{copy.groups.openGroup}<ArrowRight size={17} aria-hidden="true" /></a>
-                </div>
-              </div>
-            </article>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-      <QuickView
-        group={quickGroup}
-        products={products.filter((product) => product.category === quickGroup?.id)}
-        copy={copy}
-        onClose={() => setQuickGroup(null)}
-        returnFocus={trigger}
-      />
     </section>
-  );
-}
-
-/**
- * Quick View lists every sub-product of the group (customer item 11). Closing
- * returns focus to the button without scrolling, so the page stays exactly
- * where it was (item 12).
- */
-export function QuickView({ group, products, copy, onClose, returnFocus }) {
-  return (
-    <Dialog.Root open={Boolean(group)} onOpenChange={(open) => !open && onClose()}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="dialog-overlay quick-overlay" />
-        {group && (
-          <Dialog.Content
-            className="quick-view"
-            onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus?.current?.focus({ preventScroll: true }); }}
-          >
-            <header className="quick-view__head">
-              <ProductMedia src={group.image} alt="" watermarked={group.imageAsset?.watermarked} className="quick-view__thumb" sizes="96px" eager />
-              <div>
-                <p className="eyebrow">{copy.groups.count(products.length)}</p>
-                <Dialog.Title>{copy.quick.title(group.title)}</Dialog.Title>
-                <Dialog.Description>{group.description}</Dialog.Description>
-              </div>
-              <a className="button button-primary quick-view__open" href={groupPath(group.id)} onClick={onClose}>{copy.quick.openGroup}<ArrowRight size={17} aria-hidden="true" /></a>
-              <Dialog.Close className="dialog-close icon-button" aria-label={copy.quick.close}><X /></Dialog.Close>
-            </header>
-            <div className="quick-view__body">
-              {products.length
-                ? <div className="product-grid-v6 product-grid-v6--quick">{products.map((product) => <ProductCard key={product.id} product={product} copy={copy} onOpen={onClose} />)}</div>
-                : <p className="v6-empty"><PackageSearch size={22} aria-hidden="true" />{copy.quick.empty}</p>}
-            </div>
-          </Dialog.Content>
-        )}
-      </Dialog.Portal>
-    </Dialog.Root>
   );
 }
 
@@ -136,7 +85,7 @@ export function QuickView({ group, products, copy, onClose, returnFocus }) {
 /* Home: product finder (chips = header menu, submitted search)         */
 /* ------------------------------------------------------------------ */
 
-export function ProductFinder({ groups, products, copy }) {
+export function ProductFinder({ groups, products, copy, heading }) {
   const [group, setGroup] = useState("all");
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
@@ -160,7 +109,7 @@ export function ProductFinder({ groups, products, copy }) {
   return (
     <section className="v6-finder section-pad" aria-labelledby="v6-finder-title">
       <div className="container">
-        <SectionHead eyebrow={copy.finder.eyebrow} title={copy.finder.title} lead={copy.finder.lead} id="v6-finder-title" />
+        <SectionHead eyebrow={heading?.eyebrow ?? copy.finder.eyebrow} title={heading?.title ?? copy.finder.title} lead={heading?.body ?? copy.finder.lead} id="v6-finder-title" />
         <form
           className="finder-search"
           role="search"
@@ -275,7 +224,7 @@ export function NotFound({ copy, title }) {
   );
 }
 
-export function GroupPage({ group, groups, products, copy, language, onQuote, contact }) {
+export function GroupPage({ group, groups, products, copy, language, onQuote }) {
   const items = products.filter((product) => product.category === group.id);
   const number = String(groups.findIndex((item) => item.id === group.id) + 1).padStart(2, "0");
   return (
@@ -290,7 +239,7 @@ export function GroupPage({ group, groups, products, copy, language, onQuote, co
           <h1 id="group-title">{group.title}</h1>
           <p>{group.description}</p>
           <div className="group-hero__actions">
-            <a className="button button-primary" href="#contact" onClick={() => onQuote(`group:${group.id}`)}>{copy.group.quote}<ArrowUpRight size={17} aria-hidden="true" /></a>
+            <button type="button" className="button button-primary" onClick={() => onQuote(`group:${group.id}`)}>{copy.group.quote}<ArrowUpRight size={17} aria-hidden="true" /></button>
             {items.length > 0 && <a className="button button-outline group-hero__count" href="#group-products">{copy.groups.count(items.length)}</a>}
           </div>
         </div>
@@ -304,13 +253,12 @@ export function GroupPage({ group, groups, products, copy, language, onQuote, co
             <PackageSearch size={30} aria-hidden="true" />
             <h3>{copy.group.emptyTitle}</h3>
             <p>{copy.group.emptyBody}</p>
-            <a className="button button-primary" href="#contact" onClick={() => onQuote(`group:${group.id}`)}>{copy.group.quote}<ArrowUpRight size={17} aria-hidden="true" /></a>
+            <button type="button" className="button button-primary" onClick={() => onQuote(`group:${group.id}`)}>{copy.group.quote}<ArrowUpRight size={17} aria-hidden="true" /></button>
           </div>
         )}
         <p className="spec-notice"><FileCheck2 size={17} aria-hidden="true" />{SPEC_NOTICE[language] ?? SPEC_NOTICE.en}</p>
       </section>
       <OtherGroups groups={groups} current={group.id} copy={copy} />
-      {contact}
     </>
   );
 }
@@ -344,8 +292,8 @@ function StickyQuote({ product, copy, ctaRef, onQuote }) {
       frame = 0;
       const cta = ctaRef.current;
       if (!cta) return;
-      // The form is lazy-loaded, so it is looked up on every measurement.
-      const form = document.querySelector("#contact .contact-form");
+      // The bar steps aside when the footer arrives so it never covers it.
+      const form = document.querySelector(".site-footer");
       const ctaPassed = cta.getBoundingClientRect().bottom < 0;
       const formOnScreen = form ? form.getBoundingClientRect().top < window.innerHeight - 40 : false;
       setVisible(ctaPassed && !formOnScreen);
@@ -369,13 +317,13 @@ function StickyQuote({ product, copy, ctaRef, onQuote }) {
       <div className="container quote-bar__inner">
         <ProductMedia src={product.image} alt="" watermarked className="quote-bar__thumb" sizes="56px" />
         <span className="quote-bar__text"><strong dir="auto">{product.title}</strong><small>{product.code}</small></span>
-        <a className="button button-primary" href="#contact" tabIndex={visible ? 0 : -1} onClick={() => onQuote(product.id)}>{copy.form.sticky}<ArrowUpRight size={17} aria-hidden="true" /></a>
+        <button type="button" className="button button-primary" tabIndex={visible ? 0 : -1} onClick={() => onQuote(product.id)}>{copy.form.sticky}<ArrowUpRight size={17} aria-hidden="true" /></button>
       </div>
     </div>
   );
 }
 
-export function ProductPage({ product, group, related, copy, language, onQuote, contact, socialLinks }) {
+export function ProductPage({ product, group, related, copy, language, onQuote, socialLinks }) {
   const ctaRef = useRef(null);
   const whatsapp = whatsappQuoteLink(safeSocialLink(socialLinks?.whatsapp) || "https://wa.me/84962284872", `${language === "vi" ? "Xin chào, tôi quan tâm sản phẩm" : "Hello, I am interested in"} ${product.code} · ${product.title}`);
   return (
@@ -392,7 +340,7 @@ export function ProductPage({ product, group, related, copy, language, onQuote, 
           <p className="product-detail__code">{copy.card.code}: <strong>{product.code}</strong></p>
           <p className="product-detail__lead" dir="auto">{product.description}</p>
           <div className="product-detail__actions" ref={ctaRef}>
-            <a className="button button-primary" href="#contact" onClick={() => onQuote(product.id)}>{copy.product.quote}<ArrowUpRight size={18} aria-hidden="true" /></a>
+            <button type="button" className="button button-primary" onClick={() => onQuote(product.id)}>{copy.product.quote}<ArrowUpRight size={18} aria-hidden="true" /></button>
             {whatsapp.href && <a className="button button-outline" href={whatsapp.href} target="_blank" rel="noopener noreferrer"><FaWhatsapp size={18} aria-hidden="true" />{copy.product.whatsapp}</a>}
           </div>
           <h2 className="v6-subtitle">{copy.product.specs}</h2>
@@ -412,7 +360,6 @@ export function ProductPage({ product, group, related, copy, language, onQuote, 
           <div className="product-grid-v6">{related.map((item) => <ProductCard key={item.id} product={item} copy={copy} />)}</div>
         </section>
       )}
-      {contact}
       <StickyQuote product={product} copy={copy} ctaRef={ctaRef} onQuote={onQuote} />
     </>
   );

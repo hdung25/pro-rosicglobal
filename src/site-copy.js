@@ -84,7 +84,7 @@ export const SITE_UI_COPY = {
   },
   en: {
     skip: "Skip to main content",
-    nav: { home: "Home", about: "About us", journey: "Our approach", products: "Products", partners: "Partners", journal: "Insights", contact: "Contact" },
+    nav: { home: "Home", about: "About us", journey: "Journey", products: "Products", partners: "Partners", journal: "News", contact: "Contact" },
     exportCatalog: "Export catalogue", language: "Choose language", openMenu: "Open menu", closeMenu: "Close menu", primaryNavigation: "Primary navigation", mobileMenuTitle: "Navigation", productNavigation: "Products and contact",
     brand: { topbar: "Manufacturing with Heart, Trading with Vision", mobileDescription: "Explore Hồng Tâm Rosic Global", logoAlt: "Hồng Tâm Rosic Global logo", homeLabel: "Hồng Tâm Rosic Global, home" },
     theme: { switchToDark: "Switch to dark mode", switchToLight: "Switch to light mode", light: "Light", dark: "Dark" },

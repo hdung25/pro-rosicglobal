@@ -21,7 +21,10 @@ function mark(width, cx = 256, cy = 256) {
   return `<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${scale.toFixed(4)})"><path d="${path}" fill="${GOLD}" fill-rule="evenodd"/></g>`;
 }
 
-const round = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>Hồng Tâm Rosic Global</title><circle cx="256" cy="256" r="256" fill="${FOREST}"/>${mark(400)}</svg>\n`;
+const roundWith = (width) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>Hồng Tâm Rosic Global</title><circle cx="256" cy="256" r="256" fill="${FOREST}"/>${mark(width)}</svg>\n`;
+const round = roundWith(400);
+// At 16–48 px the mark is drawn larger so its strokes stay crisp in a browser tab.
+const roundSmall = roundWith(452);
 // Square artwork for platforms that apply their own mask (iOS, Android maskable).
 const square = (markWidth) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="${FOREST}"/>${mark(markWidth)}</svg>\n`;
 
@@ -33,7 +36,9 @@ fs.writeFileSync("public/icons/rosic-app.svg", square(380));
 const png = (svg, size) => sharp(Buffer.from(svg), { density: 600 }).resize(size, size).png({ compressionLevel: 9 }).toBuffer();
 
 const outputs = [
-  ["public/favicon-48.png", round, 48],
+  ["public/favicon-32.png", roundSmall, 32],
+  ["public/favicon-48.png", roundSmall, 48],
+  ["public/favicon-180.png", round, 180],
   ["public/favicon-96.png", round, 96],
   ["public/favicon.png", round, 192],
   ["public/favicon-512.png", round, 512],
@@ -48,7 +53,7 @@ for (const [file, svg, size] of outputs) fs.writeFileSync(file, await png(svg, s
 
 // favicon.ico with 16, 32 and 48 px PNG entries (supported by all browsers).
 const sizes = [16, 32, 48];
-const images = await Promise.all(sizes.map((size) => png(round, size)));
+const images = await Promise.all(sizes.map((size) => png(roundSmall, size)));
 const header = Buffer.alloc(6);
 header.writeUInt16LE(0, 0);
 header.writeUInt16LE(1, 2);
