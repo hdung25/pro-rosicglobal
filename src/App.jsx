@@ -46,7 +46,7 @@ import {
   siteCopyFor,
 } from "./site-copy";
 
-import { ROSIC_VALUES, brandStoryFor } from "./brand-story";
+import { ROSIC_VALUES, brandStoryFor, rosicExplanation } from "./brand-story";
 import "./components/ThemeToggle.css";
 import "./brand-story.css";
 import "./vr4.css";
@@ -550,15 +550,24 @@ function RosicValues({ story, language, values = ROSIC_VALUES }) {
       <div className="container rosic-layout">
         <p className="rosic-slogan">{story.title[0]}<br /><em>{story.title[1]}</em></p>
         <ul className="rosic-values" dir="ltr">
-          {values.map(({ letter, word, icon, explanation, explanationEn }) => (
-            <li key={letter}>
-              <span className="rosic-letter">{letter}</span>
-              {createElement(icons[icon] ?? Globe2, { size: 23, strokeWidth: 1.2, "aria-hidden": true })}
-              <span className="rosic-word">{word}</span>
-              <span className="rosic-explanation">{language === "vi" ? explanation : explanationEn}</span>
+          {values.map((value) => (
+            <li key={value.letter}>
+              <span className="rosic-letter">{value.letter}</span>
+              {createElement(icons[value.icon] ?? Globe2, { size: 23, strokeWidth: 1.2, "aria-hidden": true })}
+              <span className="rosic-word">{value.word}</span>
+              <span className="rosic-explanation">{rosicExplanation(value, language)}</span>
             </li>
           ))}
         </ul>
+        {/* Phones: the letters stay on one line; descriptions follow as a list. */}
+        <dl className="rosic-legend">
+          {values.map((value) => (
+            <div key={value.letter}>
+              <dt><span dir="ltr">{value.letter} – {value.word}</span></dt>
+              <dd>{rosicExplanation(value, language)}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

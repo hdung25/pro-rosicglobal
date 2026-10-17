@@ -5,15 +5,16 @@ test("theme preference is accessible, persists, and uses the site token", async 
   await page.evaluate(() => window.localStorage.clear());
   await page.reload();
 
-  const control = page.locator(".topbar .theme-switch");
+  const control = page.locator(".topbar .theme-cell");
   const before = await page.locator("html").getAttribute("data-theme");
   expect(["light", "dark"]).toContain(before);
-  await expect(control.getByRole("button", { name: before === "dark" ? "Tối" : "Sáng" })).toHaveAttribute("aria-pressed", "true");
+  await expect(control).toHaveAttribute("aria-pressed", before === "dark" ? "true" : "false");
+  await expect(control).toContainText(before === "dark" ? "Tối" : "Sáng");
 
   const after = before === "dark" ? "light" : "dark";
-  await control.getByRole("button", { name: after === "dark" ? "Tối" : "Sáng" }).click();
+  await control.click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", after);
-  await expect(control.getByRole("button", { name: after === "dark" ? "Tối" : "Sáng" })).toHaveAttribute("aria-pressed", "true");
+  await expect(control).toHaveAttribute("aria-pressed", after === "dark" ? "true" : "false");
   await expect.poll(() => page.evaluate(() => localStorage.getItem("rosic-theme"))).toBe(after);
 
   await page.reload();
@@ -25,20 +26,20 @@ test("Arabic mobile form, menu utilities, and watermarked group images fit the v
   await page.goto("/");
 
   await page.getByRole("button", { name: "Mở menu", exact: true }).click();
-  await page.locator(".mobile-language select").selectOption("ar");
+  await page.locator(".mobile-menu-tools .language-cell select").selectOption("ar");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(page.locator(".mobile-menu .theme-switch").getByRole("button", { name: "داكن" })).toBeVisible();
+  await expect(page.locator(".mobile-menu .theme-cell")).toBeVisible();
   await page.locator(".mobile-menu .icon-button").click();
 
   await page.locator("#contact").scrollIntoViewIfNeeded();
-  await expect(page.locator("#quote-message")).toBeVisible();
+  await expect(page.locator('#contact [name="consent"]')).toBeVisible();
   await expect.poll(() => page.evaluate(() => ({
     scroll: document.documentElement.scrollWidth,
     client: document.documentElement.clientWidth,
   }))).toMatchObject({ scroll: 390, client: 390 });
 
   await page.locator("#export-catalog").scrollIntoViewIfNeeded();
-  await expect(page.locator(".gcard .product-image-brand")).toHaveCount(9);
-  await page.locator(".gcard").first().getByRole("button").click();
-  await expect(page.getByRole("dialog").locator(".product-image-brand").first()).toBeVisible();
+  await expect(page.locator(".gcard .product-image-brand")).toHaveCount(8);
+  await page.locator(".gcard a").first().click();
+  await expect(page.locator(".group-hero .product-image-brand")).toBeVisible();
 });

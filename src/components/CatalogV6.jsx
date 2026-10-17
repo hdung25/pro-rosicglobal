@@ -292,11 +292,9 @@ function StickyQuote({ product, copy, ctaRef, onQuote }) {
       frame = 0;
       const cta = ctaRef.current;
       if (!cta) return;
-      // The bar steps aside when the footer arrives so it never covers it.
-      const form = document.querySelector(".site-footer");
-      const ctaPassed = cta.getBoundingClientRect().bottom < 0;
-      const formOnScreen = form ? form.getBoundingClientRect().top < window.innerHeight - 40 : false;
-      setVisible(ctaPassed && !formOnScreen);
+      // Visible as soon as the page's own CTA has scrolled away; the footer
+      // reserves room for it (see .has-quote-bar) so nothing is covered.
+      setVisible(cta.getBoundingClientRect().bottom < 0);
     };
     const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
     window.addEventListener("scroll", schedule, { passive: true });

@@ -4,7 +4,7 @@ test("Korean uses reviewed public copy and a locally served Taegukgi", async ({ 
   await page.addInitScript(() => window.localStorage.clear());
   await page.goto("/");
 
-  const picker = page.locator(".header-language select");
+  const picker = page.locator(".topbar .language-cell select");
   await picker.selectOption("ko");
 
   await expect(page.locator("html")).toHaveAttribute("lang", "ko");
@@ -15,7 +15,7 @@ test("Korean uses reviewed public copy and a locally served Taegukgi", async ({ 
   await expect(page.locator("#feedback-title")).toHaveText("경청으로 더 나은 협업을 만듭니다.");
   await expect(page.getByRole("region", { name: "예시 피드백" })).toBeVisible();
 
-  const flag = page.locator(".header-language .language-picker-flag");
+  const flag = page.locator(".topbar .language-cell .language-picker-flag");
   await expect(flag).toHaveAttribute("src", /\/flags\/kr\.svg$/);
   await expect.poll(() => flag.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true);
 
@@ -45,18 +45,19 @@ test("every supported locale supplies human-facing theme and editorial copy", as
 test("English localizes the catalogue, quote choices, and numeric specifications", async ({ page }) => {
   await page.addInitScript(() => window.localStorage.clear());
   await page.goto("/");
-  await page.locator(".header-language select").selectOption("en");
+  await page.locator(".topbar .language-cell select").selectOption("en");
 
   await page.locator("#products").scrollIntoViewIfNeeded();
-  await expect(page.locator("#products .pcard__title").first()).toHaveText("Green Robusta S18 – Cleaned");
+  await expect(page.locator("#products .pcard__title").first()).toHaveText("Green Robusta size 13 – Clean");
   await expect(page.locator("#products")).not.toContainText("Cà phê nhân xanh");
 
-  const productSelect = page.locator("#quote-product");
+  await page.locator("#contact").scrollIntoViewIfNeeded();
+  const productSelect = page.locator('#contact [name="product"]');
   await expect(productSelect.locator("option").first()).toHaveText("Several products / not decided");
   await expect(productSelect.locator("option").filter({ hasText: "Black pepper" })).toHaveCount(2);
 
   await page.goto("/san-pham/hoa-hoi/hoi-vu-thu");
-  await page.locator(".header-language select").selectOption("en");
+  await page.locator(".topbar .language-cell select").selectOption("en");
   await expect(page.locator(".spec-table")).toContainText("Moisture");
   await expect(page.locator(".spec-table")).toContainText("13.5%");
   await expect(page.locator(".spec-table")).toContainText("2.5 cm");

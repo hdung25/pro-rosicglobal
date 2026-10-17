@@ -14,13 +14,13 @@ test('brand layout, mobile fit, photo, navigation and fixed controls', async ({ 
   await page.locator('.hero-about-button').click();
   await expect(page).toHaveURL(/#about$/);
   await page.mouse.wheel(0, 1200);
-  await page.locator('.back-to-top').click();
+  await page.locator('.topbar .top-cell').click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-  await page.locator('.topbar .theme-switch').getByRole('button', { name: 'Tối' }).click();
+  await page.locator('.topbar .theme-cell').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(page.locator('.theme-switch')).toHaveCount(1);
+  await expect(page.locator('.topbar .theme-cell')).toHaveCount(1);
   await page.screenshot({ path: 'artifacts/vr4/home-dark.png' });
-  await page.locator('.topbar .theme-switch').getByRole('button', { name: 'Sáng' }).click();
+  await page.locator('.topbar .theme-cell').click();
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -29,15 +29,10 @@ test('brand layout, mobile fit, photo, navigation and fixed controls', async ({ 
   expect(errors).toEqual([]);
 });
 
-test('quick view stays attached to its group card, product lightbox and keyboard dismissal', async ({ page }) => {
+test('group card opens its page; product lightbox and keyboard dismissal', async ({ page }) => {
   await page.goto('/#export-catalog');
-  const card = page.locator('.gcard').first();
-  const trigger = card.getByRole('button', { name: 'Xem nhanh' });
-  await trigger.click();
-  await expect(page.locator('.quick-view')).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.locator('.quick-view')).toHaveCount(0);
-  await expect(trigger).toBeFocused();
+  await page.locator('.gcard a').first().click();
+  await expect(page).toHaveURL(/\/san-pham\/ca-phe$/);
   await page.goto('/san-pham/ca-phe/ca-phe-nhan-xanh-s16-clean');
   await page.locator('.product-detail__media .image-zoom').click();
   await expect(page.locator('.image-lightbox')).toBeVisible();
@@ -46,20 +41,16 @@ test('quick view stays attached to its group card, product lightbox and keyboard
   await expect(page.locator('.image-lightbox')).toHaveCount(0);
 });
 
-test('every public product group has products, except the dried fruit list still being prepared', async ({ page }) => {
+test('every listed product group has products; dried fruit stays hidden until it has some', async ({ page }) => {
   await page.goto('/#products');
   const chips = page.locator('.v6-finder .chip');
   await expect(chips.first()).toBeVisible();
-  const count = await chips.count();
-  expect(count).toBe(10);
-  for (let index = 0; index < count; index += 1) {
+  expect(await chips.count()).toBe(9);
+  await expect(page.locator('.v6-finder .chip-row')).not.toContainText('Trái cây sấy');
+  for (let index = 0; index < 9; index += 1) {
     await chips.nth(index).click();
-    if ((await chips.nth(index).textContent()).includes('Trái cây sấy')) {
-      await expect(page.locator('.v6-finder .v6-empty')).toContainText('Danh sách đang được bổ sung');
-    } else {
-      await expect(page.locator('.v6-finder .pcard').first()).toBeVisible();
-      await expect(page.locator('.v6-finder .v6-empty')).toHaveCount(0);
-    }
+    await expect(page.locator('.v6-finder .pcard').first()).toBeVisible();
+    await expect(page.locator('.v6-finder .v6-empty')).toHaveCount(0);
   }
 });
 
@@ -94,9 +85,9 @@ test('live admin preview uses draft data on desktop/mobile and respects blank so
   await page.getByRole('button', { name: 'Cài đặt', exact: true }).click();
   await expect(page.getByLabel('Facebook', { exact: true })).toHaveValue('https://www.facebook.com/share/1Dq8KnnGEK/');
   await page.getByLabel('Facebook', { exact: true }).fill('https://www.facebook.com/rosic-example');
-  await expect(preview.locator('.footer-invitation [data-channel="facebook"] a')).toHaveAttribute('href', 'https://www.facebook.com/rosic-example');
+  await expect(preview.locator('.footer-social .social-icon[data-channel="facebook"]')).toHaveCount(1);
   await page.getByLabel('Facebook', { exact: true }).fill('');
-  await expect(preview.locator('.footer-invitation [data-channel="facebook"] a')).toHaveCount(0);
+  await expect(preview.locator('.footer-social .social-icon[data-channel="facebook"]')).toHaveCount(0);
   await page.screenshot({ path: 'artifacts/vr4/admin-live-preview.png' });
 });
 

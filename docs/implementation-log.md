@@ -226,3 +226,22 @@ Kiểm thử (bản build production, `vite preview`):
 | `tests/customer-feedback-oct.spec.js` — mỗi mục khách nêu một test, gồm WCAG AA sáng/tối | Đạt |
 | Bộ Playwright đầy đủ (trừ PWA cần server 4173) | 161/161 đạt (bản gốc trước thay đổi: 116 đạt, 5 lỗi sẵn có); các test giao diện cũ (hộp thoại sản phẩm, bộ lọc cũ, nút nổi, form nhiều bước) được viết lại cho giao diện mới thay vì xóa |
 | Sửa thêm khi kiểm thử | Tương phản nút Sáng/Tối, chữ ROSIC trên mobile, số bước Hành trình (tối), nút WhatsApp (tối); tràn ngang 3px ở màn 280px; Back khôi phục đúng vị trí cuộn (React 19 xử lý `popstate` đồng bộ) |
+
+## Phản hồi khách 18/10/2026 — 46 mục rà soát + phần giá trị ROSIC
+
+| Nhóm | Xử lý | Vị trí trong mã |
+| --- | --- | --- |
+| Topbar | Nền topbar bằng màu nền trang (sáng/tối); Sáng/Tối và Ngôn ngữ là hai ô bằng nhau (cao, bo góc); nút lên đầu trang nằm cạnh, chỉ hiện sau khi cuộn, không còn nút nổi. Footer dùng đúng bộ công cụ này. | `TopTools` trong `src/App.jsx`, `src/release-v7.css` |
+| Menu | Một danh sách cho desktop/mobile, vi/en; mobile hai cấp (mục → nhóm sản phẩm), không đổ hết danh mục ra. | `Header` |
+| Logo, favicon | Không slogan, ROSIC Cormorant Garamond một dòng; favicon tròn 32/48/96/180. | `Brand`, `scripts/generate-favicons.mjs` |
+| Trang chủ | Bỏ dải chữ chạy dưới hero; một dải ảnh nhóm tròn (ảnh đại diện nhóm) chỉ gồm ảnh + tên + "Xem quy cách", không thanh cuộn xám; tiêu đề tìm sản phẩm không bị cắt; bỏ gradient xanh ở Tin tức. | `GroupsSection`, `ProductFinder` |
+| ROSIC | Giữ chữ tiếng Anh, mô tả dịch theo ngôn ngữ trang: Reliable, Origin, Standardized, International, Customer. | `ROSIC_TEXT` trong `src/brand-story.js` |
+| Sản phẩm | Bỏ Xem nhanh; thẻ mở trang nhóm; trái cây sấy ẩn đến khi có sản phẩm; cà phê size 13/16/18 Clean/Không clean; biểu tượng nhóm vẽ lại. | `src/catalog-v6.js`, `src/category-icons.js` |
+| Báo giá | "Yêu cầu báo giá" mở form ngay trên trang, tự điền sản phẩm; gửi một bước mở WhatsApp/Email; Zalo sao chép tin nhắn trước; bắt buộc đồng ý chính sách; bỏ tự điền dữ liệu cũ; thông tin đã gõ được giữ khi đóng/mở lại form trong cùng lượt xem. | `QuoteForm`, `QuoteDialog` |
+| Dịch tự động | Trình duyệt dịch trang không còn làm trắng trang sản phẩm. | `src/translate-guard.js`, `PageBoundary` |
+| Footer | Logo vector cân đối, slogan chính thức "Manufacturing with Heart, Trading with Vision", biểu tượng mạng xã hội có popup riêng, ẩn kênh chưa có link (TikTok); trên điện thoại hai cột liên kết nằm song song cho gọn. | `Footer`, `SocialChannels` |
+| Màn hẹp | Sửa tràn ngang ở 280–320px (lưới "Về chúng tôi", footer, nút dài tiếng Pháp/Đức, tiêu đề hero tiếng Anh). | cuối `src/release-v7.css` |
+
+Cần khách xác nhận: cách đặt tên cà phê "size 13/16/18 – Clean/Không clean"; ảnh nhóm đang dùng ảnh danh mục trong CMS; ảnh phóng to sẽ nét hơn khi tải ảnh gốc độ phân giải cao (hiện 900px); dữ liệu tự điền cũ nằm trong trình duyệt của người dùng, website không xóa được, nhưng các ô đã tắt tự điền.
+
+Kiểm thử (bản build production, `vite preview`): Playwright 169/169 đạt (gồm `customer-feedback-oct.spec.js` 23 test cho từng mục và PWA), `test:quote-api` 8/8, `eslint` sạch, rà tràn ngang 8 ngôn ngữ × 280/320/390/768/1440px × trang chủ/nhóm/sản phẩm không lỗi.

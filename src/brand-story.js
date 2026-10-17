@@ -1,10 +1,27 @@
-export const ROSIC_VALUES = [
-  { letter: "R", word: "Reliable", icon: "ShieldCheck", explanation: "Giữ cam kết với từng đơn hàng.", explanationEn: "Dependable commitments for every order." },
-  { letter: "O", word: "Origin", icon: "Leaf", explanation: "Minh bạch và trân trọng nguồn gốc.", explanationEn: "Care and transparency about origins." },
-  { letter: "S", word: "Standardized", icon: "BadgeCheck", explanation: "Thống nhất quy cách trước giao thương.", explanationEn: "Agreed specifications before trade." },
-  { letter: "I", word: "International", icon: "Globe2", explanation: "Đáp ứng chuẩn mực thị trường quốc tế.", explanationEn: "Meeting international market standards." },
-  { letter: "C", word: "Customer", icon: "Users", explanation: "Bắt đầu từ nhu cầu của khách hàng.", explanationEn: "Built around each customer’s needs." },
-];
+// The five letters stay in English; each description follows the page language.
+const ROSIC_TEXT = {
+  R: { vi: "Giữ đúng cam kết trong từng đơn hàng.", en: "We keep our commitments on every order.", zh: "每一笔订单都信守承诺。", ko: "모든 주문에서 약속을 지킵니다.", ja: "すべての注文で約束を守ります。", ar: "نفي بالتزاماتنا في كل طلب.", fr: "Nous tenons nos engagements à chaque commande.", de: "Wir halten unsere Zusagen bei jeder Bestellung." },
+  O: { vi: "Truy xuất được nguồn gốc, trân trọng nơi sản phẩm được tạo ra.", en: "Traceable to origin, with respect for where our products come from.", zh: "可追溯至原产地，尊重产品的来源。", ko: "원산지까지 추적할 수 있으며 제품이 온 곳을 존중합니다.", ja: "原産地まで追跡でき、産地への敬意を大切にします。", ar: "منتجات يمكن تتبعها حتى منشئها، مع احترام مصدرها.", fr: "Traçables jusqu’à l’origine, dans le respect de leur provenance.", de: "Bis zum Ursprung rückverfolgbar, mit Respekt für die Herkunft." },
+  S: { vi: "Quy cách nhất quán, được xác nhận trước khi giao hàng.", en: "Consistent specifications, confirmed before shipment.", zh: "规格统一，出货前确认。", ko: "일관된 규격을 선적 전에 확인합니다.", ja: "一貫した仕様を出荷前に確認します。", ar: "مواصفات ثابتة يتم تأكيدها قبل الشحن.", fr: "Des spécifications constantes, confirmées avant expédition.", de: "Einheitliche Spezifikationen, vor dem Versand bestätigt." },
+  I: { vi: "Vận hành theo chuẩn mực xuất khẩu quốc tế.", en: "Operating to international export standards.", zh: "按照国际出口标准运营。", ko: "국제 수출 기준에 따라 운영합니다.", ja: "国際的な輸出基準に沿って運営します。", ar: "نعمل وفق معايير التصدير الدولية.", fr: "Nous opérons selon les normes internationales d’exportation.", de: "Wir arbeiten nach internationalen Exportstandards." },
+  C: { vi: "Lấy nhu cầu của khách hàng làm trọng tâm.", en: "Built around our customers’ needs.", zh: "以客户需求为核心。", ko: "고객의 필요를 중심으로 합니다.", ja: "お客様のニーズを中心に考えます。", ar: "نبني عملنا حول احتياجات عملائنا.", fr: "Pensé autour des besoins de nos clients.", de: "Ausgerichtet auf die Bedürfnisse unserer Kunden." },
+};
+const ROSIC_WORDS = [["R", "Reliable", "ShieldCheck"], ["O", "Origin", "Leaf"], ["S", "Standardized", "BadgeCheck"], ["I", "International", "Globe2"], ["C", "Customer", "Users"]];
+export const ROSIC_VALUES = ROSIC_WORDS.map(([letter, word, icon]) => ({
+  letter,
+  word,
+  icon,
+  explanation: ROSIC_TEXT[letter].vi,
+  explanationEn: ROSIC_TEXT[letter].en,
+  explanations: ROSIC_TEXT[letter],
+}));
+
+/** Description in the page language; Vietnamese/English stay editable in Admin. */
+export function rosicExplanation(value, language) {
+  if (language === "vi") return value.explanation;
+  if (language === "en") return value.explanationEn;
+  return value.explanations?.[language] ?? ROSIC_TEXT[value.letter]?.[language] ?? value.explanationEn;
+}
 
 const headings = {
   vi: ["Khởi từ Tâm", "Vươn bằng Tầm"],

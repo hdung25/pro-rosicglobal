@@ -16,27 +16,20 @@ for (const width of [1440, 390]) {
   test(`official links and original QR images work with existing CMS at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/#contact');
-    for (const parent of ['.contact-intro', '.footer-invitation']) {
+    for (const parent of ['.contact-intro', '.footer-social']) {
+      await expect(page.locator(`${parent} [data-channel="tiktok"]`)).toHaveCount(0);
       for (const key of ['facebook', 'whatsapp', 'wechat']) {
-        await expect(page.locator(`${parent} [data-channel="${key}"] > a`)).toHaveAttribute('href', SOCIAL_DEFAULTS[key]);
+        await page.locator(`${parent} .social-icon[data-channel="${key}"]`).click();
+        const popup = page.locator('.social-qr-dialog');
+        await expect(popup.locator('.social-popup__open')).toHaveAttribute('href', SOCIAL_DEFAULTS[key]);
+        if (SOCIAL_QR_DEFAULTS[key]) await expect(popup.locator('img')).toHaveAttribute('src', SOCIAL_QR_DEFAULTS[key]);
+        await expect(popup.locator('img')).toBeInViewport();
+        if (key === 'wechat') await page.screenshot({ path: `artifacts/vr5/social-wechat-qr-${width}.png` });
+        await page.keyboard.press('Escape');
+        await expect(popup).toHaveCount(0);
       }
-      if (parent === ".contact-intro") await expect(page.locator(`${parent} [data-channel="wechat"] img`)).toHaveAttribute('src', SOCIAL_QR_DEFAULTS.wechat);
-      if (parent === ".contact-intro") await expect(page.locator(`${parent} [data-channel="whatsapp"] img`)).toHaveAttribute('src', SOCIAL_QR_DEFAULTS.whatsapp);
-      await expect(page.locator(`${parent} [data-channel="tiktok"]`)).toContainText('Đang cập nhật');
     }
-    for (const key of ['wechat', 'whatsapp']) {
-      const thumbnail = page.locator(`.contact-intro [data-channel="${key}"] button`);
-      await thumbnail.evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
-      await thumbnail.screenshot({ path: `artifacts/vr5/social-${key}-thumbnail-${width}.png` });
-    }
-    await page.locator('.contact-intro [data-channel="wechat"] button').click();
-    const qr = page.locator('.social-qr-dialog');
-    await expect(qr.locator('img')).toHaveAttribute('src', SOCIAL_QR_DEFAULTS.wechat);
-    await expect(qr.locator('img')).toBeInViewport();
-    await page.screenshot({ path: `artifacts/vr5/social-wechat-qr-${width}.png` });
-    await page.keyboard.press('Escape');
-    await expect(qr).toHaveCount(0);
-    await page.locator('.footer-invitation .social-channel-grid').scrollIntoViewIfNeeded();
+    await page.locator('.footer-social').scrollIntoViewIfNeeded();
     await page.screenshot({ path: `artifacts/vr5/social-channels-${width}.png` });
   });
 }
@@ -51,10 +44,12 @@ test('Admin can edit every link, keep TikTok pending and clear an obsolete offic
   await expect(page.getByLabel('TikTok', { exact: true })).toHaveValue('');
   const preview = page.frameLocator('iframe');
   await page.getByLabel('TikTok', { exact: true }).fill('https://www.tiktok.com/@rosic-test');
-  await expect(preview.locator('.footer-invitation [data-channel="tiktok"] > a')).toHaveAttribute('href', 'https://www.tiktok.com/@rosic-test');
+  await expect(preview.locator('.footer-social .social-icon[data-channel="tiktok"]')).toHaveCount(1);
   await page.getByLabel('WhatsApp · Kênh chính', { exact: true }).fill('https://wa.me/message/OTHERBUSINESS');
   await expect(page.getByLabel('QR chính thức · WhatsApp · Kênh chính', { exact: true })).toHaveValue('');
-  await expect(preview.locator('.contact-intro [data-channel="whatsapp"] img')).toHaveAttribute('src', /^data:image\/png/);
+  await preview.locator('.contact-intro .social-icon[data-channel="whatsapp"]').click();
+  await expect(preview.locator('.social-qr-dialog img')).toHaveAttribute('src', /^data:image\/png/);
+  await preview.locator('.social-qr-close').click();
   await page.getByLabel('TikTok', { exact: true }).fill('');
-  await expect(preview.locator('.footer-invitation [data-channel="tiktok"]')).toContainText('Đang cập nhật');
+  await expect(preview.locator('.footer-social [data-channel="tiktok"]')).toHaveCount(0);
 });

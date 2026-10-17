@@ -16,14 +16,15 @@ for (const language of ['vi', 'en', 'zh', 'ko', 'ja', 'ar', 'fr', 'de']) {
       expect(title.x + title.width).toBeLessThanOrEqual(width + 1);
       if (width === 390) {
         await page.screenshot({ path: `artifacts/vr4/mobile-${language}.png` });
-        await page.locator('#export-catalog').scrollIntoViewIfNeeded();
-        await page.locator('.gcard .gcard__actions button').first().click();
-        const dialog = page.locator('.quick-view');
+        await page.goto('/san-pham/que/que-ong');
+        await page.locator('.product-detail__actions .button-primary').click();
+        const dialog = page.locator('.quote-dialog');
         await expect(dialog).toBeVisible();
         const box = await dialog.boundingBox();
         expect(box.x).toBeGreaterThanOrEqual(0);
         expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
         await page.keyboard.press('Escape');
+        await page.goto('/');
       }
     }
     await page.goto('/san-pham/que/que-ong');

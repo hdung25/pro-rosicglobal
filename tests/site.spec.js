@@ -42,7 +42,8 @@ test('all rendered images load, internal links resolve, and the page has no runt
 test('group chips, accent-insensitive submitted search, empty state and reset work together', async ({ page }) => {
   await page.locator('#products').scrollIntoViewIfNeeded()
   const finder = page.locator('.v6-finder')
-  for (const group of GROUPS) {
+  // Groups without products (dried fruit for now) stay hidden until they have some.
+  for (const group of GROUPS.filter(item => DEFAULT_PRODUCTS.some(product => product.category === item.id))) {
     await finder.locator('.chip', { hasText: GROUP_NAMES.vi[group.id] }).click()
     const expected = DEFAULT_PRODUCTS.filter(product => product.category === group.id).length
     if (expected) await expect(finder.locator('.pcard')).toHaveCount(expected)
@@ -54,7 +55,7 @@ test('group chips, accent-insensitive submitted search, empty state and reset wo
   await search.press('Enter')
   await expect(finder.locator('.pcard')).toHaveCount(1)
   await expect(finder.locator('.pcard__title')).toHaveText('Quế điếu')
-  await search.fill('s18')
+  await search.fill('size 18')
   await search.press('Enter')
   await expect(finder.locator('.pcard')).toHaveCount(2)
   await search.fill('khong co san pham nay')
@@ -79,19 +80,21 @@ for (const product of DEFAULT_PRODUCTS) {
   })
 }
 
-test('quote CTA selects the viewed product, keeps typed details and reaches the form', async ({ page }) => {
+test('quote CTA opens the quote form with the viewed product and keeps typed details', async ({ page }) => {
   await page.goto('/san-pham/trai-cay-tuoi/dragonfruit')
-  const cta = page.locator('.product-detail__actions').getByRole('link', { name: 'Yêu cầu báo giá' })
+  const cta = page.locator('.product-detail__actions').getByRole('button', { name: 'Yêu cầu báo giá' })
   await cta.click()
-  const product = page.getByLabel('Sản phẩm quan tâm', { exact: true })
+  const dialog = page.locator('.quote-dialog')
+  await expect(dialog).toBeVisible()
+  const product = dialog.locator('[name="product"]')
   await expect(product).toHaveValue('dragonfruit')
-  await expect(page).toHaveURL(/#contact$/)
-  await expect(page.locator('#contact')).toBeInViewport()
-  await page.getByLabel('Họ và tên').fill('Giữ nguyên tên đã nhập')
+  await expect(page).toHaveURL(/\/san-pham\/trai-cay-tuoi\/dragonfruit$/)
+  await dialog.locator('[name="name"]').fill('Giữ nguyên tên đã nhập')
   await product.selectOption('cashew-1-0')
+  await page.keyboard.press('Escape')
   await cta.click()
   await expect(product).toHaveValue('dragonfruit')
-  await expect(page.getByLabel('Họ và tên')).toHaveValue('Giữ nguyên tên đã nhập')
+  await expect(dialog.locator('[name="name"]')).toHaveValue('Giữ nguyên tên đã nhập')
 })
 
 test('article contact CTA reaches contact after closing the dialog', async ({ page }) => {
@@ -126,7 +129,8 @@ test('all four journey steps reveal the corresponding image and description', as
     await expect(page.locator('.journey-step[aria-expanded="true"]')).toHaveCount(1)
     const panel = page.getByRole('region', { name: item.title, exact: true })
     await expect(panel).toBeVisible()
-    await expect(panel.locator('img')).toHaveAttribute('src', item.image)
+    // Legacy sky photos are replaced by the brand terraces image.
+    await expect(panel.locator('img')).toHaveAttribute('src', item.image.includes('vietnam-hero-w960') ? '/images/rosic-terraces-mobile.webp' : item.image)
     await expect.poll(() => panel.locator('img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
     await expect(panel).toContainText(item.caption)
     await expect(trigger.locator('.step-description')).toBeVisible()
@@ -160,34 +164,37 @@ test('privacy dialog explains quote routing and closes accessibly', async ({ pag
   await expect(trigger).toBeFocused()
 })
 
-test('quote validates input before opening an app and copies the prepared message', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+test('quote validates input and consent before opening WhatsApp with the prepared message', async ({ page, context }) => {
   const requests = []
   await page.route('**/api/quote', route => { requests.push(route.request()); return route.abort() })
+  await context.route(/wa\.me|api\.whatsapp\.com/, route => route.fulfill({ status: 200, contentType: 'text/html', body: 'ok' }))
   await page.locator('#contact').scrollIntoViewIfNeeded()
   const form = page.locator('#contact')
   const whatsapp = form.getByRole('button', { name: 'Gửi qua WhatsApp' })
   let popups = 0
   context.on('page', () => { popups += 1 })
   await whatsapp.click()
-  await expect(form.locator('#quote-name-error')).toBeVisible()
-  await form.locator('#quote-name').fill('QA Kiểm tra')
-  await form.locator('#quote-phone').fill('abcdefgh')
+  await expect(form.locator('.quote-error').first()).toBeVisible()
+  await form.locator('[name="name"]').fill('QA Kiểm tra')
+  await form.locator('[name="phone"]').fill('abcdefgh')
   await whatsapp.click()
-  await expect(form.locator('#quote-phone-error')).toBeVisible()
+  await expect(form.locator('[name="phone"]')).toHaveAttribute('aria-invalid', 'true')
+  await form.locator('[name="phone"]').fill('+84 912 345 678')
+  await form.locator('[name="email"]').fill('qa@example.com')
+  await form.locator('[name="product"]').selectOption('cashew-1-0')
+  await form.locator('[name="market"]').fill('Đức')
+  await form.locator('[name="quantity"]').fill('1 container')
+  await whatsapp.click()
+  await expect(form.locator('[name="consent"]')).toHaveAttribute('aria-invalid', 'true')
   expect(popups).toBe(0)
-  await form.locator('#quote-phone').fill('+84 912 345 678')
-  await form.locator('#quote-email').fill('qa@example.com')
-  await form.locator('#quote-product').selectOption('cashew-1-0')
-  await form.locator('#quote-market').fill('Đức')
-  await form.locator('#quote-quantity').fill('1 container')
-  const message = await form.locator('#quote-message').inputValue()
-  expect(message).toContain('ROS-028 · Hạt điều 16 · nguyên')
-  expect(message).toContain('Thị trường/cảng nhận: Đức')
-  expect(message).toContain('QA Kiểm tra')
-  await form.getByRole('button', { name: 'Sao chép tin nhắn' }).click()
-  await expect(form.locator('.quote-status')).toContainText('Đã sao chép tin nhắn')
-  expect((await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, '\n')).toBe(message)
+  await form.locator('[name="consent"]').check()
+  const [popup] = await Promise.all([context.waitForEvent('page'), whatsapp.click()])
+  const text = decodeURIComponent(new URL(popup.url()).searchParams.get('text') || popup.url())
+  expect(text).toContain('Hạt điều 16')
+  expect(text).toContain('Đức')
+  expect(text).toContain('QA Kiểm tra')
+  await popup.close()
+  await expect(form.locator('.quote-status')).toContainText('Đã mở ứng dụng')
   expect(requests).toHaveLength(0)
 })
 
@@ -195,7 +202,7 @@ test('quote works without an API: Zalo and email channels are offered', async ({
   await page.route('**/api/quote', route => route.abort())
   await page.locator('#contact').scrollIntoViewIfNeeded()
   const form = page.locator('#contact')
-  await expect(form.getByRole('link', { name: /Mở Zalo/ })).toHaveAttribute('href', /^https:\/\/zalo\.me\//)
+  await expect(form.locator('.quote-send--zalo')).toBeVisible()
   await expect(form.getByRole('button', { name: 'Gửi qua Email' })).toBeVisible()
   await expect(form.getByRole('link', { name: 'info@rosicglobal.com' })).toHaveAttribute('href', 'mailto:info@rosicglobal.com')
 })
@@ -220,10 +227,12 @@ for (const width of [360, 390, 768, 1440, 1920, 2560]) {
       const menuBox = await menu.boundingBox()
       expect(menuBox.x).toBeGreaterThanOrEqual(-1)
       expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(width + 1)
-      await menu.locator('nav').getByRole('link', { name: /Sản phẩm/ }).click()
+      await menu.locator('nav').getByRole('button', { name: /Sản phẩm/ }).click()
+      await expect(menu.locator('.mobile-nav__sub a')).toHaveCount(new Set(DEFAULT_PRODUCTS.map(product => product.category)).size)
+      await menu.locator('nav').getByRole('link', { name: /Liên hệ/ }).click()
       await expect(menu).toHaveCount(0)
-      await expect(page).toHaveURL(/#products$/)
-      await expect(page.locator('#products')).toBeInViewport()
+      await expect(page).toHaveURL(/#contact$/)
+      await expect(page.locator('#contact')).toBeInViewport()
       await open.click()
       await page.keyboard.press('Escape')
       await expect(menu).toHaveCount(0)
@@ -234,23 +243,21 @@ for (const width of [360, 390, 768, 1440, 1920, 2560]) {
     await page.goto('/san-pham/trai-cay-tuoi/mango')
     await expect.poll(() => page.locator('.product-detail__media img').first().evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
     await noOverflow('product page')
-    await expect(page.locator('.product-detail__actions').getByRole('link', { name: 'Yêu cầu báo giá' })).toBeVisible()
+    await expect(page.locator('.product-detail__actions').getByRole('button', { name: 'Yêu cầu báo giá' })).toBeVisible()
     await page.screenshot({ path: testInfo.outputPath(`product-${width}.png`) })
   })
 }
 
 test('motion rails pause by touch or keyboard without a corner button', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await expect(page.locator('.marquee-control')).toHaveCount(0);
-  const rail=page.locator('.marquee-section');
-  await rail.focus(); await page.keyboard.press('Enter');
-  await expect(rail).toHaveClass(/is-paused/);
+  // The ticker under the hero was removed; only the feedback rails move.
+  await expect(page.locator('.marquee-control, .marquee-section')).toHaveCount(0);
   await page.locator('#testimonials').scrollIntoViewIfNeeded();
   const feedback=page.locator('.feedback-rails');
   await feedback.focus(); await page.keyboard.press('Enter');
   await expect(page.locator('.feedback-section')).toHaveClass(/feedback-paused/);
   await page.emulateMedia({ reducedMotion:'reduce' });
-  await expect.poll(()=>page.locator('.marquee-track').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+  await expect.poll(()=>page.locator('.feedback-track').first().evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
 });
 
 for (const width of [390, 1440]) {

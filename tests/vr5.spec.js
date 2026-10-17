@@ -19,68 +19,64 @@ for (const width of [1440, 390, 320]) {
     await search.press('Enter');
     await expect(page.locator('.v6-finder .pcard')).toHaveCount(1);
     await page.locator('.v6-finder .pcard__link').click();
-    await expect(page.locator('h1')).toHaveText('Cà phê nhân xanh S18 – Clean');
+    await expect(page.locator('h1')).toHaveText('Cà phê nhân xanh size 13 – Clean');
     await page.locator('.related .pcard__link', { hasText: 'Cà phê rang xay' }).click();
     await expect(page.locator('.spec-table')).toContainText('ROS-108');
     await page.locator('.product-detail').screenshot({ path: `artifacts/vr5/product-${width}.png` });
     await page.locator('.product-detail__actions .button-primary').click();
-    await expect(page.locator('#quote-product')).toHaveValue('ca-phe-rang-xay');
-    await page.locator('#quote-name').fill('Kiểm thử ROSIC');
-    await page.locator('#quote-phone').fill('+84962284872');
-    await page.locator('#quote-email').fill('vr5-test@example.com');
-    await page.locator('#quote-quantity').fill('1 container');
-    const [whatsapp] = await Promise.all([context.waitForEvent('page'), page.getByRole('button', { name: 'Gửi qua WhatsApp' }).click()]);
+    const dialog = page.locator('.quote-dialog');
+    await expect(dialog.locator('[name="product"]')).toHaveValue('ca-phe-rang-xay');
+    await dialog.locator('[name="name"]').fill('Kiểm thử ROSIC');
+    await dialog.locator('[name="phone"]').fill('+84962284872');
+    await dialog.locator('[name="email"]').fill('vr5-test@example.com');
+    await dialog.locator('[name="quantity"]').fill('1 container');
+    await dialog.locator('[name="consent"]').check();
+    const [whatsapp] = await Promise.all([context.waitForEvent('page'), dialog.getByRole('button', { name: 'Gửi qua WhatsApp' }).click()]);
     const url = new URL(whatsapp.url());
     expect(url.searchParams.get('text') ?? url.searchParams.get('text')).toContain('ROS-108 · Cà phê rang xay');
     expect(url.pathname === '/84962284872' || url.searchParams.get('phone') === '84962284872').toBe(true);
     await whatsapp.close();
-    await expect(page.locator('.quote-status')).toContainText('Đã mở ứng dụng');
+    await expect(dialog.locator('.quote-status')).toContainText('Đã mở ứng dụng');
     await page.screenshot({ path: `artifacts/vr5/quote-${width}.png`, fullPage: false });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect(errors).toEqual([]);
   });
 }
 
-test('VR5 Quick View variants, search fallback, themes and seven channel slots', async ({ page }) => {
-  await page.goto('/#export-catalog');
-  await page.locator('.gcard', { hasText: 'Cà phê' }).getByRole('button', { name: 'Xem nhanh' }).click();
-  await expect(page.locator('.quick-view .pcard')).toHaveCount(8);
-  await page.keyboard.press('Escape');
-  await page.locator('.gcard', { hasText: 'Hạt điều' }).getByRole('button', { name: 'Xem nhanh' }).click();
-  await expect(page.locator('.quick-view .pcard')).toHaveCount(9);
+test('VR5 group pages list variants, search fallback, themes and linked channels only', async ({ page }) => {
+  await page.goto('/san-pham/ca-phe');
+  await expect(page.locator('.group-products .pcard')).toHaveCount(8);
+  await page.goto('/san-pham/hat-dieu');
+  await expect(page.locator('.group-products .pcard')).toHaveCount(9);
   await page.screenshot({ path: 'artifacts/vr5/cashew-variants.png' });
-  await page.keyboard.press('Escape');
-  await page.locator('.topbar .theme-switch').getByRole('button', { name: 'Tối' }).click();
-  await page.locator('.gcard', { hasText: 'Cà phê' }).getByRole('button', { name: 'Xem nhanh' }).click();
-  await expect(page.locator('.quick-view')).toHaveCSS('background-color', 'rgb(21, 28, 21)');
+  await page.locator('.topbar .theme-cell').click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.screenshot({ path: 'artifacts/vr5/category-dark.png' });
-  await page.keyboard.press('Escape');
+  await page.goto('/#products');
   const search = page.locator('.finder-search input');
   await search.fill('no-match-vr5');
   await search.press('Enter');
   await expect(page.locator('.v6-finder .v6-empty')).toBeVisible();
   await page.locator('.v6-finder .v6-empty button').click();
   expect(await page.locator('.v6-finder .pcard').count()).toBeGreaterThan(10);
-  await expect(page.locator('.footer-invitation .social-channel')).toHaveCount(7);
-  await expect(page.locator('.contact-intro .social-channel')).toHaveCount(7);
-  await expect(page.locator('.footer-invitation .social-channel .social-qr-action')).toHaveCount(6);
+  // TikTok has no link yet, so it is hidden; the other six channels stay.
+  await expect(page.locator('.footer-social .social-icon')).toHaveCount(6);
+  await expect(page.locator('.contact-intro .social-icon')).toHaveCount(6);
+  await expect(page.locator('[data-channel="tiktok"]')).toHaveCount(0);
 });
 
-test('VR5 mobile Quick View reaches the group page, direct journey anchor and logo', async ({ page }) => {
+test('VR5 mobile group card reaches the group page, direct journey anchor and logo', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 700 });
   await page.goto('/');
-  await page.locator('.about-copy .text-link').click();
+  await page.locator('.about-journey-button').click();
   await expect(page).toHaveURL(/#journey$/);
   await expect(page.locator('#journey h2')).toBeInViewport();
   await page.locator('#export-catalog').scrollIntoViewIfNeeded();
-  await page.locator('.gcard', { hasText: 'Hạt điều' }).getByRole('button', { name: 'Xem nhanh' }).click();
-  const open = page.locator('.quick-view__open');
-  await expect(open).toBeInViewport();
-  await page.screenshot({ path: 'artifacts/vr5/category-mobile-scroll.png' });
-  await open.click();
+  await page.locator('.gcard', { hasText: 'Hạt điều' }).getByRole('link').click();
   await expect(page).toHaveURL(/\/san-pham\/hat-dieu$/);
   await page.locator('.group-hero .button-primary').click();
-  await expect(page.locator('#quote-product')).toHaveValue('group:cashew-kernel');
+  await expect(page.locator('.quote-dialog [name="product"]')).toHaveValue('group:cashew-kernel');
+  await page.keyboard.press('Escape');
   await page.locator('.site-header .brand').screenshot({ path: 'artifacts/vr5/logo-after.png' });
 });
 

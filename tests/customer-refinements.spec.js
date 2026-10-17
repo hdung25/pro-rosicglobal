@@ -15,8 +15,9 @@ test("product menu lists every group, stays open while scrolling and closes on s
   const panel = page.locator("#product-menu");
   await trigger.click();
   await expect(panel).toBeVisible();
-  await expect(panel.locator(".mega-menu__grid a")).toHaveCount(GROUPS.length);
-  for (const [index, group] of GROUPS.entries()) {
+  const listed = GROUPS.filter(group => DEFAULT_PRODUCTS.some(item => item.category === group.id));
+  await expect(panel.locator(".mega-menu__grid a")).toHaveCount(listed.length);
+  for (const [index, group] of listed.entries()) {
     if (!(await panel.isVisible())) await trigger.click();
     await panel.locator(".mega-menu__grid a").nth(index).click();
     await expect(panel).toBeHidden();
@@ -40,16 +41,17 @@ test("a category added in Admin renders in menu, chips and its own page, keeping
   await page.route("**/api/content", route => route.fulfill({ json: { ok: true, data: { categories: [...EXPORT_CATEGORIES, newCategory], products: [{ ...PRODUCTS[0], id: "tea-product", title: "Trà mới nguyên lá", category: "tea-review", code: "TEA-2026", status: "published" }] } } }));
   await page.goto("/");
   await page.locator(".products-menu-trigger").click();
-  await expect(page.locator(".mega-menu__grid a")).toHaveCount(10);
+  await expect(page.locator(".mega-menu__grid a")).toHaveCount(9);
   await page.locator(".mega-menu__grid a").last().click();
   await expect(page).toHaveURL(/\/san-pham\/tea-review$/);
   await expect(page.locator(".group-products .pcard__meta")).toContainText("TEA-2026");
   await page.goto("/#products");
-  await expect(page.locator(".v6-finder .chip")).toHaveCount(11);
+  await expect(page.locator(".v6-finder .chip")).toHaveCount(10);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator(".menu-toggle").click();
-  await expect(page.locator(".mobile-category-menu a")).toHaveCount(10);
-  await page.locator(".mobile-category-menu a").last().click();
+  await page.locator(".mobile-nav__group > button").click();
+  await expect(page.locator(".mobile-nav__sub a")).toHaveCount(9);
+  await page.locator(".mobile-nav__sub a").last().click();
   await expect(page.locator(".mobile-menu")).toHaveCount(0);
   await expect(page.locator(".group-products .pcard__meta")).toContainText("TEA-2026");
 });
@@ -62,8 +64,8 @@ test("mobile footer language is compact, ROSIC labels fit, hero is upright and m
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.locator(".site-footer").scrollIntoViewIfNeeded();
-    const box = await page.locator(".footer-language").boundingBox();
-    expect(box.width).toBeLessThan(110);
+    const box = await page.locator(".footer-tools").boundingBox();
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const labels = await page.locator(".rosic-word").evaluateAll(nodes => nodes.map(node => node.scrollWidth <= node.clientWidth));
     expect(labels.every(Boolean)).toBe(true);

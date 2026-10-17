@@ -106,11 +106,9 @@ test("dynamic categories add, reorder, protect assigned products and delete", as
   await page.getByRole("button", { name: "Đưa lên trước" }).click();
   await expect(page.locator('.admin-category-list button').nth(8)).toContainText("Hạt mới VR4");
   const preview = page.frameLocator('iframe');
-  await expect(preview.locator('.gcard')).toHaveCount(10);
-  await expect(preview.locator('.gcard').nth(8)).toContainText("Hạt mới VR4");
-  await preview.locator('.topbar-language select').selectOption('en');
-  await expect(preview.locator('.gcard').nth(8)).toContainText("Hạt mới VR4");
-  await preview.locator('.topbar-language select').selectOption('vi');
+  // A category without products stays out of the public lists until it has one.
+  await expect(preview.locator('.gcard')).toHaveCount(8);
+  await expect(preview.locator('.group-strip')).not.toContainText("Hạt mới VR4");
   await page.getByRole("button", { name: "Sản phẩm", exact: true }).click();
   await page.getByRole("button", { name: "Thêm sản phẩm", exact: true }).click();
   await page.getByRole("combobox", { name: "Nhóm sản phẩm", exact: true }).selectOption({ label: "Hạt mới VR4" });
@@ -124,7 +122,7 @@ test("dynamic categories add, reorder, protect assigned products and delete", as
   page.once('dialog', dialog => dialog.accept());
   await page.getByTitle("Xóa danh mục", { exact: true }).click();
   await expect(page.locator('.admin-category-list button')).toHaveCount(9);
-  await expect(preview.locator('.gcard')).toHaveCount(9);
+  await expect(preview.locator('.gcard')).toHaveCount(8);
 });
 
 test("admin waits for saved server data before allowing new edits", async ({ page }) => {

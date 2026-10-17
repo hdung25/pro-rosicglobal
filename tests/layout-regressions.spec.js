@@ -6,7 +6,7 @@ test("topbar controls stay contained and group cards are large enough to read", 
   await page.goto("/");
   const containment = await page.evaluate(() => {
     const bar = document.querySelector(".topbar").getBoundingClientRect();
-    return [".topbar-language", ".topbar .theme-switch"].map((selector) => {
+    return [".topbar .language-cell", ".topbar .theme-cell"].map((selector) => {
       const box = document.querySelector(selector).getBoundingClientRect();
       return { top: box.top >= bar.top, bottom: box.bottom <= bar.bottom, width: box.width };
     });
@@ -15,26 +15,27 @@ test("topbar controls stay contained and group cards are large enough to read", 
     expect(item.top).toBe(true);
     expect(item.bottom).toBe(true);
   }
-  expect(containment[0].width).toBeLessThanOrEqual(96);
+  expect(Math.abs(containment[0].width - containment[1].width)).toBeLessThan(1);
 
   await page.locator("#export-catalog").scrollIntoViewIfNeeded();
-  const cardWidth = await page.locator(".gcard").first().evaluate((node) => node.getBoundingClientRect().width);
-  expect(cardWidth).toBeGreaterThanOrEqual(280);
+  // Round group images in one strip: each stays large enough to recognise.
+  const mediaWidth = await page.locator(".gcard__media").first().evaluate((node) => node.getBoundingClientRect().width);
+  expect(mediaWidth).toBeGreaterThanOrEqual(110);
+  expect(await page.locator(".gcard__name").first().evaluate((node) => parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(13);
 });
 
-test("desktop Quick View keeps every product and the group link reachable within its scroll region", async ({ page }) => {
-  await page.goto("/#export-catalog");
-  await page.locator(".gcard", { hasText: "Quế" }).getByRole("button", { name: "Xem nhanh" }).click();
-  const dialog = page.locator(".quick-view");
+test("desktop quote dialog keeps every field and the send buttons reachable within its scroll region", async ({ page }) => {
+  await page.goto("/san-pham/que/que-dieu");
+  await page.locator(".product-detail__actions .button-primary").click();
+  const dialog = page.locator(".quote-dialog");
   await expect(dialog).toBeVisible();
-  const metrics = await page.locator(".quick-view__body").evaluate((node) => ({
+  const metrics = await page.locator(".quote-dialog__body").evaluate((node) => ({
     overflowY: getComputedStyle(node).overflowY,
     bottom: node.getBoundingClientRect().bottom,
   }));
   expect(metrics.overflowY).toBe("auto");
   expect(metrics.bottom).toBeLessThanOrEqual(970);
-  await expect(page.locator(".quick-view__open")).toBeInViewport();
-  const last = page.locator(".quick-view .pcard").last();
-  await last.scrollIntoViewIfNeeded();
-  await expect(last).toBeInViewport();
+  const send = dialog.locator(".quote-send--whatsapp");
+  await send.scrollIntoViewIfNeeded();
+  await expect(send).toBeInViewport();
 });

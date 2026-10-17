@@ -10,16 +10,16 @@ for (const [width, height] of screens) {
     page.on('pageerror', error => errors.push(error.message));
     if (new URL(test.info().project.use.baseURL).hostname === '127.0.0.1') await page.route('**/api/content', route => route.fulfill({ json: { ok: true, data: null } }));
     await page.goto('/');
-    for (const hash of ['home','products','private-label','about','testimonials','journey','blog','contact']) {
+    for (const hash of ['home','private-label','about','testimonials','journey','blog','contact']) {
       await page.locator('.menu-toggle').tap();
       await page.locator(`.mobile-menu nav a[href="#${hash}"]`).tap();
       await expect(page.locator('.mobile-menu')).toHaveCount(0);
       await expect(page).toHaveURL(new RegExp(`#${hash}$`));
     }
     await page.locator('.menu-toggle').tap();
-    await page.locator('.mobile-language select').selectOption('en');
+    await page.locator('.mobile-menu-tools .language-cell select').selectOption('en');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-    await page.locator('.mobile-language select').selectOption('vi');
+    await page.locator('.mobile-menu-tools .language-cell select').selectOption('vi');
     await page.locator('.mobile-menu-top button').tap();
     // Submitted search by product code, then the product page.
     await page.locator('#products').scrollIntoViewIfNeeded();
@@ -34,23 +34,25 @@ for (const [width, height] of screens) {
     const cta = page.locator('.product-detail__actions .button-primary');
     await cta.scrollIntoViewIfNeeded();
     await cta.tap();
-    await expect(page.locator('#quote-product')).toHaveValue('cashew-1-2');
-    await page.locator('#quote-name').fill('Khách kiểm thử');
-    await page.locator('#quote-phone').fill('+84962284872');
-    await page.locator('#quote-email').fill('mobile@example.com');
-    await expect(page.locator('#quote-message')).toHaveValue(/ROS-030/);
-    const [whatsapp] = await Promise.all([context.waitForEvent('page'), page.locator('.quote-send--whatsapp').tap()]);
+    const dialog = page.locator('.quote-dialog');
+    await expect(dialog.locator('[name="product"]')).toHaveValue('cashew-1-2');
+    await dialog.locator('[name="name"]').fill('Khách kiểm thử');
+    await dialog.locator('[name="phone"]').fill('+84962284872');
+    await dialog.locator('[name="email"]').fill('mobile@example.com');
+    await dialog.locator('[name="consent"]').check();
+    const [whatsapp] = await Promise.all([context.waitForEvent('page'), dialog.locator('.quote-send--whatsapp').tap()]);
     expect(new URL(whatsapp.url()).searchParams.get('text')).toContain('ROS-030');
     await whatsapp.close();
+    await page.keyboard.press('Escape');
     for (const key of ['email','whatsapp','linkedin','facebook','zalo','wechat']) {
-      await page.locator(`.footer-invitation [data-channel="${key}"] button`).tap();
+      await page.locator(`.footer-social .social-icon[data-channel="${key}"]`).tap();
       await expect(page.locator('.social-qr-dialog img')).toBeVisible();
       await page.locator('.social-qr-close').tap();
     }
     await page.locator('.install-app-button').tap();
     await expect(page.locator('.install-app-dialog')).toContainText('iPhone / iPad');
     await page.locator('.install-app-dialog .social-qr-close').tap();
-    const undersized = await page.locator('.menu-toggle, .theme-switch button, .topbar .language-picker select, .crumbs a, .product-detail__actions a, .quote-field select, .quote-actions button, .quote-zalo, .footer-column a, .footer-invitation .social-channel > a, .social-qr-action, .install-app-button').evaluateAll(elements => elements.filter(e => {
+    const undersized = await page.locator('.menu-toggle, .topbar .tool-cell, .crumbs a, .product-detail__actions :is(a, button), .footer-column a, .footer-social .social-icon, .footer-tools .tool-cell, .install-app-button').evaluateAll(elements => elements.filter(e => {
       const box = e.getBoundingClientRect();
       return box.width && box.height && (box.width < 43.9 || box.height < 43.9);
     }).map(e => ({ text: e.textContent.trim(), height: e.getBoundingClientRect().height, width: e.getBoundingClientRect().width })));
@@ -85,16 +87,16 @@ test('Arabic compact header keeps menu and display controls apart', async ({ pag
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto('/');
   await page.locator('.menu-toggle').click();
-  await page.locator('.mobile-language select').selectOption('ar');
+  await page.locator('.mobile-menu-tools .language-cell select').selectOption('ar');
   await page.locator('.mobile-menu-top button').click();
   await page.locator('.menu-toggle').click();
   await expect(page.locator('.mobile-menu')).toBeVisible();
   await page.locator('.mobile-menu-top button').click();
   const toggle = await page.locator('.menu-toggle').boundingBox();
-  const theme = page.locator('.topbar .theme-switch');
+  const theme = page.locator('.topbar .theme-cell');
   const themeBox = await theme.boundingBox();
   expect(themeBox.y + themeBox.height).toBeLessThanOrEqual(toggle.y);
   const current = await page.locator('html').getAttribute('data-theme');
-  await theme.getByRole('button', { name: current === 'dark' ? 'فاتح' : 'داكن' }).click();
+  await theme.click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
 });

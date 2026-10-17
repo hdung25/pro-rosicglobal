@@ -57,6 +57,10 @@ function composeMessage(values, form) {
  * app opens directly with the prepared message, where it can still be edited.
  * Zalo cannot be prefilled, so its button copies the message first.
  */
+// What the visitor typed survives closing and reopening the quote dialog
+// (kept in memory only for this page view, never stored).
+let quoteDraft = null;
+
 export function QuoteForm({
   prefillKey = "",
   prefillNonce = 0,
@@ -73,7 +77,8 @@ export function QuoteForm({
   const uid = useId().replace(/:/g, "");
   const formRef = useRef(null);
   const validKeys = useMemo(() => new Set([GENERAL, ...products.map((item) => item.id), ...groups.map((group) => `group:${group.id}`)]), [products, groups]);
-  const [values, setValues] = useState({ name: "", phone: "", email: "", quantity: "", market: "", note: "", consent: false, product: validKeys.has(prefillKey) ? prefillKey : GENERAL });
+  const [values, setValues] = useState(() => ({ name: "", phone: "", email: "", quantity: "", market: "", note: "", consent: false, ...quoteDraft, product: validKeys.has(prefillKey) ? prefillKey : quoteDraft?.product && validKeys.has(quoteDraft.product) ? quoteDraft.product : GENERAL }));
+  useEffect(() => { quoteDraft = values; }, [values]);
   const [status, setStatus] = useState("");
   const [errors, setErrors] = useState({});
   const [startedAt] = useState(() => new Date().toISOString());

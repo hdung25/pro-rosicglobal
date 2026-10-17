@@ -5,7 +5,7 @@ test("public root serves the official catalogue and keeps direct contact availab
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Khởi từ Tâm");
   await expect(page.locator("#export-catalog")).toBeVisible();
   await expect(page.locator("#contact form")).toBeVisible();
-  await expect(page.locator(".footer-invitation [data-channel='whatsapp'] a[href='https://wa.me/message/CYXCER7RBB6SJ1']")).toBeVisible();
+  await expect(page.locator(".footer-social .social-icon[data-channel='whatsapp']")).toBeVisible();
   await expect(page.locator("a[href='mailto:info@rosicglobal.com']").first()).toBeVisible();
   await expect(page.getByText("Copyright © HONG TAM ROSIC GLOBAL JSC. All rights reserved.")).toBeVisible();
 });
