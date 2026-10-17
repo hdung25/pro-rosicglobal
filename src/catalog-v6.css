@@ -730,3 +730,21 @@ html[data-theme] .site-app .contact-channels svg { flex: 0 0 auto; color: var(--
   .theme-switch button { padding: 0 7px; gap: 4px; }
   html[data-theme] .site-app .topbar .language-picker select { width: 52px; min-width: 52px; }
 }
+/* Long labels (fr/de) must never push the group card wider than the screen. */
+.site-app .gcard__actions .button,
+.site-app .group-hero__actions .button,
+.site-app .product-detail__actions .button,
+.quick-view .button { white-space: normal; text-align: center; min-width: 0; }
+@media (max-width: 420px) {
+  .gcard__actions { grid-template-columns: 1fr; }
+}
+.private-label__copy, .private-label__media, .private-label__steps li > span { min-width: 0; }
+.private-label__steps li { overflow-wrap: anywhere; }
+.site-app .private-label__cta { white-space: normal; text-align: center; max-width: 100%; }
+@media (max-width: 1000px) {
+  .private-label__grid { grid-template-columns: minmax(0, 1fr); }
+}
+.site-app .quote-actions .quote-send { min-width: 0; white-space: normal; text-align: center; }
+@media (max-width: 420px) {
+  .site-app .quote-actions .quote-send { flex: 1 1 100%; }
+}
