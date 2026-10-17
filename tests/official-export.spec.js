@@ -6,9 +6,9 @@ test.describe("official export catalogue", () => {
     await expect(page.locator("#export-catalog")).toBeVisible();
   });
 
-  test("places all eight export categories on the official root and opens a detailed product view", async ({ page }) => {
+  test("places all nine export categories on the official root and opens a detailed product view", async ({ page }) => {
     const cards = page.locator(".official-export-card");
-    await expect(cards).toHaveCount(8);
+    await expect(cards).toHaveCount(9);
 
     const starAnise = page.getByRole("button", { name: "Xem quy cách: Hoa hồi" });
     await starAnise.scrollIntoViewIfNeeded();
@@ -22,7 +22,7 @@ test.describe("official export catalogue", () => {
 
     await dialog.getByRole("button", { name: "Yêu cầu quy cách" }).click();
     await expect(dialog).toHaveCount(0);
-    await expect(page.locator("#contact select").first()).toHaveValue("Hoa hồi");
+    await expect(page.locator("#contact-product")).toHaveValue("Hoa hồi");
   });
 
   test("makes every requested language available on the official header and localises the export surface", async ({ page }) => {

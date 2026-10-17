@@ -2,14 +2,20 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon-rosic.svg?v=20260919" />
-    <link rel="alternate icon" type="image/png" sizes="64x64" href="/favicon-rosic.png?v=20260919" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-rosic.svg" />
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="/apple-touch-icon-rosic.png?v=20260919"
+      href="/icons/rosic-apple-180.png"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preload" as="image" href="/images/rosic-terraces.webp" imagesrcset="/images/rosic-terraces-mobile.webp 960w, /images/rosic-terraces.webp 1920w" imagesizes="100vw" fetchpriority="high" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="ROSIC" />
     <meta name="theme-color" content="#fafaf5" />
     <script>
       (() => {
@@ -36,6 +42,7 @@
       content="Hồng Tâm Rosic Global kết nối nông sản Việt Nam với đối tác quốc tế qua các nhóm hạt điều, cà phê, hồ tiêu, quế, hoa hồi, cơm dừa, trái cây sấy và nông sản chế biến."
     />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="https://rosicglobal.com/" />
     <meta
       property="og:title"
@@ -51,15 +58,15 @@
     <meta property="og:locale" content="vi_VN" />
     <meta
       property="og:image"
-      content="https://rosicglobal.com/images/hero.webp"
+      content="https://rosicglobal.com/images/rosic-terraces.webp"
     />
-    <meta property="og:image:secure_url" content="https://rosicglobal.com/images/hero.webp" />
+    <meta property="og:image:secure_url" content="https://rosicglobal.com/images/rosic-terraces.webp" />
     <meta property="og:image:type" content="image/webp" />
-    <meta property="og:image:width" content="1672" />
-    <meta property="og:image:height" content="941" />
+    <meta property="og:image:width" content="1920" />
+    <meta property="og:image:height" content="1080" />
     <meta
       property="og:image:alt"
-      content="Ảnh minh họa những đồi chè xanh trong nắng sớm"
+      content="Ảnh tư liệu ruộng bậc thang và núi rừng Việt Nam do Hồng Tâm cung cấp"
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
@@ -72,12 +79,37 @@
     />
     <meta
       name="twitter:image"
-      content="https://rosicglobal.com/images/hero.webp"
+      content="https://rosicglobal.com/images/rosic-terraces.webp"
     />
     <meta
       name="twitter:image:alt"
-      content="Ảnh minh họa những đồi chè xanh trong nắng sớm"
+      content="Ảnh tư liệu ruộng bậc thang và núi rừng Việt Nam do Hồng Tâm cung cấp"
     />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://rosicglobal.com/#organization",
+            "name": "Hồng Tâm Rosic Global",
+            "alternateName": "ROSIC",
+            "url": "https://rosicglobal.com/",
+            "logo": "https://rosicglobal.com/favicon.png",
+            "email": "info@rosicglobal.com"
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://rosicglobal.com/#website",
+            "url": "https://rosicglobal.com/",
+            "name": "Hồng Tâm Rosic Global",
+            "alternateName": "ROSIC",
+            "publisher": { "@id": "https://rosicglobal.com/#organization" },
+            "inLanguage": ["vi", "en", "zh", "ko", "ja", "ar", "fr", "de"]
+          }
+        ]
+      }
+    </script>
     <title>Hồng Tâm Rosic Global | Nông sản Việt Nam xuất khẩu</title>
   </head>
   <body>

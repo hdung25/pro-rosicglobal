@@ -78,8 +78,21 @@ export async function processCmsImage(file, presetName = "product") {
   context.imageSmoothingQuality = "high";
   context.drawImage(image, sx, sy, sw, sh, 0, 0, preset.width, preset.height);
 
+  let quality = 0.84;
+  let src = canvas.toDataURL("image/webp", quality);
+  const bytes = (value) => Math.ceil((value.split(",")[1].length * 3) / 4);
+  while ((presetName === "product" || presetName === "category") && bytes(src) >= 150000 && quality > 0.12) {
+    quality -= 0.06;
+    src = canvas.toDataURL("image/webp", quality);
+  }
+  if ((presetName === "product" || presetName === "category") && bytes(src) >= 150000) {
+    throw new Error("image_compression_limit");
+  }
+  const slug = file.name.replace(/\.[^.]+$/, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "product";
   return {
-    src: canvas.toDataURL("image/webp", 0.84),
+    src,
+    name: `vietnam-${slug}-w${preset.width}-hong-tam-rosic.webp`,
+    bytes: bytes(src),
     width: preset.width,
     height: preset.height,
     preset: presetName,

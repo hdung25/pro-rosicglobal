@@ -1,3 +1,5 @@
+import { productSrcSet } from "../product-images";
+import Lightbox from "./Lightbox";
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -13,42 +15,8 @@ import { localizeExportCategory } from "../export-catalog-l10n";
 import { ProductImageBrand } from "./ProductImageBrand";
 import "./OfficialExportCatalog.css";
 
-const SECTION_COPY = {
-  vi: {
-    eyebrow: "DANH MỤC XUẤT KHẨU",
-    title: <>Từ vùng nguyên liệu đến<br /><em>quy cách giao thương.</em></>,
-    lead: "Chín nhóm hàng được trình bày theo những thông tin cần chốt trước khi chào giá: dạng hàng, chỉ tiêu tham chiếu và phương án đóng gói.",
-    category: "Nhóm hàng xuất khẩu",
-    detail: "Xem chi tiết",
-    viewSpec: "Xem quy cách",
-    notice: "Lưu ý quy cách",
-    quote: "Gửi yêu cầu báo giá",
-    productFormat: "Dạng hàng",
-    checks: "Điểm cần kiểm tra",
-    requestSpec: "Yêu cầu quy cách",
-    close: "Đóng chi tiết sản phẩm",
-  },
-  en: {
-    eyebrow: "EXPORT CATALOGUE",
-    title: <>From growing regions to<br /><em>trade-ready specifications.</em></>,
-    lead: "Nine product families are organised around the points to align before a quotation: formats, reference checks and packing options.",
-    category: "Export product family",
-    detail: "View details",
-    viewSpec: "View specifications",
-    notice: "Specification note",
-    quote: "Request a quotation",
-    productFormat: "Product format",
-    checks: "Key checks",
-    requestSpec: "Request specifications",
-    close: "Close product details",
-  },
-  zh: { eyebrow: "出口产品目录", title: <>从产区到<br /><em>贸易规格。</em></>, lead: "九大产品类别围绕报价前需要确认的信息组织：产品形态、参考检查项和包装方案。", category: "出口产品类别", detail: "查看详情", viewSpec: "查看规格", notice: "规格说明", quote: "索取报价", productFormat: "产品形态", checks: "重点检查项", requestSpec: "索取规格", close: "关闭产品详情" },
-  ko: { eyebrow: "수출 카탈로그", title: <>원산지부터<br /><em>거래 사양까지.</em></>, lead: "9개 제품군은 견적 전 확인해야 할 제품 형태, 기준 점검 항목, 포장 방법을 중심으로 구성했습니다.", category: "수출 제품군", detail: "상세 보기", viewSpec: "사양 보기", notice: "사양 안내", quote: "견적 요청", productFormat: "제품 형태", checks: "주요 확인 항목", requestSpec: "사양 요청", close: "제품 상세 닫기" },
-  ja: { eyebrow: "輸出カタログ", title: <>産地から<br /><em>取引仕様まで。</em></>, lead: "9つの製品群を、見積もり前に確認する形状、参考確認項目、梱包方法に沿って整理しました。", category: "輸出製品群", detail: "詳細を見る", viewSpec: "仕様を見る", notice: "仕様に関する注記", quote: "見積もりを依頼", productFormat: "製品形態", checks: "確認項目", requestSpec: "仕様を依頼", close: "商品詳細を閉じる" },
-  ar: { eyebrow: "كتالوج التصدير", title: <>من مناطق الزراعة إلى<br /><em>مواصفات التجارة.</em></>, lead: "تنظم تسع عائلات من المنتجات حول ما يجب تأكيده قبل عرض السعر: الشكل، نقاط الفحص المرجعية وخيارات التعبئة.", category: "فئة منتجات التصدير", detail: "عرض التفاصيل", viewSpec: "عرض المواصفات", notice: "ملاحظة المواصفات", quote: "طلب عرض سعر", productFormat: "شكل المنتج", checks: "نقاط الفحص", requestSpec: "طلب المواصفات", close: "إغلاق تفاصيل المنتج" },
-  fr: { eyebrow: "CATALOGUE EXPORT", title: <>Des régions de culture aux<br /><em>spécifications commerciales.</em></>, lead: "Neuf familles de produits structurées autour des points à valider avant un devis : formats, contrôles de référence et conditionnement.", category: "Famille export", detail: "Voir les détails", viewSpec: "Voir les spécifications", notice: "Note de spécification", quote: "Demander un devis", productFormat: "Format produit", checks: "Points de contrôle", requestSpec: "Demander les spécifications", close: "Fermer les détails produit" },
-  de: { eyebrow: "EXPORTKATALOG", title: <>Von Anbaugebieten zu<br /><em>handelstauglichen Spezifikationen.</em></>, lead: "Neun Produktfamilien, geordnet nach den Punkten vor einem Angebot: Format, Referenzprüfungen und Verpackungsoptionen.", category: "Exportproduktgruppe", detail: "Details ansehen", viewSpec: "Spezifikationen ansehen", notice: "Spezifikationshinweis", quote: "Angebot anfragen", productFormat: "Produktformat", checks: "Wichtige Prüfungen", requestSpec: "Spezifikationen anfragen", close: "Produktdetails schließen" },
-};
+import { EXPORT_SECTION_COPY } from "../export-section-copy";
+import { mergeText } from "../cms/content-overrides";
 
 /**
  * Export-category catalogue intended for the public SiteApp.
@@ -56,9 +24,9 @@ const SECTION_COPY = {
  * `onRequestQuote` lets the shell prefill or focus its contact form without
  * coupling this section to a particular form implementation.
  */
-export default function OfficialExportCatalog({ onRequestQuote, language = "vi", categoriesData = EXPORT_CATEGORIES }) {
+export default function OfficialExportCatalog({ onRequestQuote, onProduct, products = [], textOverrides, language = "vi", categoriesData = EXPORT_CATEGORIES, sectionId = "export-catalog" }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const copy = SECTION_COPY[language] ?? SECTION_COPY.vi;
+  const copy = mergeText(EXPORT_SECTION_COPY[language] ?? EXPORT_SECTION_COPY.vi, textOverrides);
   const categories = categoriesData.map((category) => localizeExportCategory(category, language));
 
   const requestQuote = (category) => {
@@ -68,7 +36,7 @@ export default function OfficialExportCatalog({ onRequestQuote, language = "vi",
 
   return (
     <section
-      id="export-catalog"
+      id={sectionId}
       className="official-export-catalog"
       aria-labelledby="official-export-title"
       lang={language}
@@ -91,11 +59,10 @@ export default function OfficialExportCatalog({ onRequestQuote, language = "vi",
               type="button"
               key={category.id}
               onClick={() => setSelectedCategory(category)}
-              aria-label={`${copy.viewSpec}: ${category.title}`}
+              aria-label={`${copy.category}: ${category.title}`}
             >
               <span className="official-export-thumbnail__image">
-                <img src={category.image} alt="" loading="lazy" width="180" height="180" />
-                <ProductImageBrand className="official-export-thumbnail__brand" />
+                <img src={category.image} srcSet={productSrcSet(category.image)} sizes="180px" alt={category.alt} loading="lazy" width="180" height="180" />
               </span>
               <span>{category.shortTitle ?? category.title}</span>
             </button>
@@ -121,6 +88,8 @@ export default function OfficialExportCatalog({ onRequestQuote, language = "vi",
                 <div className="official-export-card__image">
                   <img
                     src={category.image}
+                    srcSet={productSrcSet(category.image)}
+                    sizes="(max-width: 600px) 90vw, 320px"
                     alt={category.alt}
                     loading="lazy"
                     width="960"
@@ -157,6 +126,11 @@ export default function OfficialExportCatalog({ onRequestQuote, language = "vi",
       </div>
 
       <CategoryDialog
+        products={products.filter(product => product.category === selectedCategory?.id || ({ "cashew-kernel": ["cashews"], "coffee-bean": ["coffee", "greencoffee"], "black-pepper": ["pepper"], "fresh-fruit": ["mango", "dragonfruit", "melon", "avocado", "pineapple", "passionfruit", "banana", "pomelo", "durian"] }[selectedCategory?.id] || []).includes(product.id))}
+        onProduct={product => { setSelectedCategory(null); onProduct?.(product); }}
+        categories={categories}
+        onCategory={setSelectedCategory}
+        language={language}
         category={selectedCategory}
         copy={copy}
         onClose={() => setSelectedCategory(null)}
@@ -166,7 +140,7 @@ export default function OfficialExportCatalog({ onRequestQuote, language = "vi",
   );
 }
 
-function CategoryDialog({ category, copy, onClose, onRequestQuote }) {
+function CategoryDialog({ category, copy, onClose, onRequestQuote, language, products, onProduct, categories, onCategory }) {
   return (
     <Dialog.Root open={Boolean(category)} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
@@ -185,15 +159,17 @@ function CategoryDialog({ category, copy, onClose, onRequestQuote }) {
 
             <div className="official-export-dialog__scroll">
               <div className="official-export-dialog__visual">
-                <img src={category.image} alt={category.alt} />
+                <Lightbox src={category.image} alt={category.alt} language={language} />
                 <ProductImageBrand />
                 <span className="official-export-dialog__number">{category.number}</span>
               </div>
 
               <div className="official-export-dialog__body">
+                <label className="product-switcher">{language === "vi" ? "Chuyển nhóm hàng" : "Switch category"}<select value={category.id} onChange={event => onCategory(categories.find(item => item.id === event.target.value))}>{categories.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
                 <p className="official-export-catalog__eyebrow">{copy.category}</p>
                 <Dialog.Title>{category.title}</Dialog.Title>
                 <Dialog.Description>{category.overview}</Dialog.Description>
+                {products.length > 0 && <section className="category-variants"><h3>{language === "vi" ? "Sản phẩm trong nhóm" : "Products in this category"}</h3>{products.map(product => <button type="button" key={product.id} onClick={() => onProduct(product)}><span>{product.code}</span> {product.title}<ChevronRight size={16} /></button>)}</section>}
 
                 <div className="official-export-dialog__summary">
                   <PackageCheck size={19} aria-hidden="true" />

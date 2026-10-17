@@ -1,3 +1,4 @@
+import { upgradeProducts } from "./vr5-catalog";
 import { EXTRA_PRODUCTS } from "./products-extra";
 
 export const CATEGORIES = [
@@ -6,15 +7,16 @@ export const CATEGORIES = [
   { id: "vegetables", label: "Rau củ theo mùa" },
   { id: "nuts", label: "Hạt & ngũ cốc" },
   { id: "processed", label: "Nông sản chế biến" },
+  { id: "other", label: "Lương thực, Thực phẩm khác" },
 ];
 
-export const PRODUCTS = [
+export const PRODUCTS = upgradeProducts([
   {
     id: "mango",
     title: "Xoài chín vàng",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/mango.webp",
+    image: "/images/vr5/vietnam-mango-w960-hong-tam-rosic.webp",
     alt: "Quả xoài vỏ vàng chín trên nền sáng",
     short: "Sắc vàng ấm áp, hương thơm của mùa nắng.",
     description:
@@ -25,7 +27,7 @@ export const PRODUCTS = [
     title: "Thanh long ruột đỏ",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/dragonfruit.webp",
+    image: "/images/vietnam-red-dragon-fruit-w960-hong-tam-rosic.webp",
     alt: "Thanh long bổ đôi với phần thịt đỏ và hạt đen nhỏ",
     short: "Vị thanh mát trong sắc đỏ tự nhiên.",
     description:
@@ -36,7 +38,7 @@ export const PRODUCTS = [
     title: "Dưa lưới",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/melon.webp",
+    image: "/images/vietnam-cantaloupe-w960-hong-tam-rosic.webp",
     alt: "Dưa lưới nguyên quả và miếng dưa với phần thịt màu cam",
     short: "Hương dịu nhẹ, từng miếng dưa mát lành.",
     description:
@@ -47,7 +49,7 @@ export const PRODUCTS = [
     title: "Bơ tươi",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/avocado.webp",
+    image: "/images/vietnam-avocado-w960-hong-tam-rosic.webp",
     alt: "Bơ xanh nguyên quả và nửa quả bơ với phần thịt vàng xanh",
     short: "Mềm mịn, béo dịu và đầy cảm hứng.",
     description:
@@ -58,7 +60,7 @@ export const PRODUCTS = [
     title: "Hạt điều",
     category: "nuts",
     group: "Hạt & ngũ cốc",
-    image: "/images/cashews.webp",
+    image: "/images/vietnam-cashew-nuts-w960-hong-tam-rosic.webp",
     alt: "Những hạt điều màu kem được bày trên nền sáng",
     short: "Mộc mạc từ hình dáng đến vị bùi thân thuộc.",
     description:
@@ -69,7 +71,7 @@ export const PRODUCTS = [
     title: "Cà phê rang",
     category: "processed",
     group: "Nông sản chế biến",
-    image: "/images/coffee.webp",
+    image: "/images/vr5/vietnam-coffee-w960-hong-tam-rosic.webp",
     alt: "Hạt cà phê rang màu nâu trên nền sáng",
     short: "Hương rang ấm, mở đầu những câu chuyện.",
     description:
@@ -80,7 +82,7 @@ export const PRODUCTS = [
     title: "Rau củ theo mùa",
     category: "vegetables",
     group: "Rau củ theo mùa",
-    image: "/images/vegetables.webp",
+    image: "/images/vietnam-vegetables-w960-hong-tam-rosic.webp",
     alt: "Các loại rau lá xanh, cà chua, cà rốt và ớt chuông tươi",
     short: "Đa sắc, tươi mới và thay đổi cùng mùa vụ.",
     description:
@@ -91,21 +93,21 @@ export const PRODUCTS = [
     title: "Đông trùng hạ thảo",
     category: "processed",
     group: "Nông sản chế biến",
-    image: "/images/cordyceps.webp",
+    image: "/images/vietnam-cordyceps-w960-hong-tam-rosic.webp",
     alt: "Những sợi đông trùng hạ thảo màu cam trong vật đựng sáng màu",
     short: "Sắc cam đặc trưng, một lựa chọn khác biệt.",
     description:
       "Đông trùng hạ thảo được giới thiệu như một nhóm sản phẩm để đối tác tìm hiểu thêm. Dạng sản phẩm, thành phần, nguồn gốc, cách sử dụng và hồ sơ đi kèm cần được xác nhận cụ thể trước khi lựa chọn.",
   },
   ...EXTRA_PRODUCTS,
-];
+]);
 
 export const JOURNEY = [
   {
     title: "Bắt đầu từ nguồn trồng",
     description:
       "Hiểu xuất xứ và nhịp mùa vụ để có cơ sở lựa chọn sản phẩm phù hợp với nhu cầu.",
-    image: "/images/hero.webp",
+    image: "/images/vietnam-hero-w960-hong-tam-rosic.webp",
     alt: "Những đồi chè xanh trải dài trong ánh nắng",
     caption: "Từ đất lành, câu chuyện bắt đầu.",
   },
@@ -113,7 +115,7 @@ export const JOURNEY = [
     title: "Lựa chọn từng sản phẩm",
     description:
       "Trao đổi về chủng loại, độ chín, kích cỡ và những đặc điểm quan trọng với mỗi đơn hàng.",
-    image: "/images/produce.webp",
+    image: "/images/vietnam-produce-w960-hong-tam-rosic.webp",
     alt: "Các loại trái cây, hạt điều và cà phê được bày trên nền sáng",
     caption: "Mỗi nhu cầu, một lựa chọn riêng.",
   },
@@ -121,7 +123,7 @@ export const JOURNEY = [
     title: "Chăm chút cách đóng gói",
     description:
       "Thống nhất cách sơ chế, quy cách bao bì và điều kiện bảo quản theo từng loại nông sản.",
-    image: "/images/agri-processing-line.webp",
+    image: "/images/vietnam-agri-processing-line-w960-hong-tam-rosic.webp",
     alt: "Dây chuyền phân loại và đóng gói nông sản trong không gian sáng",
     caption: "Hiểu sản phẩm để chăm chút đúng cách.",
   },
@@ -129,7 +131,7 @@ export const JOURNEY = [
     title: "Kết nối đến nơi nhận",
     description:
       "Làm rõ lịch giao, điểm nhận và trách nhiệm của các bên để việc phối hợp được thuận lợi.",
-    image: "/images/logistics.webp",
+    image: "/images/vietnam-logistics-w960-hong-tam-rosic.webp",
     alt: "Không gian nhà kho và khu vực tập kết hàng hóa",
     caption: "Phối hợp rõ ràng trên từng chặng.",
   },
@@ -141,7 +143,7 @@ export const ARTICLES = [
     title: "Chọn đúng mùa, hiểu đúng sản phẩm.",
     category: "Câu chuyện mùa vụ",
     readTime: 2,
-    image: "/images/hero.webp",
+    image: "/images/vietnam-hero-w960-hong-tam-rosic.webp",
     alt: "Đồi chè xanh trong ánh nắng tự nhiên",
     excerpt:
       "Một danh mục nông sản phù hợp bắt đầu từ việc hiểu nhu cầu sử dụng và những thay đổi của mùa vụ.",
@@ -165,7 +167,7 @@ export const ARTICLES = [
     title: "Một hành trình tốt cần cách gói phù hợp.",
     category: "Góc nhìn sản phẩm",
     readTime: 2,
-    image: "/images/agri-processing-line.webp",
+    image: "/images/vietnam-agri-processing-line-w960-hong-tam-rosic.webp",
     alt: "Dây chuyền phân loại và đóng gói nông sản trong không gian sáng",
     excerpt:
       "Bao bì và kế hoạch giao nhận là những chi tiết nên được trao đổi cùng sản phẩm ngay từ đầu.",
@@ -189,7 +191,7 @@ export const ARTICLES = [
     title: "Đơn hàng đầu tiên bắt đầu bằng sự rõ ràng.",
     category: "Kết nối đối tác",
     readTime: 2,
-    image: "/images/produce.webp",
+    image: "/images/vietnam-produce-w960-hong-tam-rosic.webp",
     alt: "Danh mục trái cây, hạt điều và cà phê được sắp xếp cùng nhau",
     excerpt:
       "Một bản yêu cầu ngắn gọn nhưng đủ thông tin giúp cuộc trao đổi giữa các đối tác đi vào đúng nhu cầu.",

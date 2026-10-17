@@ -1,0 +1,41 @@
+{
+  "name": "Hồng Tâm Rosic Global",
+  "short_name": "ROSIC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf5",
+  "theme_color": "#193B30",
+  "icons": [
+    {
+      "src": "/icons/rosic-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/rosic-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/rosic-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "scope": "/",
+  "description": "Nông sản Việt Nam · Vietnamese agricultural exports",
+  "shortcuts": [
+    {
+      "name": "Sản phẩm · Products",
+      "url": "/#products"
+    },
+    {
+      "name": "Báo giá · Quotation",
+      "url": "/#contact"
+    }
+  ]
+}

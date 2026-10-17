@@ -18,7 +18,7 @@ export function LanguagePicker({ language, onChange, compact = false, className 
           </option>
         ))}
       </select>
-      <ChevronDown className="language-picker-chevron" size={15} aria-hidden="true" />
+      <ChevronDown className="language-picker-chevron" size={13} aria-hidden="true" />
     </label>
   );
 }

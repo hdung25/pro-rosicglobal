@@ -9,7 +9,7 @@ test("Korean uses reviewed public copy and a locally served Taegukgi", async ({ 
 
   await expect(page.locator("html")).toHaveAttribute("lang", "ko");
   await expect(page.locator(".topbar")).toContainText("정성으로 만들고");
-  await expect(page.locator("#about")).toContainText("베트남에 뿌리내리고");
+  await expect(page.locator("#about")).toContainText("진심에서 시작하여");
   await expect(page.locator("#journey")).toContainText("모든 단계에 담은 정성");
   await page.locator("#testimonials").scrollIntoViewIfNeeded();
   await expect(page.locator("#feedback-title")).toHaveText("경청으로 더 나은 협업을 만듭니다.");
@@ -24,7 +24,7 @@ test("Korean uses reviewed public copy and a locally served Taegukgi", async ({ 
 
   await page.locator(".site-footer").scrollIntoViewIfNeeded();
   await page.getByRole("button", { name: "정보 및 개인정보", exact: true }).click();
-  await expect(page.getByRole("dialog")).toContainText("영업팀 배정과 이메일 확인");
+  await expect(page.getByRole("dialog")).toContainText("앱에서 보내기");
 });
 
 test("every supported locale supplies human-facing theme and editorial copy", async () => {
@@ -54,7 +54,7 @@ test("English localizes the general catalogue, quote choices, and numeric export
   await expect(productSelect.locator("option").first()).toHaveText("Mixed seasonal order");
   await expect(productSelect.locator("option").filter({ hasText: "Black pepper" })).toHaveCount(2);
 
-  await page.getByRole("button", { name: /Star anise$/ }).click();
+  await page.locator(".official-export-card").filter({ hasText: "Star anise" }).getByRole("button").click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toContainText("Reference figures");
   await expect(dialog).toContainText("13.5%");

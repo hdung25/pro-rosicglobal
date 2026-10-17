@@ -8,3 +8,8 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+
+// Keep development and embedded Admin previews free of service-worker interception.
+if (import.meta.env.PROD && 'serviceWorker' in navigator && window.top === window.self && !location.pathname.startsWith('/admin') && !location.search) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {}); });
+}

@@ -306,10 +306,10 @@ export function localizeProduct(product, language = "vi") {
   const title =
     PRODUCT_NAMES[language]?.[product.id] ??
     PRODUCT_NAMES.en[product.id] ??
-    product.title;
+    product.englishTitle ?? product.title;
   const category = product.category;
 
-  return {
+  const translated = {
     ...localized,
     title,
     group:
@@ -322,6 +322,8 @@ export function localizeProduct(product, language = "vi") {
       locale.description[category]?.(title) ??
       locale.description.processed(title),
   };
+  const overrides = Object.fromEntries(Object.entries(product.translations?.[language] || {}).filter(([key, value]) => ["title", "short", "description", "alt"].includes(key) && typeof value === "string" && value.trim()));
+  return { ...translated, ...overrides };
 }
 
 export function localizeProducts(products, language = "vi") {

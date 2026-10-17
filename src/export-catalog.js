@@ -4,7 +4,7 @@ export const EXPORT_CATEGORIES = [
     number: "01",
     title: "Hạt điều nhân",
     shortTitle: "Hạt điều",
-    image: "/images/cashews.webp",
+    image: "/images/vietnam-cashew-nuts-w960-hong-tam-rosic.webp",
     alt: "Hạt điều nhân màu kem trong bát gốm sáng",
     description:
       "Điều nhân theo grade, phù hợp cho nguyên liệu thực phẩm, bán lẻ và chế biến sâu.",
@@ -41,7 +41,7 @@ export const EXPORT_CATEGORIES = [
     number: "02",
     title: "Quế cassia",
     shortTitle: "Quế",
-    image: "/images/cassia-export.webp",
+    image: "/images/vietnam-cassia-cinnamon-w960-hong-tam-rosic.webp",
     alt: "Quế cassia thanh và vỏ quế trên bề mặt đá sáng",
     description:
       "Quế thanh, quế cắt và quế bột cho ngành gia vị, đồ uống và thực phẩm.",
@@ -80,7 +80,7 @@ export const EXPORT_CATEGORIES = [
     number: "03",
     title: "Hạt tiêu",
     shortTitle: "Hạt tiêu",
-    image: "/images/pepper.webp",
+    image: "/images/vr5/vietnam-black-pepper-w960-hong-tam-rosic.webp",
     alt: "Hạt tiêu đen nguyên hạt cùng chùm tiêu xanh",
     description:
       "Tiêu đen và tiêu trắng theo độ rời, sàng và mức làm sạch cần cho mỗi thị trường.",
@@ -119,7 +119,7 @@ export const EXPORT_CATEGORIES = [
     number: "04",
     title: "Hoa hồi",
     shortTitle: "Hoa hồi",
-    image: "/images/star-anise-export.webp",
+    image: "/images/vietnam-star-anise-w960-hong-tam-rosic.webp",
     alt: "Hoa hồi nguyên cánh trên nền đá sáng",
     description:
       "Hoa hồi nguyên cánh, hồi vụ thu, hồi vụ xuân và hồi vỡ cho chuỗi gia vị.",
@@ -158,7 +158,7 @@ export const EXPORT_CATEGORIES = [
     number: "05",
     title: "Cà phê hạt",
     shortTitle: "Cà phê",
-    image: "/images/green-coffee-export.webp",
+    image: "/images/vietnam-green-coffee-beans-w960-hong-tam-rosic.webp",
     alt: "Hạt cà phê nhân xanh trong khay gốm sáng màu",
     description:
       "Cà phê hạt theo sàng, phương pháp sơ chế và bộ chỉ tiêu phù hợp với hợp đồng xuất khẩu.",
@@ -196,7 +196,7 @@ export const EXPORT_CATEGORIES = [
     number: "06",
     title: "Cơm dừa sấy",
     shortTitle: "Cơm dừa",
-    image: "/images/desiccated-coconut-export.webp",
+    image: "/images/vietnam-desiccated-coconut-w960-hong-tam-rosic.webp",
     alt: "Cơm dừa sấy trắng trong bát gốm, cạnh trái dừa bổ đôi",
     description:
       "Cơm dừa sấy mịn hoặc thô, high-fat hoặc low-fat cho thực phẩm và bánh kẹo.",
@@ -235,7 +235,7 @@ export const EXPORT_CATEGORIES = [
     number: "07",
     title: "Trái cây sấy",
     shortTitle: "Trái cây sấy",
-    image: "/images/dried-fruit-export.webp",
+    image: "/images/vietnam-dried-fruit-w960-hong-tam-rosic.webp",
     alt: "Xoài sấy, chuối sấy và dứa sấy trong khay gốm sáng",
     description:
       "Dòng chip và dẻo từ xoài, mít, chuối, dứa cùng công thức phù hợp từng kênh bán.",
@@ -272,7 +272,7 @@ export const EXPORT_CATEGORIES = [
     number: "08",
     title: "Trái cây tươi",
     shortTitle: "Trái cây tươi",
-    image: "/images/produce.webp",
+    image: "/images/vietnam-produce-w960-hong-tam-rosic.webp",
     alt: "Danh mục trái cây tươi Việt Nam trên nền sáng",
     description:
       "Trái cây nhiệt đới theo mùa cho kênh nhập khẩu, bán lẻ, foodservice và chế biến.",
@@ -307,9 +307,9 @@ export const EXPORT_CATEGORIES = [
   {
     id: "other",
     number: "09",
-    title: "Other",
-    shortTitle: "Other",
-    image: "/images/finished-cashew-export.webp",
+    title: "Lương thực, Thực phẩm khác",
+    shortTitle: "Lương thực, Thực phẩm khác",
+    image: "/images/vietnam-processed-foods-w960-hong-tam-rosic.webp",
     alt: "Sản phẩm nông nghiệp chế biến và đóng gói theo yêu cầu",
     description:
       "Nhóm sản phẩm mở cho nguyên liệu, hàng chế biến và dự án nhãn riêng theo yêu cầu riêng.",

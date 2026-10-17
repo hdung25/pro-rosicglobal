@@ -27,6 +27,7 @@ export function verifyAdminCredentials(username, password) {
 }
 
 function sessionSecret() {
+  if (process.env.VERCEL && !process.env.ADMIN_SESSION_SECRET) throw new Error("Admin session secret is not configured");
   return String(process.env.ADMIN_SESSION_SECRET || FALLBACK_SESSION_SECRET);
 }
 
@@ -51,7 +52,7 @@ export function verifySessionToken(token, now = Date.now()) {
   }
 }
 
-function cookieValue(req) {
+export function cookieValue(req) {
   const cookies = String(req.headers.cookie || "").split(";");
   for (const cookie of cookies) {
     const [name, ...value] = cookie.trim().split("=");
@@ -66,7 +67,7 @@ function expectedOrigin(req) {
   return host ? `${protocol}://${host}` : "";
 }
 
-function sameOrigin(req) {
+export function sameOrigin(req) {
   const origin = String(req.headers.origin || "");
   return !origin || origin === expectedOrigin(req);
 }

@@ -18,7 +18,7 @@ test("topbar controls stay contained and category thumbnails are larger", async 
   expect(thumbnailWidth).toBeGreaterThanOrEqual(120);
 });
 
-test("desktop category popup presents all information without an inner scrollbar", async ({ page }) => {
+test("desktop category popup keeps the quote reachable within its scroll region", async ({ page }) => {
   await page.goto("/");
   await page.locator("#export-catalog").scrollIntoViewIfNeeded();
   await page.getByRole("button", { name: /Hoa hồi/ }).first().click();
@@ -29,8 +29,9 @@ test("desktop category popup presents all information without an inner scrollbar
     overflowY: getComputedStyle(node).overflowY,
     bottom: node.getBoundingClientRect().bottom,
   }));
-  expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 1);
-  expect(metrics.overflowY).toBe("hidden");
+  expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
+  expect(metrics.overflowY).toBe("auto");
   expect(metrics.bottom).toBeLessThanOrEqual(970);
+  await page.locator(".official-export-dialog__action").scrollIntoViewIfNeeded();
   await expect(page.locator(".official-export-dialog__action")).toBeInViewport();
 });

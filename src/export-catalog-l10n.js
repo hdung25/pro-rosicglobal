@@ -8,7 +8,7 @@ const NAMES = {
     "desiccated-coconut": "Desiccated coconut",
     "dried-fruit": "Dried fruit",
     "fresh-fruit": "Fresh fruit",
-    other: "Other",
+    other: "Other Food & Foodstuffs",
   },
   zh: {
     "cashew-kernel": "腰果仁",
@@ -223,7 +223,7 @@ const LOCALES = {
 };
 
 export function localizeExportCategory(category, language) {
-  if (language === "vi") {
+  if (language === "vi" || !NAMES.en[category.id]) {
     return { ...category, sourceTitle: category.title, notice: null };
   }
 

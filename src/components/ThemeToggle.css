@@ -104,6 +104,36 @@ html[data-theme="dark"] .field textarea {
   border-color: #65705e;
 }
 
+html[data-theme="dark"] .contact-form {
+  color: var(--ink);
+  border-color: #4d5949;
+  background: #202a1f;
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.18);
+}
+
+html[data-theme="dark"] .contact-intro > p:not(.eyebrow),
+html[data-theme="dark"] .contact-intro li,
+html[data-theme="dark"] .contact-intro .form-note {
+  color: #c8d1c2;
+}
+
+html[data-theme="dark"] .contact-channels a {
+  padding: 11px 13px;
+  border: 1px solid #465241;
+  border-radius: 10px;
+  color: #edf1e7;
+  background: #202a1f;
+}
+
+html[data-theme="dark"] .field select option {
+  color: #edf1e7;
+  background: #202a1f;
+}
+
+html[data-theme="dark"] .checkbox-label input {
+  accent-color: #dfbb62;
+}
+
 html[data-theme="dark"] .dialog-overlay {
   background: rgb(0 0 0 / 0.58);
 }

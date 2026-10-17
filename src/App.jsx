@@ -5,7 +5,6 @@ import {
   MotionConfig,
   useReducedMotion,
   useScroll,
-  useSpring,
   useTransform,
 } from "motion/react";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -15,7 +14,6 @@ import {
   ArrowUp,
   ChevronDown,
   Leaf,
-  Sprout,
   PackageCheck,
   Globe2,
   Menu,
@@ -23,16 +21,18 @@ import {
   Search,
   Plus,
   Minus,
-  Network,
-  Mail,
-  MessageCircle,
+  ShieldCheck,
+  BadgeCheck,
+  HeartHandshake,
+  Users,
 } from "lucide-react";
-import { FaLinkedinIn, FaWhatsapp } from "react-icons/fa6";
+import { FaLinkedinIn, FaWhatsapp, FaFacebookF, FaWeixin, FaTiktok } from "react-icons/fa6";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import { SiZalo } from "react-icons/si";
-import Contact from "./components/Contact";
-import Feedback from "./components/Feedback";
-import CatalogDemo from "./components/CatalogDemo";
+import { productSrcSet, vr5ProductImage } from "./product-images";
+import DeferredContent from "./components/DeferredContent";
+import Lightbox from "./components/Lightbox";
+import ContentProtection from "./components/ContentProtection";
 import OfficialExportCatalog from "./components/OfficialExportCatalog";
 import { LanguagePicker } from "./components/LanguagePicker";
 import { ProductImageBrand } from "./components/ProductImageBrand";
@@ -40,7 +40,7 @@ import { ThemeToggle } from "./components/ThemeToggle";
 import { useSiteLanguage } from "./language";
 import { useSiteTheme } from "./theme";
 import { PRODUCTS, CATEGORIES, ARTICLES, JOURNEY } from "./data";
-import { EXPORT_CATEGORIES } from "./export-catalog";
+import { EXPORT_CATEGORIES, EXPORT_SPEC_NOTICE } from "./export-catalog";
 import { localizeExportCategory } from "./export-catalog-l10n";
 import { localizeProducts } from "./product-l10n";
 import {
@@ -49,14 +49,29 @@ import {
   siteCopyFor,
 } from "./site-copy";
 
+import { ROSIC_VALUES, brandStoryFor } from "./brand-story";
+import { CATEGORY_ICONS, categoryIconKey } from "./category-icons";
+import "./brand-story.css";
+import "./vr4.css";
+import "./customer-refinements.css";
+import "./vr5.css";
+import "./mobile-polish.css";
+import { mergeText } from "./cms/content-overrides";
+import SocialChannels from "./components/SocialChannels";
+import InstallApp from "./components/InstallApp";
+import { SOCIAL_DEFAULTS, configuredSocial, configuredSocialQr } from "./social-config";
+import { upgradeProducts } from "./vr5-catalog";
+
 const AdminPanel = lazy(() => import("./components/AdminPanel"));
+const CatalogDemo = lazy(() => import("./components/CatalogDemo"));
+const Contact = lazy(() => import("./components/Contact"));
+const Feedback = lazy(() => import("./components/Feedback"));
 
 const NAV = [
   { key: "home", label: "Trang chủ", href: "#home" },
   { key: "products", label: "Sản phẩm", href: "#products" },
   { key: "about", label: "Về chúng tôi", href: "#about" },
   { key: "partners", label: "Đối tác", href: "#testimonials" },
-  { key: "oem", label: "OEM/ODM", href: "#export-catalog" },
   { key: "journey", label: "Hành trình", href: "#journey" },
   { key: "journal", label: "Tin tức", href: "#blog" },
   { key: "contact", label: "Liên hệ", href: "#contact" },
@@ -64,14 +79,14 @@ const NAV = [
 
 const SOCIAL_LINKS = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/clairehong-hongtamrosicglobal/", icon: FaLinkedinIn, external: true },
-  { label: "WhatsApp", href: "https://wa.me/84962284872", icon: FaWhatsapp, external: true },
+  { label: "WhatsApp", href: SOCIAL_DEFAULTS.whatsapp, icon: FaWhatsapp, external: true },
   { label: "Email", href: "mailto:info@rosicglobal.com", icon: HiOutlineEnvelope },
+  { label: "Facebook", href: SOCIAL_DEFAULTS.facebook, icon: FaFacebookF, external: true },
+  { label: "WeChat", href: SOCIAL_DEFAULTS.wechat, icon: FaWeixin, external: true },
+  { label: "TikTok", href: "", icon: FaTiktok, external: true },
   { label: "Zalo", href: "https://zalo.me/84962284872", icon: SiZalo, external: true },
 ];
 
-const DEFAULT_PUBLIC_SOCIAL = Object.fromEntries(
-  SOCIAL_LINKS.map(({ label, href }) => [label.toLowerCase(), href]),
-);
 
 const navLabel = (copy, item) => copy.nav[item.key] ?? item.label;
 
@@ -161,9 +176,8 @@ const MAINTENANCE_COPY = {
   },
 };
 
-function Brand({ footer = false, copy, language = "vi" }) {
+function Brand({ footer = false, copy }) {
   const brandCopy = copy?.brand;
-  const international = language !== "vi";
   return (
     <a
       className={`brand ${footer ? "brand-footer" : ""}`}
@@ -178,8 +192,9 @@ function Brand({ footer = false, copy, language = "vi" }) {
         height="159"
       />
       <span className="brand-name">
-        {international ? "HONG TAM" : "HỒNG TÂM"} <span>ROSIC</span>
+        ROSIC
       </span>
+      <span className="brand-slogan">Manufacturing with Heart, Trading with Vision</span>
     </a>
   );
 }
@@ -195,7 +210,7 @@ function MaintenancePage() {
         <section className="maintenance-shell" aria-labelledby="maintenance-title">
           <div className="maintenance-topline">
             <a className="maintenance-brand" href="/" aria-label="Hồng Tâm Rosic Global">
-              <img src="/brand-mark.svg" alt="Hồng Tâm Rosic Global" width="445" height="159" />
+              <img src="/brand-kit/rosic-logo-stacked.svg" alt="Hồng Tâm Rosic Global" width="600" height="370" />
             </a>
             <div className="maintenance-utilities">
               <LanguagePicker compact language={language} onChange={setLanguage} />
@@ -222,9 +237,9 @@ function MaintenancePage() {
             <div className="maintenance-footer-row">
               <p className="maintenance-footer">{copy.slogan}</p>
               <div className="maintenance-socials" aria-label={copy.social}>
-                <a href="https://wa.me/84962284872" target="_blank" rel="noreferrer" aria-label="WhatsApp"><MessageCircle size={17} /></a>
-                <a href="https://www.linkedin.com/in/clairehong-hongtamrosicglobal/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Network size={17} /></a>
-                <a href="mailto:info@rosicglobal.com" aria-label="Email"><Mail size={17} /></a>
+                <a href="https://wa.me/84962284872" target="_blank" rel="noreferrer" aria-label="WhatsApp"><FaWhatsapp size={17} /></a>
+                <a href="https://www.linkedin.com/in/clairehong-hongtamrosicglobal/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedinIn size={17} /></a>
+                <a href="mailto:info@rosicglobal.com" aria-label="Email"><HiOutlineEnvelope size={17} /></a>
               </div>
             </div>
           </div>
@@ -251,8 +266,29 @@ function Reveal({ children, className = "", delay = 0 }) {
     </Motion.div>
   );
 }
-function Header({ language, onLanguage, theme, onThemeChange, copy, exportCategories = EXPORT_CATEGORIES }) {
+function Header({ language, onLanguage, theme, onThemeChange, copy, exportCategories = EXPORT_CATEGORIES, onFilter }) {
   const [open, setOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const triggerRef = useRef(null);
+  useEffect(() => {
+    const close = () => setProductsOpen(false);
+    const outside = event => { if (!dropdownRef.current?.contains(event.target)) close(); };
+    const escape = event => { if (event.key === "Escape" && productsOpen) { close(); triggerRef.current?.focus(); } };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    window.addEventListener("hashchange", close);
+    window.addEventListener("scroll", close, { passive: true });
+    window.addEventListener("resize", close);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+      window.removeEventListener("hashchange", close);
+      window.removeEventListener("scroll", close);
+      window.removeEventListener("resize", close);
+    };
+  }, [productsOpen]);
+  const chooseCategory = id => { onFilter?.(id); setProductsOpen(false); setOpen(false); };
   const [active, setActive] = useState("home");
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -262,26 +298,26 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
       },
       { rootMargin: "-20% 0px -60% 0px" },
     );
-    NAV.forEach((item) => {
-      const node = document.querySelector(item.href);
-      if (node) observer.observe(node);
-    });
-    return () => observer.disconnect();
+    const observeSections = () => {
+      observer.disconnect();
+      NAV.forEach((item) => {
+        const node = document.querySelector(item.href);
+        if (node) observer.observe(node);
+      });
+    };
+    observeSections();
+    window.addEventListener("rosic:content-ready", observeSections);
+    return () => { observer.disconnect(); window.removeEventListener("rosic:content-ready", observeSections); };
   }, []);
   return (
     <>
       <div className="topbar">
         <div className="topbar-inner container">
-          <ThemeToggle
-            className="topbar-theme"
-            theme={theme}
-            onThemeChange={onThemeChange}
-            labels={copy.theme}
-          />
+          <span aria-hidden="true" />
           <span className="topbar-message">{copy.brand.topbar}</span>
           <LanguagePicker
             compact
-            className="topbar-language"
+            className="topbar-language header-language"
             language={language}
             onChange={onLanguage}
             label={copy.language}
@@ -290,17 +326,27 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
       </div>
       <header className="site-header">
         <div className="nav-shell container">
+      <aside className="floating-tools" aria-label={copy.footer.tools ?? "Display controls"}>
+        <ThemeToggle className="floating-theme" theme={theme} onThemeChange={onThemeChange} labels={copy.theme} />
+        <a className="floating-back-top" href="#home" aria-label={copy.footer.backTop}><ArrowUp size={18} /></a>
+      </aside>
           <nav className="nav-left" aria-label={copy.primaryNavigation}>
             {NAV.slice(0, 4).map((item) => item.key === "products" ? (
-              <div className="nav-dropdown" key={item.href}>
-                <a href={item.href} aria-current={active === "products" ? "location" : undefined}>
+              <div className="nav-dropdown" key={item.href} ref={dropdownRef}
+                onMouseLeave={() => setProductsOpen(false)}
+                onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setProductsOpen(false); }}>
+                <button ref={triggerRef} className="products-menu-trigger" aria-expanded={productsOpen} aria-controls="product-menu"
+                  onClick={() => setProductsOpen(value => !value)}
+                  onKeyDown={event => { if (event.key === "ArrowDown") { event.preventDefault(); setProductsOpen(true); requestAnimationFrame(() => dropdownRef.current?.querySelector(".dropdown-panel a")?.focus()); } }}
+                  aria-current={active === "products" ? "location" : undefined}>
                   {navLabel(copy, item)} <ChevronDown size={12} />
-                </a>
-                <div className="dropdown-panel">
+                </button>
+                <div id="product-menu" className="dropdown-panel" hidden={!productsOpen}>
+                  <a className="dropdown-all" href="#products" onClick={() => chooseCategory("all")}>{copy.tabs.all} <ArrowUpRight size={15} /></a>
                   {exportCategories.map((category) => (
-                    <a key={category.id} href="#export-catalog">
-                      {localizeExportCategory(category, language).shortTitle ?? localizeExportCategory(category, language).title}
-                      <ArrowUpRight size={14} />
+                    <a key={category.id} href="#products" onClick={() => chooseCategory(category.id)}>
+                      {createElement(CATEGORY_ICONS[categoryIconKey(category)], { size: 22, strokeWidth: 1.5, "aria-hidden": true })}
+                      <span>{localizeExportCategory(category, language).shortTitle ?? localizeExportCategory(category, language).title}</span>
                     </a>
                   ))}
                 </div>
@@ -320,7 +366,7 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
                 className={item.key === "contact" ? "nav-contact" : undefined}
                 aria-current={active === item.href.slice(1) ? "location" : undefined}
               >
-                {navLabel(copy, item)} {item.key === "contact" && <ArrowUpRight size={15} />}
+                {navLabel(copy, item)}
               </a>
             ))}
           </nav>
@@ -350,6 +396,7 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
                     <a
                       key={item.href}
                       href={item.href}
+                      style={{ "--menu-index": index }}
                       onClick={() => setOpen(false)}
                     >
                       <span>0{index + 1}</span>
@@ -358,6 +405,25 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
                     </a>
                   ))}
                 </nav>
+                <div className="mobile-category-menu" aria-label={copy.nav.products}>
+                  {exportCategories.map(category => <a key={category.id} href="#products" onClick={() => chooseCategory(category.id)}>
+                    {createElement(CATEGORY_ICONS[categoryIconKey(category)], { size: 18, strokeWidth: 1.5, "aria-hidden": true })}
+                    <span>{localizeExportCategory(category, language).shortTitle ?? category.title}</span>
+                  </a>)}
+                </div>
+                <LanguagePicker
+                  compact
+                  className="mobile-language"
+                  language={language}
+                  onChange={onLanguage}
+                  label={copy.language}
+                />
+                <ThemeToggle
+                  className="mobile-theme"
+                  theme={theme}
+                  onThemeChange={onThemeChange}
+                  labels={copy.theme}
+                />
                 <p>
                   {copy.brand.topbar}
                 </p>
@@ -369,7 +435,7 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
     </>
   );
 }
-function Hero({ copy, image = "/images/hero.webp" }) {
+function Hero({ copy, story, image = "/images/rosic-terraces.webp" }) {
   const ref = useRef(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -386,7 +452,6 @@ function Hero({ copy, image = "/images/hero.webp" }) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.7 }}
         >
-          <span className="eyebrow-line" />
           {copy.hero.eyebrow}
         </Motion.p>
         <h1>
@@ -396,7 +461,7 @@ function Hero({ copy, image = "/images/hero.webp" }) {
               animate={{ y: 0 }}
               transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
             >
-              {copy.hero.start}
+              {story.title[0]}
             </Motion.span>
           </span>
           <span className="title-line title-accent">
@@ -409,7 +474,7 @@ function Hero({ copy, image = "/images/hero.webp" }) {
                 ease: [0.22, 1, 0.36, 1],
               }}
             >
-              {copy.hero.accent}
+              {story.title[1]}
             </Motion.span>
           </span>
         </h1>
@@ -423,18 +488,20 @@ function Hero({ copy, image = "/images/hero.webp" }) {
             <br />
             {copy.hero.second}
           </p>
-          <a className="button button-primary" href="#export-catalog">
-            {copy.hero.cta} <ArrowUpRight size={18} />
+          <a className="button hero-about-button" href="#about">
+            {copy.hero.aboutCta || copy.nav.about} <ArrowUpRight size={18} />
           </a>
         </Motion.div>
       </div>
       <div className="hero-landscape">
         <Motion.img
           src={image}
+          srcSet={image === "/images/rosic-terraces.webp" ? "/images/rosic-terraces-mobile.webp 960w, /images/rosic-terraces.webp 1920w" : undefined}
+          sizes="100vw"
           alt={copy.hero.origin}
           fetchPriority="high"
-          width="1672"
-          height="941"
+          width="2560"
+          height="1440"
           style={reduce ? undefined : { y }}
         />
         <div className="landscape-caption">
@@ -446,9 +513,9 @@ function Hero({ copy, image = "/images/hero.webp" }) {
     </section>
   );
 }
-function Marquee({ copy }) {
+function Marquee({ copy, categories }) {
   const [paused, setPaused] = useState(false);
-  const words = copy.marquee;
+  const words = categories?.length ? categories : copy.marquee.map((title, index) => ({ id: ["processed", "fruit", "vegetables", "nuts"][index], title }));
   return (
     <section
       className={`marquee-section ${paused ? "is-paused" : ""}`}
@@ -470,14 +537,10 @@ function Marquee({ copy }) {
             key={copy}
             aria-hidden={copy === 1 ? true : undefined}
           >
-            {words.map((word) => (
-              <span key={word}>
-                {word}
-                <Sprout
-                  className="marquee-flower"
-                  aria-hidden="true"
-                  strokeWidth={1.2}
-                />
+            {words.map((category) => (
+              <span key={category.id || category.title}>
+                {category.shortTitle ?? category.title}
+                {createElement(CATEGORY_ICONS[categoryIconKey(category)], { className: "marquee-flower", "aria-hidden": true, strokeWidth: 1.5 })}
               </span>
             ))}
           </div>
@@ -486,59 +549,73 @@ function Marquee({ copy }) {
     </section>
   );
 }
-function About({ copy, image = "/images/produce.webp" }) {
+function RosicValues({ story, language, values = ROSIC_VALUES }) {
+  const reduce = useReducedMotion();
+  const icons = { ShieldCheck, Leaf, BadgeCheck, HeartHandshake, Users };
   return (
-    <section id="about" className="about-section section-pad">
-      <div className="container about-grid">
-        <Reveal className="about-photo">
-          <img
-            src={image}
-            alt={copy.about.alt}
-            loading="lazy"
-            width="1536"
-            height="1024"
-          />
-          <div className="photo-border" aria-hidden="true" />
-        </Reveal>
-        <Reveal className="about-copy">
-          <p className="eyebrow">{copy.about.eyebrow}</p>
-          <h2 className="section-heading">
-            {copy.about.title[0]}
-            <br />
-            {copy.about.title[1]}
-          </h2>
-          <p>{copy.about.first}</p>
-          <p>{copy.about.second}</p>
-          <a className="text-link" href="#journey">
-            {copy.about.link} <ArrowUpRight size={18} />
-          </a>
-          <div className="about-signature">
-            <span>Hồng Tâm</span>
-            <p>{copy.brand.topbar}</p>
-          </div>
-        </Reveal>
+    <section className="rosic-section" aria-label="ROSIC">
+      <div className="container rosic-layout">
+        <p className="rosic-slogan">{story.title[0]}<br /><em>{story.title[1]}</em></p>
+        <ul className="rosic-values" dir="ltr">
+          {values.map(({ letter, word, icon, explanation, explanationEn }, index) => (
+            <Motion.li key={letter} initial={reduce ? false : { opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.07 }}>
+              <span className="rosic-letter">{letter}</span>
+              {createElement(icons[icon], { size: 23, strokeWidth: 1.2, 'aria-hidden': true })}
+              <span className="rosic-word">{word}</span><span className="rosic-explanation">{language === "vi" ? explanation : explanationEn}</span>
+            </Motion.li>
+          ))}
+        </ul>
       </div>
-      <Reveal className="container values-band">
-        <div>
-          <Sprout />
-          <h3>{copy.about.values[0].title}</h3>
-          <p>{copy.about.values[0].body}</p>
-        </div>
-        <div>
-          <PackageCheck />
-          <h3>{copy.about.values[1].title}</h3>
-          <p>{copy.about.values[1].body}</p>
-        </div>
-        <div>
-          <Globe2 />
-          <h3>{copy.about.values[2].title}</h3>
-          <p>{copy.about.values[2].body}</p>
-        </div>
-      </Reveal>
     </section>
   );
 }
-function Catalog({ category, setCategory, onProduct, copy, products }) {
+function About({ copy, story, image = "/images/vietnam-produce-w960-hong-tam-rosic.webp" }) {
+  return (
+    <section id="about" className="about-section section-pad">
+      <div className="container">
+        <Reveal className="about-story-heading">
+          <p className="eyebrow">{copy.about.eyebrow}</p>
+          <h2 className="section-heading">{story.slogan}</h2>
+        </Reveal>
+        <div className="about-grid">
+          <Reveal className="about-photo">
+            <img src={image} srcSet={productSrcSet(image)} sizes="(max-width: 600px) 90vw, 480px" alt={copy.about.alt} loading="lazy" width="1536" height="1024" />
+            <div className="photo-border" aria-hidden="true" />
+          </Reveal>
+          <Reveal className="about-copy">
+            <div className="about-pillars">
+              {story.title.map((title, index) => (
+                <article key={title}>
+                  <h3>{title}</h3>
+                  <p>{story.blocks[index]}</p>
+                </article>
+              ))}
+            </div>
+            <a className="text-link" href="#journey">{copy.about.link} <ArrowUpRight size={18} /></a>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+const EXPORT_CATEGORY_PRODUCT_IDS = Object.freeze({
+  "cashew-kernel": ["cashews"],
+  "black-pepper": ["pepper"],
+  "coffee-bean": ["coffee"],
+  "fresh-fruit": ["mango", "dragonfruit", "melon", "avocado", "pineapple", "passionfruit", "banana", "pomelo", "durian"],
+  "other": ["rice", "cordyceps", "vegetables", "sweetpotato"],
+});
+
+function matchesCatalogCategory(product, category) {
+  if (category === "all") return true;
+  if (product.category === category) return true;
+  if (category === "nuts" && product.category === "cashew-kernel") return true;
+  if (category === "processed" && product.category === "coffee-bean") return true;
+  if (category === "fresh-fruit" && product.category === "fruit") return true;
+  return EXPORT_CATEGORY_PRODUCT_IDS[category]?.includes(product.id) ?? false;
+}
+
+function Catalog({ category, setCategory, onProduct, copy, products, categories = CATEGORIES }) {
   const [query, setQuery] = useState("");
   const normalize = (value) =>
     value
@@ -548,11 +625,54 @@ function Catalog({ category, setCategory, onProduct, copy, products }) {
       .replace(/đ/g, "d");
   const visible = products.filter(
     (product) =>
-      (category === "all" || category === product.category) &&
-      normalize(product.title).includes(normalize(query.trim())),
+      matchesCatalogCategory(product, category) &&
+      normalize([product.title, product.sourceTitle, product.code, product.group].join(" ")).includes(normalize(query.trim())),
+  );
+  const families = [];
+  for (const product of visible) {
+    const family = families.find(item => item.image === product.image && item.category === product.category);
+    if (family) family.products.push(product);
+    else families.push({ image: product.image, category: product.category, products: [product] });
+  }
+  const renderCard = (product, shared = false) => (
+              <article
+                className="product-card"
+                key={product.id}
+              >
+                <button
+                  className="product-open"
+                  onClick={() => onProduct(product)}
+                  aria-label={copy.catalog.viewProduct(product.title)}
+                >
+                  {!shared && <div className="product-image">
+                    <img
+                      src={product.image}
+                      srcSet={productSrcSet(product.image)}
+                      sizes="(max-width: 600px) 45vw, (max-width: 1000px) 30vw, 320px"
+                      alt={product.alt}
+                      loading="lazy"
+                      width="640"
+                      height="640"
+                    />
+                    {!product.imageAsset?.watermarked && <ProductImageBrand />}
+                    <span className="product-detail-tab product-quick-view">
+                      {copy.catalog.quickView ?? "Quick View Product"} <ArrowUpRight size={17} />
+                    </span>
+                  </div>
+                  }
+                  <div className="product-meta">
+                    <span>{product.isCategory ? copy.footer.products : (copy.catalog.productCode ?? "Product Code")}</span>
+                    <span>{product.code || (product.id.startsWith("export-") ? "—" : `ROS-${String(products.findIndex((item) => item.id === product.id) + 1).padStart(3, "0")}`)}</span>
+                  </div>
+                  <h3>{product.title}</h3><p className="product-card-description">{product.short || product.description}</p>
+                  <span className="product-view-link">
+                    {copy.catalog.viewLabel ?? "View Product"} <ArrowUpRight size={15} />
+                  </span>
+                </button>
+              </article>
   );
   return (
-    <section id="products" className="catalog-section section-pad">
+    <section className="catalog-section section-pad">
       <div className="container">
         <Reveal className="section-intro">
           <p className="eyebrow">{copy.catalog.eyebrow}</p>
@@ -561,7 +681,7 @@ function Catalog({ category, setCategory, onProduct, copy, products }) {
         </Reveal>
         <div className="catalog-tools">
           <div className="category-tabs" aria-label={copy.catalog.filter}>
-            {CATEGORIES.map((item) => (
+            {categories.map((item) => (
               <button
                 key={item.id}
                 className={category === item.id ? "active" : ""}
@@ -586,49 +706,18 @@ function Catalog({ category, setCategory, onProduct, copy, products }) {
         <p className="sr-only" role="status">
           {copy.catalog.resultCount(visible.length)}
         </p>
-        <Motion.div layout className="product-grid">
-          <AnimatePresence mode="popLayout">
-            {visible.map((product, index) => (
-              <Motion.article
-                layout
-                className="product-card"
-                key={product.id}
-                initial={{ y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.35, delay: index * 0.035 }}
-              >
-                <button
-                  className="product-open"
-                  onClick={() => onProduct(product)}
-                  aria-label={copy.catalog.viewProduct(product.title)}
-                >
-                  <div className="product-image">
-                    <img
-                      src={product.image}
-                      alt={product.alt}
-                      loading="lazy"
-                      width="640"
-                      height="640"
-                    />
-                    <ProductImageBrand />
-                    <span className="product-detail-tab product-quick-view">
-                      {copy.catalog.quickView ?? "Quick View Product"} <ArrowUpRight size={17} />
-                    </span>
-                  </div>
-                  <div className="product-meta">
-                    <span>{copy.catalog.productCode ?? "Product Code"}</span>
-                    <span>ROS-{String(products.findIndex((item) => item.id === product.id) + 1).padStart(3, "0")}</span>
-                  </div>
-                  <h3>{product.title}</h3>
-                  <span className="product-view-link">
-                    {copy.catalog.viewLabel ?? "View Product"} <ArrowUpRight size={15} />
-                  </span>
-                </button>
-              </Motion.article>
-            ))}
-          </AnimatePresence>
-        </Motion.div>
+        <div className="product-grid">
+          
+          {families.map(family => family.products.length === 1 ? renderCard(family.products[0]) : (
+            <div className="product-family" key={`${family.category}-${family.image}`}>
+              <div className="product-family-photo">
+                <img src={family.image} srcSet={productSrcSet(family.image)} sizes="(max-width: 700px) 90vw, 380px" alt={family.products[0].alt} width="640" height="640" loading="lazy" />
+                {!family.products[0].imageAsset?.watermarked && <ProductImageBrand />}
+              </div>
+              <div className="product-family-options">{family.products.map(product => renderCard(product, true))}</div>
+            </div>
+          ))}
+        </div>
         {!visible.length && (
           <div className="empty-state">
             <Search size={32} />
@@ -652,15 +741,15 @@ function Catalog({ category, setCategory, onProduct, copy, products }) {
     </section>
   );
 }
-function Journey({ copy, language, images }) {
+function Journey({ copy, language, images, text }) {
   const [step, setStep] = useState(0);
   const steps = JOURNEY.map((item, index) => ({
-    ...localizeJourneyItem(item, index, language),
+    ...mergeText(localizeJourneyItem(item, index, language), text?.[index]),
     image: images?.[index] || item.image,
   }));
   const current = steps[step];
   return (
-    <section id="journey" className="journey-section section-pad">
+    <section className="journey-section section-pad">
       <div className="container">
         <Reveal className="section-intro">
           <h2 className="section-heading">
@@ -725,9 +814,9 @@ function Journey({ copy, language, images }) {
     </section>
   );
 }
-function Partners({ copy, language }) {
+function Partners({ copy, language, textOverrides }) {
   return (
-    <section id="testimonials" className="partners-section section-pad">
+    <section className="partners-section section-pad">
       <div className="container">
         <Reveal className="partners-statement">
           <Globe2 size={38} strokeWidth={1} />
@@ -742,7 +831,7 @@ function Partners({ copy, language }) {
           </a>
         </Reveal>
       </div>
-      <Feedback language={language} />
+      <Suspense fallback={<div className="deferred-feedback" aria-busy="true" />}><Feedback language={language} textOverrides={textOverrides} /></Suspense>
       <div className="container">
         <div id="stats" className="partner-types">
           {copy.partners.types.map((type) => (
@@ -760,10 +849,10 @@ function Partners({ copy, language }) {
     </section>
   );
 }
-function Journal({ onArticle, copy, language, images }) {
-  const articles = ARTICLES.map((article, index) => ({ ...localizeArticle(article, language), image: images?.[index] || article.image }));
+function Journal({ onArticle, copy, language, images, text }) {
+  const articles = ARTICLES.map((article, index) => ({ ...mergeText(localizeArticle(article, language), text?.[index]), image: images?.[index] || article.image }));
   return (
-    <section id="blog" className="journal-section section-pad">
+    <section className="journal-section section-pad">
       <div className="container">
         <Reveal className="section-intro">
           <h2 className="section-heading">{copy.journal.title}</h2>
@@ -802,7 +891,7 @@ function Journal({ onArticle, copy, language, images }) {
     </section>
   );
 }
-function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange, copy, socialLinks }) {
+function Footer({ onPolicy, onFilter, language, onLanguage, copy, socialLinks, socialQr, categories = CATEGORIES }) {
   return (
     <footer className="site-footer">
       <div className="container footer-main">
@@ -825,7 +914,7 @@ function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange
         <div className="footer-column">
           <h3>{copy.footer.products}</h3>
           <a href="#export-catalog">{copy.exportCatalog}</a>
-          {CATEGORIES.slice(1).map((category) => (
+          {categories.slice(1, 5).map((category) => (
             <a
               key={category.id}
               href="#products"
@@ -841,34 +930,14 @@ function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange
             {copy.footer.greeting} <ArrowUpRight />
           </a>
           <p>{copy.brand.topbar}</p>
-          <div className="footer-socials" aria-label={copy.footer.social}>
-            {SOCIAL_LINKS.map(({ label, href, icon: Icon, external }) => {
-              const configuredHref = socialLinks?.[label.toLowerCase()] || href;
-              return (
-              <a
-                key={label}
-                href={configuredHref}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noreferrer" : undefined}
-                aria-label={label}
-                title={label}
-              >
-                {createElement(Icon, { size: 17, "aria-hidden": true })}
-              </a>
-            );})}
-          </div>
+          <SocialChannels compact links={socialLinks} qr={socialQr} language={language} />
+          <InstallApp language={language} />
           <LanguagePicker
             compact
             className="footer-language"
             language={language}
             onChange={onLanguage}
             label={copy.language}
-          />
-          <ThemeToggle
-            className="footer-theme"
-            theme={theme}
-            onThemeChange={onThemeChange}
-            labels={copy.theme}
           />
         </div>
       </div>
@@ -884,7 +953,7 @@ function Footer({ onPolicy, onFilter, language, onLanguage, theme, onThemeChange
     </footer>
   );
 }
-function DetailDialog({ selected, onClose, onQuote, copy }) {
+function DetailDialog({ selected, onClose, onQuote, copy, language, products, onProduct }) {
   const lastFocused = useRef(null);
   useEffect(() => {
     if (selected) lastFocused.current = document.activeElement;
@@ -914,15 +983,11 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
           {selected?.type === "product" ? (
             <>
               <div className="detail-image-wrap">
-                <img
-                  className="detail-image"
-                  src={selected.data.image}
-                  alt={selected.data.alt}
-                />
-                <ProductImageBrand />
+                <Lightbox src={selected.data.image} alt={selected.data.alt} language={language} watermarked={selected.data.imageAsset?.watermarked} />
+                {!selected.data.imageAsset?.watermarked && <ProductImageBrand />}
               </div>
               <div className="detail-body">
-                <p className="eyebrow">{selected.data.group}</p>
+                <nav className="product-switcher" aria-label={language === "vi" ? "Chuyển sản phẩm" : "Switch product"}><label>{language === "vi" ? "Chuyển sản phẩm" : "Switch product"}<select value={selected.data.id} onChange={event => onProduct(products.find(product => product.id === event.target.value))}>{products.map(product => <option key={product.id} value={product.id}>{product.code} · {product.title}</option>)}</select></label></nav><p className="eyebrow">{selected.data.group}</p>
                 <Dialog.Title>{selected.data.title}</Dialog.Title>
                 <Dialog.Description>
                   {selected.data.description}
@@ -934,9 +999,16 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
                   </div>
                   <div>
                     <span>{copy.dialog.format}</span>
-                    <strong>{copy.dialog.formatValue}</strong>
+                    <strong>{selected.data.catalogSpec?.forms || copy.dialog.formatValue}</strong>
                   </div>
                 </div>
+                {selected.data.code && <p className="detail-product-code">{copy.catalog.productCode}: <strong>{selected.data.code}</strong></p>}
+                {selected.data.catalogSpec?.specGroups?.length > 0 && <div className="catalog-spec-groups">
+                  {selected.data.catalogSpec.specGroups.map((group, groupIndex) => <section key={groupIndex}>
+                    <h3>{group.title}</h3><dl>{(group.items || []).map((item, itemIndex) => <div key={itemIndex}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>
+                  </section>)}
+                  <p className="form-note">{selected.data.catalogSpec.notice || EXPORT_SPEC_NOTICE}</p>
+                </div>}
                 <p className="form-note">
                   {copy.dialog.imageNote}
                 </p>
@@ -987,10 +1059,12 @@ function DetailDialog({ selected, onClose, onQuote, copy }) {
     </Dialog.Root>
   );
 }
-function SiteApp({ cms }) {
+function SiteApp({ cms, preview = false }) {
   const [language, setLanguage] = useSiteLanguage("vi");
   const { theme, setTheme } = useSiteTheme();
   const [category, setCategory] = useState("all");
+  const [catalogVisit, setCatalogVisit] = useState(0);
+  const navigateCategory = id => { setCategory(id); setCatalogVisit(value => value + 1); };
   const [selected, setSelected] = useState(null);
   const [prefilledProduct, setPrefilledProduct] = useState({
     title: "",
@@ -998,7 +1072,7 @@ function SiteApp({ cms }) {
   });
   const reduced = useReducedMotion();
   const baseCopy = siteCopyFor(language);
-  const copy = language === "vi" && cms?.content ? {
+  let copy = language === "vi" && cms?.content ? {
     ...baseCopy,
     brand: { ...baseCopy.brand, topbar: cms.content.topbar || baseCopy.brand.topbar },
     hero: {
@@ -1009,6 +1083,7 @@ function SiteApp({ cms }) {
       first: cms.content.heroBody || baseCopy.hero.first,
       second: "",
       cta: cms.content.heroCta || baseCopy.hero.cta,
+      aboutCta: cms.content.brandStoryVersion === 4 ? cms.content.heroCta : null,
     },
     about: {
       ...baseCopy.about,
@@ -1040,16 +1115,58 @@ function SiteApp({ cms }) {
       invitation: cms.content.footerTitle || baseCopy.footer.invitation,
     },
   } : baseCopy;
-  const localizedProducts = language === "vi" && cms?.products
-    ? cms.products.filter((product) => product.status !== "draft")
+  copy = mergeText(copy, cms?.textOverrides?.[language]?.copy);
+  let story = brandStoryFor(language, copy);
+  if (language === "vi" && cms?.content?.brandStoryVersion === 4) {
+    story.title = [cms.content.heroStart || story.title[0], cms.content.heroAccent || story.title[1]];
+    story.slogan = story.title.join(" – ");
+    story.blocks = [cms.content.aboutBody || story.blocks[0], cms.content.aboutVision || story.blocks[1]];
+  }
+  story = mergeText(story, cms?.textOverrides?.[language]?.story);
+  const localizedProducts = cms?.products
+    ? localizeProducts((cms.catalogVersion === 5 ? cms.products : upgradeProducts(cms.products)).filter(product => product.status !== "draft"), language)
     : localizeProducts(PRODUCTS, language);
-  const sourceExportCategories = language === "vi" && cms?.categories?.length ? cms.categories : EXPORT_CATEGORIES;
+  const sourceExportCategories = (Array.isArray(cms?.categories) ? cms.categories.filter(item => item.status !== "draft") : EXPORT_CATEGORIES).map(item => ({ ...item, image: vr5ProductImage(item.image) }));
   const localizedExportCategories = sourceExportCategories.map((categoryItem) =>
     localizeExportCategory(categoryItem, language),
   );
-  const socialLinks = cms?.socialConfigVersion === 2
-    ? { ...DEFAULT_PUBLIC_SOCIAL, ...cms.social }
-    : DEFAULT_PUBLIC_SOCIAL;
+  const supplementalExportProducts = localizedExportCategories
+    .filter((categoryItem) => !localizedProducts.some((product) => matchesCatalogCategory(product, categoryItem.id)))
+    .map((categoryItem) => ({
+      id: `export-${categoryItem.id}`,
+      title: categoryItem.shortTitle ?? categoryItem.title,
+      sourceTitle: categoryItem.sourceTitle ?? categoryItem.title,
+      category: categoryItem.id,
+      group: categoryItem.title,
+      image: categoryItem.image,
+      alt: categoryItem.alt,
+      short: categoryItem.description,
+      description: categoryItem.overview ?? categoryItem.description,
+      imageAsset: categoryItem.imageAsset,
+      isCategory: true,
+      code: `ROS-${String(70 + Number(categoryItem.number || sourceExportCategories.findIndex(item => item.id === categoryItem.id) + 1)).padStart(3, "0")}`,
+    }));
+  const catalogProducts = [...localizedProducts, ...supplementalExportProducts].map(product => ({
+    ...product,
+    image: vr5ProductImage(product.image),
+    catalogSpec: (() => {
+      const base = localizedExportCategories.find(group => group.id === product.category) || localizedExportCategories.find(group => matchesCatalogCategory(product, group.id));
+      if (!/^(robusta-|arabica-|cashew-)/.test(product.id) || !base) return base;
+      return { ...base, forms: product.title, specGroups: [{ title: language === "vi" ? "Quy cách sản phẩm được chọn" : "Selected product specification", items: [
+        { label: language === "vi" ? "Sản phẩm" : "Product", value: product.title },
+        { label: language === "vi" ? "Mã" : "Code", value: product.code },
+        { label: language === "vi" ? "Xác nhận theo đơn hàng" : "Confirm per order", value: product.description },
+      ] }] };
+    })(),
+  }));
+  const catalogCategories = [
+    ...CATEGORIES.filter((item) => (item.id !== "fruit" || !sourceExportCategories.some(group => group.id === "fresh-fruit")) && (item.id === "all" || catalogProducts.some((product) => matchesCatalogCategory(product, item.id)))),
+    ...localizedExportCategories
+      .filter((item) => !CATEGORIES.some((existing) => existing.id === item.id))
+      .map((item) => ({ id: item.id, label: item.shortTitle ?? item.title })),
+  ];
+  const socialLinks = configuredSocial(cms?.social, cms?.socialConfigVersion);
+  const socialQr = configuredSocialQr(cms?.socialQr, socialLinks);
   useEffect(() => {
     const scrollHome = () => {
       if (window.location.hash === "#home")
@@ -1079,7 +1196,7 @@ function SiteApp({ cms }) {
     };
   }, [reduced]);
   const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 160, damping: 35 });
+  const scaleX = scrollYProgress;
   const quote = (title) => {
     setSelected(null);
     setPrefilledProduct((previous) => ({ title, id: previous.id + 1 }));
@@ -1093,6 +1210,8 @@ function SiteApp({ cms }) {
   return (
     <MotionConfig reducedMotion="user">
       <div className="site-app" lang={language} dir={language === "ar" ? "rtl" : "ltr"}>
+      <ContentProtection disabled={preview} />
+
       <a className="skip-link" href="#main">
         {copy.skip}
       </a>
@@ -1108,50 +1227,68 @@ function SiteApp({ cms }) {
         onThemeChange={setTheme}
         copy={copy}
         exportCategories={sourceExportCategories}
+        onFilter={navigateCategory}
       />
       <main id="main">
-        <Hero copy={copy} image={cms?.content?.heroImage} />
-        <Marquee copy={copy} />
-        <About copy={copy} image={cms?.content?.aboutImage} />
-        <OfficialExportCatalog
+        <Hero copy={copy} story={story} image={cms?.content?.heroImage === "/images/hero.webp" ? undefined : cms?.content?.heroImage} />
+        <Marquee copy={copy} categories={localizedExportCategories} />
+        <RosicValues story={story} language={language} values={mergeText(ROSIC_VALUES, cms?.textOverrides?.[language]?.values)} />
+        <About copy={copy} story={story} image={cms?.content?.aboutImage === "/images/produce.webp" ? undefined : cms?.content?.aboutImage} />
+        <DeferredContent><OfficialExportCatalog
+          sectionId={null}
           language={language}
+          textOverrides={cms?.textOverrides?.[language]?.exportCatalogue}
           categoriesData={sourceExportCategories}
+          products={catalogProducts}
+          onProduct={data => setSelected({ type: "product", data })}
+          products={catalogProducts}
+          onProduct={data => setSelected({ type: "product", data })}
           onRequestQuote={({ sourceTitle, title }) => quote(sourceTitle ?? title)}
         />
         <Catalog
+          key={catalogVisit}
+          categories={catalogCategories}
           category={category}
           setCategory={setCategory}
           onProduct={(data) => setSelected({ type: "product", data })}
           copy={copy}
-          products={localizedProducts}
+          products={catalogProducts}
         />
-        <Journey copy={copy} language={language} images={language === "vi" ? cms?.content?.journeyImages : null} />
-        <Partners copy={copy} language={language} />
+        <Journey copy={copy} language={language} text={cms?.textOverrides?.[language]?.journey} images={cms?.content?.journeyImages} />
+        <Partners copy={copy} language={language} textOverrides={cms?.textOverrides?.[language]?.feedback} />
         <Journal
+          text={cms?.textOverrides?.[language]?.articles}
           copy={copy}
           language={language}
-          images={language === "vi" ? cms?.content?.articleImages : null}
+          images={cms?.content?.articleImages}
           onArticle={(data) => setSelected({ type: "article", data })}
         />
-        <Contact
+        <Suspense fallback={<section className="deferred-contact" aria-busy="true" />}><Contact
+          sectionId={null}
           prefilledProduct={prefilledProduct.title}
           prefillKey={prefilledProduct.id}
-          products={[...localizedProducts, ...localizedExportCategories]}
+          products={[...catalogProducts, ...localizedExportCategories]}
           language={language}
-        />
+          socialLinks={socialLinks}
+          socialQr={socialQr}
+          textOverrides={cms?.textOverrides?.[language]}
+        /></Suspense></DeferredContent>
       </main>
       <Footer
+        categories={catalogCategories}
         onPolicy={() => setSelected({ type: "policy" })}
         onFilter={setCategory}
         language={language}
         onLanguage={setLanguage}
-        theme={theme}
-        onThemeChange={setTheme}
         copy={copy}
         socialLinks={socialLinks}
+        socialQr={socialQr}
       />
       <DetailDialog
+        language={language}
         selected={selected}
+        products={catalogProducts}
+        onProduct={data => setSelected({ type: "product", data })}
         onClose={() => setSelected(null)}
         onQuote={quote}
         copy={copy}
@@ -1167,18 +1304,38 @@ function readPublishedCms() {
 }
 
 function usePublishedCms() {
-  const [cms, setCms] = useState(readPublishedCms);
+  const [cms, setCms] = useState(() => import.meta.env.DEV ? readPublishedCms() : null);
   useEffect(() => {
-    const sync = () => setCms(readPublishedCms());
+    const sync = () => {
+      fetch("/api/content").then(r => r.json()).then(result => { if (result.ok) setCms(result.data); }).catch(() => {});
+    };
+    sync();
+    window.addEventListener("focus", sync);
     window.addEventListener("storage", sync);
     const channel = "BroadcastChannel" in window ? new BroadcastChannel("rosic-cms") : null;
     if (channel) channel.onmessage = (event) => setCms(event.data || readPublishedCms());
     return () => {
       window.removeEventListener("storage", sync);
+      window.removeEventListener("focus", sync);
       channel?.close();
     };
   }, []);
   return cms;
+}
+
+function DraftPreview() {
+  const [draft, setDraft] = useState(null);
+  useEffect(() => {
+    const receive = (event) => {
+      if (event.origin !== window.location.origin || event.source !== window.parent || event.data?.type !== "rosic-preview-data") return;
+      setDraft(event.data.data);
+    };
+    window.addEventListener("message", receive);
+    window.parent.postMessage({ type: "rosic-preview-ready" }, window.location.origin);
+    return () => window.removeEventListener("message", receive);
+  }, []);
+  if (!draft) return <p>Đang tải bản xem trước…</p>;
+  return draft.settings?.maintenanceMode ? <MaintenancePage /> : <SiteApp cms={draft} preview />;
 }
 
 export default function App() {
@@ -1196,6 +1353,7 @@ export default function App() {
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("demo")
       : null;
-  if (demoView === "catalog") return <CatalogDemo />;
+  if (new URLSearchParams(window.location.search).get("preview") === "1" && window.parent !== window) return <DraftPreview />;
+  if (demoView === "catalog") return <Suspense fallback={<div className="admin-loading">ROSIC…</div>}><CatalogDemo /></Suspense>;
   return MAINTENANCE_MODE || cms?.settings?.maintenanceMode ? <MaintenancePage /> : <SiteApp cms={cms} />;
 }

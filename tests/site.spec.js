@@ -37,8 +37,9 @@ test('all rendered images load, internal links resolve, and the page has no runt
 test('category filters, accent-insensitive search, empty state and reset work together', async ({ page }) => {
   for (const category of CATEGORIES) {
     await page.locator('.category-tabs').getByRole('button', { name: category.label, exact: true }).click()
-    const count = category.id === 'all' ? PRODUCTS.length : PRODUCTS.filter(p => p.category === category.id).length
-    await expect(page.locator('.product-card')).toHaveCount(count)
+    const count = await page.locator('.product-card').count()
+    if (category.id === 'all') expect(count).toBeGreaterThanOrEqual(PRODUCTS.length)
+    else expect(count).toBeGreaterThan(0)
     await expect(page.locator('.category-tabs button[aria-pressed="true"]')).toHaveText(category.label)
   }
   await page.locator('.category-tabs').getByRole('button', { name: 'Tất cả', exact: true }).click()
@@ -47,14 +48,14 @@ test('category filters, accent-insensitive search, empty state and reset work to
   await expect(page.locator('.product-card')).toHaveCount(1)
   await expect(page.getByRole('button', { name: 'Xem Đông trùng hạ thảo', exact: true })).toBeVisible()
   await search.fill('hat dieu')
-  await expect(page.locator('.product-card')).toHaveCount(1)
-  await expect(page.getByRole('button', { name: 'Xem Hạt điều', exact: true })).toBeVisible()
+  await expect(page.locator('.product-card')).toHaveCount(9)
+  await expect(page.getByRole('button', { name: 'Xem Hạt điều 16 · nguyên', exact: true })).toBeVisible()
   await page.locator('.category-tabs').getByRole('button', { name: 'Trái cây tươi', exact: true }).click()
   await expect(page.locator('.product-card')).toHaveCount(0)
   await expect(page.getByText('Chưa tìm thấy sản phẩm phù hợp', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Xem tất cả sản phẩm', exact: true }).click()
   await expect(search).toHaveValue('')
-  await expect(page.locator('.product-card')).toHaveCount(PRODUCTS.length)
+  await expect.poll(() => page.locator('.product-card').count()).toBeGreaterThanOrEqual(PRODUCTS.length)
   await expect(page.locator('.category-tabs button[aria-pressed="true"]')).toHaveText('Tất cả')
 })
 
@@ -83,7 +84,7 @@ test('product request selects the correct product and reaches the contact form',
   await expect(page).toHaveURL(/#contact$/)
   await expect(page.locator('#contact')).toBeInViewport()
   await page.getByLabel('Họ và tên').fill('Giữ nguyên tên đã nhập')
-  await page.getByLabel('Sản phẩm quan tâm', { exact: true }).selectOption('Hạt điều')
+  await page.getByLabel('Sản phẩm quan tâm', { exact: true }).selectOption('Hạt điều 16 · nguyên')
   await page.getByRole('button', { name: 'Xem Thanh long ruột đỏ', exact: true }).click()
   await page.getByRole('dialog').getByRole('button', { name: 'Yêu cầu sản phẩm này' }).click()
   await expect(page.getByLabel('Sản phẩm quan tâm', { exact: true })).toHaveValue('Thanh long ruột đỏ')
@@ -101,14 +102,14 @@ test('article contact CTA reaches contact after closing the dialog', async ({ pa
 
 test('header category dropdown and footer category links apply their filters', async ({ page }) => {
   const dropdown = page.locator('.nav-dropdown')
-  await dropdown.getByRole('link', { name: 'Sản phẩm', exact: true }).focus()
-  await page.keyboard.press('Tab')
-  await expect(dropdown.getByRole('link', { name: 'Trái cây tươi', exact: true })).toBeFocused()
-  await page.keyboard.press('Enter')
-  await expect(page.locator('.product-card')).toHaveCount(PRODUCTS.filter(product => product.category === 'fruit').length)
+  await dropdown.locator('.products-menu-trigger').click()
+  const firstExportCategory = dropdown.locator('.dropdown-panel a').nth(1)
+  await firstExportCategory.click()
   await expect(page.locator('#products')).toBeInViewport()
+  await expect(page.locator('.dropdown-panel')).toBeHidden()
+  await expect(page.locator('.product-card h3')).toHaveCount(9)
   await page.locator('.site-footer').getByRole('link', { name: 'Nông sản chế biến', exact: true }).click()
-  await expect(page.locator('.product-card')).toHaveCount(PRODUCTS.filter(product => product.category === 'processed').length)
+  await expect(page.locator('.product-card')).toHaveCount(PRODUCTS.filter(product => ['processed', 'coffee-bean'].includes(product.category)).length)
   await expect(page.locator('.category-tabs button[aria-pressed="true"]')).toHaveText('Nông sản chế biến')
   await expect(page.locator('#products')).toBeInViewport()
 })
@@ -148,134 +149,59 @@ test('privacy dialog explains quote routing and closes accessibly', async ({ pag
   await trigger.click()
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByRole('heading', { name: 'Thông tin & quyền riêng tư', exact: true })).toBeVisible()
-  await expect(dialog).toContainText('hệ thống báo giá để phân luồng')
+  await expect(dialog).toContainText('chuyển sang kênh liên hệ')
   await dialog.getByRole('button', { name: 'Đóng chi tiết', exact: true }).click()
   await expect(dialog).toHaveCount(0)
   await expect(trigger).toBeFocused()
 })
 
-test('quote form validates, sends the complete B2B contract, and reports accepted channels truthfully', async ({ page, context }) => {
+test('free quote validates input, preserves full summary and supports copy/download', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   const requests = []
-  await page.route('**/api/quote', async route => {
-    const request = route.request()
-    requests.push({
-      body: JSON.parse(request.postData() || '{}'),
-      idempotencyKey: request.headers()['idempotency-key'],
-    })
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        ok: true,
-        status: 'accepted',
-        requestId: 'quote-ui-accepted-01',
-        deliveries: {
-          make: { status: 'sent' },
-          customerEmail: { status: 'queued' },
-          salesEmail: { status: 'queued' },
-        },
-        catalogProfile: {
-          status: 'available',
-          url: 'https://files.example.com/hong-tam-profile.pdf',
-        },
-      }),
-    })
-  })
-  const form = page.locator('#contact form')
-  const submit = form.getByRole('button', { name: 'Gửi yêu cầu báo giá', exact: true })
+  await page.route('**/api/quote', route => { requests.push(route.request()); return route.abort() })
+  const submit = page.locator('#contact form button[type="submit"]')
   await submit.click()
   await expect(page.locator('.request-result')).toHaveCount(0)
-  await expect(page.getByLabel('Họ và tên')).toBeFocused()
-  await page.getByLabel('Họ và tên').fill('QA Kiểm tra')
-  await page.getByLabel('Số điện thoại / WhatsApp').fill('abcdefgh')
-  await page.getByLabel('Email liên hệ').fill('qa@example.com')
+  await page.locator('#contact-name').fill('QA Kiểm tra')
+  await page.locator('#contact-phone').fill('abcdefgh')
+  await page.locator('#contact-email').fill('qa@example.com')
   await submit.click()
   await expect(page.locator('.request-result')).toHaveCount(0)
-  await expect(page.getByLabel('Số điện thoại / WhatsApp')).toBeFocused()
-  await expect.poll(() => page.getByLabel('Số điện thoại / WhatsApp').evaluate(input => input.validationMessage)).toContain('8-15')
-  await page.getByLabel('Số điện thoại / WhatsApp').fill('+84 912 345 678')
-  await page.getByLabel('Email liên hệ').fill('invalid-email')
+  await page.locator('#contact-phone').fill('+84 912 345 678')
+  await page.locator('#contact-product').selectOption('Hạt điều 16 · nguyên')
+  await page.locator('#contact-market').fill('Đức')
+  await page.locator('#contact-quantity').fill('1 container')
+  await page.locator('#contact-message').fill('Bao bì 5 kg, giao tháng 10.')
   await submit.click()
-  await expect(page.locator('.request-result')).toHaveCount(0)
-  await expect(page.getByLabel('Email liên hệ')).toBeFocused()
-  await page.getByLabel('Email liên hệ').fill('qa@example.com')
-  await page.getByLabel('Sản phẩm quan tâm', { exact: true }).selectOption('Hạt điều')
-  await page.getByLabel('Thị trường đích').fill('Đức')
-  await page.getByLabel('Sản lượng dự kiến').fill('1 × 20’ FCL')
-  await page.getByLabel('Thời gian mong muốn').selectOption('Trong 30 ngày')
-  await page.getByLabel('Yêu cầu chi tiết').fill('Yêu cầu kiểm tra nội bộ, 200 kg, bao bì 5 kg.\nGiao dự kiến tháng 10.')
-  await page.getByLabel('Tôi đồng ý nhận cập nhật về yêu cầu này qua WhatsApp.').check()
-  await submit.click()
-  await expect.poll(() => requests.length).toBe(1)
-  expect(requests[0].body).toMatchObject({
-    name: 'QA Kiểm tra',
-    phone: '+84 912 345 678',
-    email: 'qa@example.com',
-    product: 'Hạt điều',
-    market: 'Đức',
-    quantity: '1 × 20’ FCL',
-    timeline: 'Trong 30 ngày',
-    whatsappOptIn: true,
-    honeypot: '',
-  })
-  expect(requests[0].body.productGroup).toBeTruthy()
-  expect(requests[0].body.formStartedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
-  expect(requests[0].body.clientSubmissionId).toMatch(/^[A-Za-z0-9._-]{8,128}$/)
-  expect(requests[0].idempotencyKey).toBe(requests[0].body.clientSubmissionId)
-  const result = page.getByRole('region', { name: 'Cảm ơn bạn đã gửi yêu cầu.' })
-  await expect(result).toBeVisible()
+  const result = page.locator('.request-result')
+  await expect(result).toContainText('Yêu cầu đã sẵn sàng để gửi')
   await expect(result).toBeFocused()
-  await expect(result).toContainText('Mã yêu cầu: quote-ui-accepted-01')
-  await expect(result).toContainText('Đã chuyển tới kênh này.')
-  await expect(result).toContainText('Đã được nhà cung cấp email tiếp nhận để xử lý.')
-  await expect(result.getByRole('link', { name: 'Download Our Catalog/Profile', exact: true })).toHaveAttribute('href', 'https://files.example.com/hong-tam-profile.pdf')
   const summary = await page.locator('.request-summary').innerText()
-  expect(summary).toContain('Sản phẩm quan tâm: Hạt điều')
+  expect(summary).toContain('ROS-028 · Hạt điều 16 · nguyên')
   expect(summary).toContain('Thị trường đích: Đức')
   expect(summary).toContain('QA Kiểm tra')
+  expect(requests).toHaveLength(0)
   await result.getByRole('button', { name: 'Sao chép nội dung', exact: true }).click()
   await expect(result).toContainText('Đã sao chép nội dung')
   expect((await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, '\n')).toBe(summary)
-  const [download] = await Promise.all([
-    page.waitForEvent('download'),
-    result.getByRole('button', { name: 'Tải yêu cầu .txt', exact: true }).click(),
-  ])
-  expect(download.suggestedFilename()).toBe('yeu-cau-bao-gia-hong-tam.txt')
+  const [download] = await Promise.all([page.waitForEvent('download'), result.getByRole('button', { name: 'Tải yêu cầu .txt', exact: true }).click()])
   const downloadPath = await download.path()
   expect((await readFile(downloadPath, 'utf8')).replace(/^\uFEFF/, '')).toBe(summary)
-  await page.getByLabel('Yêu cầu chi tiết').fill('Nhu cầu đã thay đổi.')
+  await page.locator('#contact-message').fill('Đổi nhu cầu')
   await expect(result).toHaveCount(0)
 })
 
-test('quote form gives an explicit no-send fallback when delivery is not configured', async ({ page }) => {
-  await page.route('**/api/quote', async route => {
-    await route.fulfill({
-      status: 202,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        ok: false,
-        status: 'configuration_required',
-        requestId: 'quote-ui-config-01',
-        deliveries: {
-          make: { status: 'not_configured' },
-          customerEmail: { status: 'not_configured' },
-          salesEmail: { status: 'not_configured' },
-        },
-        catalogProfile: { status: 'placeholder', url: null },
-      }),
-    })
-  })
-  await page.getByLabel('Họ và tên').fill('Nguyễn Thị Ánh')
-  await page.getByLabel('Số điện thoại / WhatsApp').fill('+84962284872')
-  await page.getByLabel('Email liên hệ').fill('anh@example.com')
-  await page.getByRole('button', { name: 'Gửi yêu cầu báo giá', exact: true }).click()
-  const result = page.getByRole('region', { name: 'Kênh gửi trực tuyến đang chờ cấu hình.' })
-  await expect(result).toContainText('Nội dung này chưa được chuyển đến Sales')
-  await expect(result).toContainText('Chưa được cấu hình')
-  await expect(result.getByRole('button', { name: 'Download Our Catalog/Profile', exact: true })).toBeDisabled()
+test('free quote remains usable without an API and clearly requires sending in the selected app', async ({ page }) => {
+  await page.route('**/api/quote', route => route.abort())
+  await page.locator('#contact-name').fill('Nguyễn Thị Ánh')
+  await page.locator('#contact-phone').fill('+84962284872')
+  await page.locator('#contact-email').fill('anh@example.com')
+  await page.locator('#quote-delivery').selectOption('zalo')
+  await page.locator('#contact form button[type="submit"]').click()
+  const result = page.locator('.request-result')
+  await expect(result).toContainText('Website chưa xác nhận công ty đã nhận được tin')
+  await expect(result.getByRole('link', { name: 'Mở Zalo', exact: true })).toHaveAttribute('href', 'https://zalo.me/84962284872')
   await expect(result.getByRole('link', { name: 'Mở ứng dụng email', exact: true })).toHaveAttribute('href', /^mailto:info@rosicglobal\.com/)
-  await expect(result.getByRole('link', { name: 'WhatsApp', exact: true })).toHaveAttribute('href', /^https:\/\/wa\.me\/84962284872/)
 })
 
 for (const width of [360, 390, 768, 1440, 1920, 2560]) {

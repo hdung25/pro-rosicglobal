@@ -5,7 +5,7 @@ test("theme preference is accessible, persists, and uses the site token", async 
   await page.evaluate(() => window.localStorage.clear());
   await page.reload();
 
-  const toggle = page.locator(".header-theme");
+  const toggle = page.locator(".floating-theme");
   const before = await page.locator("html").getAttribute("data-theme");
   expect(["light", "dark"]).toContain(before);
   await expect(toggle).toHaveAttribute("aria-checked", before === "dark" ? "true" : "false");
@@ -38,7 +38,7 @@ test("Arabic mobile form, menu utilities, and branded export images fit the view
   }))).toMatchObject({ scroll: 390, client: 390 });
 
   await page.locator("#export-catalog").scrollIntoViewIfNeeded();
-  await expect(page.locator(".official-export-card .product-image-brand")).toHaveCount(8);
+  await expect(page.locator(".official-export-card .product-image-brand")).toHaveCount(9);
   await page.locator(".official-export-card").first().getByRole("button").click();
   await expect(page.getByRole("dialog").locator(".product-image-brand")).toBeVisible();
 });

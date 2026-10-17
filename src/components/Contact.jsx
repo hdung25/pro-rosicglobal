@@ -9,7 +9,11 @@ import {
   Mail,
   MessageCircle,
 } from "lucide-react";
+import { mergeText } from "../cms/content-overrides";
+import { quoteFlowCopyFor } from "../quote-flow-copy";
 import { CONTACT } from "../contact-config";
+import SocialChannels from "./SocialChannels";
+import { safeSocialLink, SOCIAL_DEFAULTS, whatsappQuoteLink } from "../social-config";
 import { contactCopyFor, routingCopyFor } from "../contact-l10n";
 
 const GENERAL_REQUEST = "Đơn hàng tổng hợp theo mùa vụ";
@@ -66,9 +70,9 @@ function inferProductGroup(title, products) {
   return "";
 }
 
-function contactView(language) {
-  const copy = contactCopyFor(language);
-  const routing = routingCopyFor(language);
+function contactView(language, overrides) {
+  const copy = mergeText(contactCopyFor(language), overrides?.contact);
+  const routing = mergeText(routingCopyFor(language), overrides?.routing);
   return {
     copy,
     routing,
@@ -166,12 +170,16 @@ function resultType(payload) {
 }
 
 export default function Contact({
+  sectionId = "contact",
   prefilledProduct = "",
   prefillKey = 0,
   products = [],
   language = "vi",
+  socialLinks = SOCIAL_DEFAULTS,
+  socialQr,
+  textOverrides,
 }) {
-  const view = contactView(language);
+  const view = contactView(language, textOverrides);
   const { copy, routing, fields } = view;
   const formRef = useRef(null);
   const resultPanel = useRef(null);
@@ -189,10 +197,13 @@ export default function Contact({
   const [copyStatus, setCopyStatus] = useState("");
   const [formStartedAt, setFormStartedAt] = useState(() => new Date().toISOString());
   const [clientSubmissionId, setClientSubmissionId] = useState(createSubmissionId);
+  const [delivery, setDelivery] = useState("whatsapp");
+  const direct = mergeText(quoteFlowCopyFor(language), textOverrides?.quoteFlow);
 
-  const email = validEmail(CONTACT.email) ? CONTACT.email : FALLBACK_EMAIL;
+  const configuredEmail = socialLinks.email?.replace(/^mailto:/, "");
+  const email = validEmail(configuredEmail || "") ? configuredEmail : validEmail(CONTACT.email) ? CONTACT.email : FALLBACK_EMAIL;
   const phone = validPhone(CONTACT.phone) ? CONTACT.phone : FALLBACK_PHONE;
-  const zalo = /^https:\/\/(?:zalo\.me|chat\.zalo\.me)(?:\/|$)/i.test(CONTACT.zalo) ? CONTACT.zalo : "";
+  const zalo = safeSocialLink(socialLinks.zalo ?? CONTACT.zalo);
   const whatsappNumber = phone.replace(/\D/g, "");
 
   useEffect(() => {
@@ -292,6 +303,16 @@ export default function Contact({
       clientSubmissionId,
     };
 
+    const matchedProduct = products.find(item => (item.sourceTitle ?? item.title) === request.product);
+    if (matchedProduct?.code) request.product = `${matchedProduct.code} · ${request.product}`;
+    // A direct hand-off needs no API credentials. Never claim delivery here.
+    if (delivery !== "server") {
+      if (request.honeypot) return;
+      setResult({ type: "direct", request, response: {}, httpStatus: 0 });
+      setCopyStatus("");
+      return;
+    }
+
     setSubmitting(true);
     setResult(null);
     setCopyStatus("");
@@ -353,13 +374,15 @@ export default function Contact({
   const channels = response.deliveries || response.channels || {};
   const hasChannels = Object.keys(channels).length > 0;
   const summary = result?.request ? formatRequest(result.request, view) : "";
-  const [resultTitle, resultBody] = result ? view.result[result.type] || view.result.generic : [];
+  const [resultTitle, resultBody] = result?.type === "direct" ? [direct.title, direct.body] : result ? view.result[result.type] || view.result.generic : [];
   const catalogProfileUrl = safeHttpsUrl(response.catalogProfile?.url || response.catalogProfileUrl);
   const mailto = `mailto:${email}?subject=${encodeURIComponent(`Quote request - ${result?.request?.product || GENERAL_REQUEST}`)}&body=${encodeURIComponent(summary)}`;
-  const whatsapp = whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(summary)}` : "";
+  const whatsappBase = safeSocialLink(socialLinks.whatsapp) || `https://wa.me/${whatsappNumber}`;
+  const whatsappRequest = whatsappQuoteLink(whatsappBase, summary);
+  const whatsapp = whatsappRequest.href;
 
   return (
-    <section id="contact" className="contact-section section-pad" aria-labelledby="contact-heading">
+    <section id={sectionId} className="contact-section section-pad" aria-labelledby="contact-heading">
       <div className="container contact-grid">
         <div className="contact-intro">
           <h2 id="contact-heading" className="section-heading">{view.heading[0]}<br /><span>{view.heading[1]}</span></h2>
@@ -374,11 +397,14 @@ export default function Contact({
             {zalo && <a href={zalo} target="_blank" rel="noopener noreferrer">{copy.channels.zalo} <ArrowUpRight size={16} aria-hidden="true" /></a>}
           </div>
           <p className="form-note">{copy.notes.legal} {copy.notes.privacy}</p>
+          <SocialChannels links={socialLinks} qr={socialQr} language={language} />
         </div>
 
         <div className="contact-form">
           <h3>{copy.formTitle}</h3>
           <form ref={formRef} onSubmit={onSubmit} onChange={onFormChange} aria-busy={submitting}>
+            <label className="field" htmlFor="quote-delivery">{direct.channel}<select id="quote-delivery" value={delivery} onChange={event => setDelivery(event.target.value)}><option value="whatsapp">WhatsApp</option><option value="zalo">Zalo</option><option value="email">Email</option>{import.meta.env.VITE_QUOTE_SERVER_ENABLED === "true" && <option value="server">Email API</option>}</select></label>
+            <p className="form-note">{direct.help}</p>
             <div className="form-grid">
               <Field label={fields.name[0]} id="contact-name" error={fieldErrors.name} required>
                 <input id="contact-name" name="name" type="text" autoComplete="name" placeholder={fields.name[1]} required maxLength={100} onInput={(event) => checkName(event.currentTarget)} />
@@ -433,7 +459,7 @@ export default function Contact({
             </div>
             <button type="submit" className="button button-primary" disabled={submitting}>
               {submitting ? <LoaderCircle className="quote-spinner" size={18} aria-hidden="true" /> : <ArrowUpRight size={18} aria-hidden="true" />}
-              {submitting ? copy.actions.sending : copy.actions.submit}
+              {submitting ? copy.actions.sending : direct.submit}
             </button>
             <p id="contact-form-note" className="form-note">{copy.notes.required} {copy.notes.legal}</p>
           </form>
@@ -445,6 +471,8 @@ export default function Contact({
                 {resultTitle}
               </h4>
               <p>{resultBody}</p>
+              {result.type === "direct" && delivery === "whatsapp" && !whatsappRequest.prefilled && <p className="form-note">{language === "vi" ? "Link WhatsApp này dùng lời nhắn mặc định của tài khoản. Hãy sao chép bản yêu cầu bên dưới rồi dán vào cuộc trò chuyện để giữ đủ mã sản phẩm và nội dung." : "This WhatsApp link uses the account’s default message. Copy the request below and paste it into the chat to include the product code and all details."}</p>}
+              {result.type === "direct" && <div className="request-actions"><a className="button button-primary" href={delivery === "email" ? mailto : delivery === "zalo" ? zalo : whatsapp} target={delivery === "email" ? undefined : "_blank"} rel="noopener noreferrer">{direct.open} {delivery === "email" ? "Email" : delivery === "zalo" ? "Zalo" : "WhatsApp"} <ArrowUpRight size={17} /></a></div>}
               {response.requestId && <p className="request-id"><strong>{view.result.requestId}:</strong> {response.requestId}</p>}
               {hasChannels && <section className="delivery-statuses" aria-labelledby="delivery-status-title">
                 <h5 id="delivery-status-title">{view.result.channelTitle}</h5>
@@ -454,18 +482,18 @@ export default function Contact({
                 })}
               </section>}
               <pre className="request-summary">{summary}</pre>
-              <div className="request-actions quote-profile-action">
+              {result.type !== "direct" && <div className="request-actions quote-profile-action">
                 {catalogProfileUrl
                   ? <a className="button button-primary" href={catalogProfileUrl} target="_blank" rel="noopener noreferrer">Download Our Catalog/Profile <ArrowUpRight size={17} aria-hidden="true" /></a>
                   : <button type="button" className="button button-outline quote-profile-placeholder" disabled aria-describedby="catalog-profile-help">Download Our Catalog/Profile</button>}
                 {!catalogProfileUrl && <p id="catalog-profile-help" className="form-note quote-profile-help">{view.result.profileHelp}</p>}
-              </div>
+              </div>}
               <section className="quote-fallback" aria-labelledby="quote-fallback-title">
-                <h5 id="quote-fallback-title">{view.result.fallbackTitle}</h5>
-                <p>{view.result.fallbackBody}</p>
+                <h5 id="quote-fallback-title">{result.type === "direct" ? direct.channel : view.result.fallbackTitle}</h5>
                 <div className="request-actions">
                   <a className="button button-outline" href={mailto}><Mail size={17} aria-hidden="true" />{view.result.email}</a>
                   {whatsapp && <a className="button button-outline" href={whatsapp} target="_blank" rel="noopener noreferrer"><MessageCircle size={17} aria-hidden="true" />{view.result.whatsapp}</a>}
+                  {zalo && <a className="button button-outline" href={zalo} target="_blank" rel="noopener noreferrer">Zalo ↗</a>}
                   <button type="button" className="button button-outline" onClick={downloadRequest}><ArrowDownToLine size={17} aria-hidden="true" />{view.result.download}</button>
                   <button type="button" className="button button-outline" onClick={copyRequest}><Copy size={17} aria-hidden="true" />{view.result.copy}</button>
                   {result.type !== "accepted" && <button type="button" className="button button-outline" onClick={retrySubmission}>{view.result.tryAgain}</button>}

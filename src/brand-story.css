@@ -1,0 +1,81 @@
+
+.site-app .hero-section {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-items: center;
+  min-height: clamp(560px, 46vw, 760px);
+  padding: 76px 0;
+  background: #19352b;
+}
+.site-app .hero-landscape {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+.site-app .hero-landscape::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #10291fd9, #10291f87 62%, #10291f38);
+}
+.site-app .hero-landscape > img { object-position: center 60%; }
+.site-app .landscape-caption { display: none; }
+.site-app .hero-copy { text-align: start; }
+.site-app .hero-copy .eyebrow { justify-content: flex-start; color: #fff3cd; }
+.site-app .hero-copy h1 {
+  font-family: "Noto Serif", Georgia, serif;
+  font-size: clamp(48px, 5.6vw, 86px);
+  font-weight: 400;
+  line-height: 1.22;
+  letter-spacing: -0.035em;
+  color: #f4d780;
+  text-shadow: 0 2px 16px #10291f55;
+}
+.site-app .hero-copy .title-accent { color: #f4d780; font-style: italic; }
+.site-app .hero-description { color: #fff; margin: 26px 0; max-width: 540px; }
+.site-app .hero-copy .hero-about-button {
+  border: 1px solid #f4d780;
+  color: #fff3cd;
+  background: transparent;
+  border-radius: 0;
+  margin: 4px 0 0;
+  padding: 13px 23px;
+}
+.site-app .hero-about-button:hover { background: #f4d780; color: #19352b; }
+.rosic-section { background: #193b30; color: #f4d780; padding: 66px 0; }
+.rosic-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 48px; align-items: center; }
+.rosic-slogan { font: 400 clamp(25px, 2.4vw, 38px)/1.4 "Noto Serif", Georgia, serif; }
+.rosic-slogan em { font-weight: 400; }
+.rosic-values { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; padding: 0; margin: 0; }
+.rosic-values li { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.rosic-letter { font: 400 clamp(60px, 6vw, 92px)/1 Georgia, "Times New Roman", serif; }
+.rosic-word { color: #fff3cd; font-size: 12px; line-height: 1.5; }
+.about-story-heading { max-width: 960px; margin-bottom: 48px; }
+.about-story-heading .section-heading { font-family: "Noto Serif", Georgia, serif; font-weight: 400; line-height: 1.3; letter-spacing: -0.025em; }
+.about-pillars { display: grid; gap: 32px; margin-bottom: 28px; }
+.about-pillars h3 { font: 400 30px/1.35 "Noto Serif", Georgia, serif; color: var(--ink); margin-bottom: 14px; }
+.about-pillars p { font-size: 14px; line-height: 1.95; color: var(--muted); }
+@media (max-width: 1000px) {
+  .rosic-layout { grid-template-columns: 1fr; gap: 32px; }
+  .rosic-slogan { text-align: center; }
+}
+@media (max-width: 600px) {
+  .site-app .hero-section { min-height: 560px; padding: 64px 0; }
+  .site-app .hero-copy h1 { font-size: clamp(38px, 9.3vw, 55px); line-height: 1.3; letter-spacing: -0.04em; }
+  .site-app .hero-copy .eyebrow { font-size: 10px; letter-spacing: 0.1em; line-height: 1.8; }
+  .site-app .hero-description { font-size: 13px; }
+  .site-app .hero-landscape > img { object-position: 40% center; }
+  .site-app .hero-landscape::after { background: #10291f99; }
+  .rosic-section { padding: 42px 0; }
+  .rosic-values { gap: 6px; }
+  .rosic-letter { font-size: 49px; }
+  .rosic-word { font-size: 9px; overflow-wrap: anywhere; }
+  .rosic-values li { gap: 10px; }
+  .about-story-heading { margin-bottom: 30px; }
+  .about-story-heading .section-heading { font-size: 34px; }
+  .about-pillars h3 { font-size: 28px; }
+}

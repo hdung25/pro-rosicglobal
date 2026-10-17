@@ -47,3 +47,4 @@ Thumbs.db
 artifacts/
 playwright-report/
 test-results/
+.env*.local

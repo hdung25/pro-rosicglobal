@@ -4,7 +4,7 @@ export const EXTRA_PRODUCTS = [
     title: "Dứa tươi",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/pineapple.webp",
+    image: "/images/vietnam-pineapple-w960-hong-tam-rosic.webp",
     alt: "Quả dứa có tán lá xanh bên những lát dứa vàng",
     short: "Chua ngọt hài hòa, hương thơm nhiệt đới.",
     description:
@@ -15,7 +15,7 @@ export const EXTRA_PRODUCTS = [
     title: "Chanh dây",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/passionfruit.webp",
+    image: "/images/vietnam-passion-fruit-w960-hong-tam-rosic.webp",
     alt: "Chanh dây vỏ tím và nửa quả có phần ruột vàng",
     short: "Hương thơm đậm, vị chua thanh đặc trưng.",
     description:
@@ -26,7 +26,7 @@ export const EXTRA_PRODUCTS = [
     title: "Chuối chín",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/banana.webp",
+    image: "/images/vietnam-banana-w960-hong-tam-rosic.webp",
     alt: "Nải chuối vỏ vàng trên nền sáng",
     short: "Vị ngọt dịu trong từng trái chín vàng.",
     description:
@@ -37,7 +37,7 @@ export const EXTRA_PRODUCTS = [
     title: "Bưởi tươi",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/pomelo.webp",
+    image: "/images/vietnam-pomelo-w960-hong-tam-rosic.webp",
     alt: "Bưởi vỏ xanh và múi bưởi được tách bên cạnh",
     short: "Tép mọng, hương vị thanh mát.",
     description:
@@ -48,7 +48,7 @@ export const EXTRA_PRODUCTS = [
     title: "Sầu riêng",
     category: "fruit",
     group: "Trái cây tươi",
-    image: "/images/durian.webp",
+    image: "/images/vietnam-durian-w960-hong-tam-rosic.webp",
     alt: "Quả sầu riêng mở vỏ để lộ phần cơm vàng",
     short: "Hương vị riêng của trái cây nhiệt đới.",
     description:
@@ -59,7 +59,7 @@ export const EXTRA_PRODUCTS = [
     title: "Khoai lang",
     category: "vegetables",
     group: "Rau củ theo mùa",
-    image: "/images/sweetpotato.webp",
+    image: "/images/vietnam-sweet-potato-w960-hong-tam-rosic.webp",
     alt: "Khoai lang vỏ tím cùng phần khoai được bổ để thấy ruột",
     short: "Dẻo bùi, quen thuộc từ bữa ăn Việt.",
     description:
@@ -70,7 +70,7 @@ export const EXTRA_PRODUCTS = [
     title: "Gạo trắng",
     category: "nuts",
     group: "Hạt & ngũ cốc",
-    image: "/images/rice.webp",
+    image: "/images/vietnam-rice-w960-hong-tam-rosic.webp",
     alt: "Hạt gạo trắng chưa nấu trong bát gốm sáng màu",
     short: "Hạt gạo mộc mạc, căn bếp thân quen.",
     description:
@@ -81,7 +81,7 @@ export const EXTRA_PRODUCTS = [
     title: "Hạt tiêu đen",
     category: "processed",
     group: "Nông sản chế biến",
-    image: "/images/pepper.webp",
+    image: "/images/vr5/vietnam-black-pepper-w960-hong-tam-rosic.webp",
     alt: "Hạt tiêu đen nguyên hạt trong bát nhỏ",
     short: "Vị cay ấm, hương thơm của gia vị Việt.",
     description:

@@ -1,0 +1,10 @@
+ROSIC — VR4
+
+Logo: rosic-logo-stacked.svg (vector), rosic-logo-stacked.png (1200px, transparent).
+Symbol: rosic-symbol.svg. Favicon: rosic-favicon.svg.
+Gold: #A77C30. Bright banner gold: #F4D780. Forest green: #193B30. Paper: #FAFAF5.
+Logo: Georgia, Times New Roman, serif. Headlines: Noto Serif (Vietnamese and Latin); system sans-serif for Chinese, Korean, Japanese and Arabic. Website: Be Vietnam Pro; Manrope Variable.
+Slogan: Khởi từ Tâm – Vươn bằng Tầm
+Logo tagline: Manufacturing with Heart, Trading with Vision
+No terminal punctuation in the logo tagline.
+The existing vector HTR symbol is preserved; the attached reference defines the three-tier layout.

@@ -1,3 +1,4 @@
+import { quoteFlowCopyFor } from "./quote-flow-copy";
 /**
  * Human-reviewed UI and editorial copy for the public site.
  *
@@ -207,7 +208,9 @@ export const SITE_UI_COPY = {
 };
 
 export function siteCopyFor(language) {
-  return SITE_UI_COPY[language] ?? SITE_UI_COPY.en;
+  const copy = SITE_UI_COPY[language] ?? SITE_UI_COPY.en;
+  const privateLabel = { vi: "Nhãn hiệu riêng", en: "Private Label", zh: "自有品牌", ko: "자체 브랜드", ja: "プライベートブランド", ar: "علامة تجارية خاصة", fr: "Marque privée", de: "Eigenmarke" };
+  return { ...copy, dialog: { ...copy.dialog, policySections: copy.dialog.policySections.map((section, index) => index === 1 ? { ...section, body: quoteFlowCopyFor(language).policy } : section) }, nav: { ...copy.nav, oem: privateLabel[language] || privateLabel.en }, tabs: { ...copy.tabs, other: language === "vi" ? "Lương thực, Thực phẩm khác" : "Other Food & Foodstuffs" } };
 }
 
 export function localizeJourneyItem(item, index, language) {
