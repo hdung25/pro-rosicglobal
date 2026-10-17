@@ -794,10 +794,10 @@ function Journal({ onArticle, copy, language, images, text }) {
     </section>
   );
 }
-const LEGACY_BRAND = /H[ỒồOo]NGs+T[ÂâAa]M(?:s+ROSIC)?(?:s+GLOBAL)?|Hong Tam Rosic Global|HONG TAM ROSIC GLOBAL(?! JSC)/giu;
+const LEGACY_BRAND = /H[ỒồOo]NG\s+T[ÂâAa]M(?:\s+ROSIC)?(?:\s+GLOBAL)?|Hong Tam Rosic Global|HONG TAM ROSIC GLOBAL(?! JSC)/giu;
 function rosicContent(content) {
   if (!content) return content;
-  return Object.fromEntries(Object.entries(content).map(([key, value]) => [key, typeof value === "string" ? value.normalize("NFC").replace(LEGACY_BRAND, "ROSIC").replace(/s{2,}/g, " ") : value]));
+  return Object.fromEntries(Object.entries(content).map(([key, value]) => [key, typeof value === "string" ? value.normalize("NFC").replace(LEGACY_BRAND, "ROSIC").replace(/ {2,}/g, " ") : value]));
 }
 const CMS_CACHE_KEY = "rosic-cms-cache-v1";
 function readCachedCms() {

@@ -359,3 +359,18 @@ test("WCAG AA: home, group page, product page, quote dialog and policy in light 
     await scan(`${theme} quote dialog`);
   }
 });
+
+test("Brand naming: page copy and older CMS text say ROSIC, not Hồng Tâm (review 19/10)", async ({ page }) => {
+  const content = { brandStoryVersion: 4, heroEyebrow: "HỒNG TÂM ROSIC  · VIỆT NAM", aboutBody: "Hồng Tâm bắt đầu từ chữ Tâm: sự tử tế trong kinh doanh." };
+  await page.route("**/api/content", (route) => route.fulfill({ json: { ok: true, data: { content, settings: {}, products: [], categories: [] } } }));
+  await page.goto("/");
+  await expect(page.locator(".hero-copy .eyebrow")).toHaveText("ROSIC · VIỆT NAM");
+  await expect(page.locator(".about-pillars")).toContainText("ROSIC bắt đầu từ chữ Tâm");
+  for (const language of ["vi", "fr"]) {
+    await page.evaluate((value) => localStorage.setItem("rosic-language", value), language);
+    await page.reload();
+    for (let y = 0; y < 12000; y += 1200) await page.mouse.wheel(0, 1200);
+    const text = await page.evaluate(() => document.body.innerText.normalize("NFC"));
+    expect(text.match(/.{0,40}(Hồng Tâm|HỒNG TÂM).{0,40}/gu) ?? [], language).toEqual([]);
+  }
+});
