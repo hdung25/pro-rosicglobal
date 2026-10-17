@@ -461,3 +461,35 @@ html[data-theme] :is(.site-app, .quote-dialog) .quote-field .quote-consent__labe
 @media (max-width: 379px) {
   .site-app .footer-social { grid-template-columns: repeat(3, 44px); }
 }
+
+/* ---------------------------------------------------------------------
+   Typography, review 19/10: one heading face (the logo's Cormorant
+   Garamond) and one text face (Be Vietnam Pro) across every page.
+   Small uppercase labels (eyebrows, footer/partner labels) stay in the
+   text face; body copy, including the brand story, uses the text face.
+   --------------------------------------------------------------------- */
+html[data-theme] .site-app :is(.section-heading, main h2, .partners-section h2, .group-hero h1, .product-detail h1, .v6-subtitle, .other-groups h2, .journal-section h3, .contact-section h3, .private-label h3),
+html[data-theme] :is(.quote-dialog__head h2, .detail-dialog h2) {
+  font-family: var(--logo-font);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+html[data-theme] .site-app :is(.section-heading, main h2.section-heading) { font-size: clamp(38px, 4.4vw, 64px); line-height: 1.1; }
+html[data-theme] .site-app .partners-section h2 { font-size: clamp(40px, 4.8vw, 70px); line-height: 1.08; }
+html[data-theme] .site-app :is(.group-hero h1, .product-detail h1) { font-size: clamp(38px, 4.8vw, 68px); line-height: 1.08; }
+html[data-theme] .site-app .v6-subtitle { font-size: clamp(26px, 2.4vw, 34px); }
+html[data-theme] .site-app .other-groups h2 { font-size: clamp(24px, 2vw, 28px); }
+html[data-theme] .site-app .journal-section h3 { font-size: clamp(24px, 1.9vw, 28px); line-height: 1.2; }
+html[data-theme] .site-app .contact-section h3 { font-size: clamp(28px, 2.4vw, 34px); }
+html[data-theme] :is(.quote-dialog__head h2, .detail-dialog h2) { font-size: clamp(26px, 2.4vw, 34px); line-height: 1.15; }
+/* The story eyebrow and paragraphs follow the rest of the page. */
+html[data-theme] .site-app .about-story-heading .eyebrow { font-family: "Be Vietnam Pro", sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.18em; }
+html[data-theme] .site-app .about-pillars p { font-family: "Be Vietnam Pro", sans-serif; font-weight: 400; font-size: 15px; line-height: 1.85; }
+
+/* Group strip: whole rows only (8, or 4 + 4), never 7 + 1. */
+@media (min-width: 761px) {
+  .site-app .group-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .site-app .group-strip { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}

@@ -88,11 +88,15 @@ test("One radius for buttons, inputs, cards and frames in light and dark, incl. 
   }
 });
 
-test("Logo without slogan; ROSIC, hero title and brand story use Cormorant Garamond (items 7, 16, 26)", async ({ page }) => {
+test("Logo without slogan; headings in Cormorant Garamond, body copy in Be Vietnam Pro (items 7, 16, 26; review 19/10)", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".site-header .brand-slogan")).toHaveCount(0);
-  for (const selector of [".site-header .brand-name", ".hero-copy h1", ".about-story-heading .section-heading", ".about-pillars h3", ".about-pillars p"])
-    expect(await page.locator(selector).first().evaluate((node) => getComputedStyle(node).fontFamily), selector).toContain("Cormorant Garamond");
+  // Review 19/10: every heading uses the logo face; all body copy uses the text face.
+  const font = (selector) => page.locator(selector).first().evaluate((node) => getComputedStyle(node).fontFamily);
+  for (const selector of [".site-header .brand-name", ".hero-copy h1", ".about-story-heading .section-heading", ".about-pillars h3", "#export-catalog h2", "#journey h2", "#contact h2"])
+    expect(await font(selector), selector).toContain("Cormorant Garamond");
+  for (const selector of [".about-pillars p", ".hero-description", "#export-catalog p:not(.eyebrow)", ".about-story-heading .eyebrow"])
+    expect(await font(selector), selector).toContain("Be Vietnam Pro");
   await page.evaluate(() => localStorage.setItem("rosic-language", "en"));
   await page.reload();
   await expect(page.locator(".hero-copy h1")).toHaveText(/Manufacturing with Heart\s*Trading with Vision/);

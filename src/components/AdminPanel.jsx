@@ -48,7 +48,7 @@ const DEFAULT_CONTENT = {
   brandStoryVersion: 4,
   aboutVision: defaultStory.blocks[1],
   topbar: "Manufacturing with Heart, Trading with Vision",
-  heroEyebrow: "HỒNG TÂM ROSIC GLOBAL · VIỆT NAM",
+  heroEyebrow: "ROSIC · VIỆT NAM",
   heroStart: "Khởi từ Tâm",
   heroAccent: "Vươn bằng Tầm",
   heroBody: "Kết nối nguồn nông sản Việt Nam với các đối tác quốc tế bằng chất lượng, sự rõ ràng và trách nhiệm.",

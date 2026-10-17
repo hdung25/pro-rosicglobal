@@ -48,7 +48,7 @@ const COPY = {
       edited: "Bạn đã chỉnh tin nhắn — thông tin mới nhập sẽ không ghi đè.",
       resetMessage: "Soạn lại theo thông tin mới",
       sent: "Đã mở ứng dụng. Bấm Gửi trong WhatsApp/Email để hoàn tất.",
-      greeting: "Xin chào Hồng Tâm Rosic Global,",
+      greeting: "Xin chào ROSIC,",
       intro: "Tôi muốn nhận báo giá cho yêu cầu sau:",
       closing: "Xin cảm ơn.",
       lines: { name: "Họ tên", company: "Liên hệ", phone: "Điện thoại/WhatsApp", email: "Email", product: "Sản phẩm", quantity: "Sản lượng", market: "Thị trường/cảng nhận", note: "Ghi chú" },
@@ -99,7 +99,7 @@ const COPY = {
       edited: "You edited the message — new details will not overwrite it.",
       resetMessage: "Rebuild from my details",
       sent: "The app is open. Press Send in WhatsApp/email to finish.",
-      greeting: "Hello Hong Tam Rosic Global,",
+      greeting: "Hello ROSIC,",
       intro: "I would like a quotation for the following request:",
       closing: "Thank you.",
       lines: { name: "Name", company: "Contact", phone: "Phone/WhatsApp", email: "Email", product: "Product", quantity: "Quantity", market: "Market/port", note: "Notes" },
@@ -129,14 +129,14 @@ const PRIVATE_LABEL = {
 
 /** One-step quote form extras (note, privacy consent, Zalo copy). */
 const FORM_EXTRA = {
-  vi: { lead: "Điền thông tin rồi bấm gửi — WhatsApp hoặc email mở sẵn nội dung để bạn chỉnh và gửi.", note: "Ghi chú thêm (không bắt buộc)", consent: ["Tôi đồng ý với ", "Chính sách bảo mật", " để Hồng Tâm Rosic Global liên hệ báo giá."], consentError: "Vui lòng đồng ý với chính sách bảo mật trước khi gửi.", zaloButton: "Sao chép & mở Zalo", zaloCopied: "Đã sao chép nội dung — dán vào Zalo để gửi.", dialogTitle: "Yêu cầu báo giá", close: "Đóng" },
-  en: { lead: "Fill in your details and press send — WhatsApp or email opens with the message ready for you to edit and send.", note: "Additional notes (optional)", consent: ["I agree to the ", "Privacy Policy", " so that Hong Tam Rosic Global can contact me about this quotation."], consentError: "Please accept the privacy policy before sending.", zaloButton: "Copy & open Zalo", zaloCopied: "Message copied — paste it into Zalo to send.", dialogTitle: "Request a quotation", close: "Close" },
-  zh: { lead: "填写信息后点击发送——WhatsApp 或电子邮件将打开已拟好的消息，供您修改后发送。", note: "补充说明（选填）", consent: ["我同意", "隐私政策", "，以便 Hong Tam Rosic Global 就本次询价与我联系。"], consentError: "发送前请同意隐私政策。", zaloButton: "复制并打开 Zalo", zaloCopied: "已复制内容，请粘贴到 Zalo 发送。", dialogTitle: "索取报价", close: "关闭" },
-  ko: { lead: "정보를 입력하고 보내기를 누르면 WhatsApp 또는 이메일이 작성된 메시지와 함께 열립니다.", note: "추가 요청 (선택)", consent: ["", "개인정보 처리방침", "에 동의하며 Hong Tam Rosic Global이 견적 관련 연락하는 것에 동의합니다."], consentError: "보내기 전에 개인정보 처리방침에 동의해 주세요.", zaloButton: "복사 후 Zalo 열기", zaloCopied: "내용을 복사했습니다. Zalo에 붙여 넣어 보내세요.", dialogTitle: "견적 요청", close: "닫기" },
-  ja: { lead: "情報を入力して送信を押すと、WhatsApp またはメールが作成済みのメッセージで開きます。", note: "補足事項（任意）", consent: ["", "プライバシーポリシー", "に同意し、Hong Tam Rosic Global から見積もりの連絡を受けることに同意します。"], consentError: "送信前にプライバシーポリシーに同意してください。", zaloButton: "コピーして Zalo を開く", zaloCopied: "内容をコピーしました。Zalo に貼り付けて送信してください。", dialogTitle: "見積もりを依頼", close: "閉じる" },
-  ar: { lead: "املأ بياناتك واضغط إرسال — يفتح WhatsApp أو البريد برسالة جاهزة لتعديلها وإرسالها.", note: "ملاحظات إضافية (اختياري)", consent: ["أوافق على ", "سياسة الخصوصية", " لكي تتواصل معي Hong Tam Rosic Global بشأن عرض السعر."], consentError: "يرجى الموافقة على سياسة الخصوصية قبل الإرسال.", zaloButton: "نسخ وفتح Zalo", zaloCopied: "تم نسخ الرسالة — الصقها في Zalo للإرسال.", dialogTitle: "طلب عرض سعر", close: "إغلاق" },
-  fr: { lead: "Renseignez vos informations puis envoyez — WhatsApp ou votre messagerie s’ouvre avec le message prêt à modifier.", note: "Précisions (facultatif)", consent: ["J’accepte la ", "politique de confidentialité", " afin que Hong Tam Rosic Global me contacte au sujet de ce devis."], consentError: "Veuillez accepter la politique de confidentialité avant l’envoi.", zaloButton: "Copier et ouvrir Zalo", zaloCopied: "Message copié — collez-le dans Zalo pour l’envoyer.", dialogTitle: "Demander un devis", close: "Fermer" },
-  de: { lead: "Angaben ausfüllen und senden — WhatsApp oder E-Mail öffnet sich mit der vorbereiteten Nachricht zum Bearbeiten.", note: "Weitere Hinweise (optional)", consent: ["Ich stimme der ", "Datenschutzerklärung", " zu, damit Hong Tam Rosic Global mich zu diesem Angebot kontaktiert."], consentError: "Bitte stimmen Sie vor dem Senden der Datenschutzerklärung zu.", zaloButton: "Kopieren & Zalo öffnen", zaloCopied: "Nachricht kopiert — in Zalo einfügen und senden.", dialogTitle: "Angebot anfragen", close: "Schließen" },
+  vi: { lead: "Điền thông tin rồi bấm gửi — WhatsApp hoặc email mở sẵn nội dung để bạn chỉnh và gửi.", note: "Ghi chú thêm (không bắt buộc)", consent: ["Tôi đồng ý với ", "Chính sách bảo mật", " để ROSIC liên hệ báo giá."], consentError: "Vui lòng đồng ý với chính sách bảo mật trước khi gửi.", zaloButton: "Sao chép & mở Zalo", zaloCopied: "Đã sao chép nội dung — dán vào Zalo để gửi.", dialogTitle: "Yêu cầu báo giá", close: "Đóng" },
+  en: { lead: "Fill in your details and press send — WhatsApp or email opens with the message ready for you to edit and send.", note: "Additional notes (optional)", consent: ["I agree to the ", "Privacy Policy", " so that ROSIC can contact me about this quotation."], consentError: "Please accept the privacy policy before sending.", zaloButton: "Copy & open Zalo", zaloCopied: "Message copied — paste it into Zalo to send.", dialogTitle: "Request a quotation", close: "Close" },
+  zh: { lead: "填写信息后点击发送——WhatsApp 或电子邮件将打开已拟好的消息，供您修改后发送。", note: "补充说明（选填）", consent: ["我同意", "隐私政策", "，以便 ROSIC 就本次询价与我联系。"], consentError: "发送前请同意隐私政策。", zaloButton: "复制并打开 Zalo", zaloCopied: "已复制内容，请粘贴到 Zalo 发送。", dialogTitle: "索取报价", close: "关闭" },
+  ko: { lead: "정보를 입력하고 보내기를 누르면 WhatsApp 또는 이메일이 작성된 메시지와 함께 열립니다.", note: "추가 요청 (선택)", consent: ["", "개인정보 처리방침", "에 동의하며 ROSIC이 견적 관련 연락하는 것에 동의합니다."], consentError: "보내기 전에 개인정보 처리방침에 동의해 주세요.", zaloButton: "복사 후 Zalo 열기", zaloCopied: "내용을 복사했습니다. Zalo에 붙여 넣어 보내세요.", dialogTitle: "견적 요청", close: "닫기" },
+  ja: { lead: "情報を入力して送信を押すと、WhatsApp またはメールが作成済みのメッセージで開きます。", note: "補足事項（任意）", consent: ["", "プライバシーポリシー", "に同意し、ROSIC から見積もりの連絡を受けることに同意します。"], consentError: "送信前にプライバシーポリシーに同意してください。", zaloButton: "コピーして Zalo を開く", zaloCopied: "内容をコピーしました。Zalo に貼り付けて送信してください。", dialogTitle: "見積もりを依頼", close: "閉じる" },
+  ar: { lead: "املأ بياناتك واضغط إرسال — يفتح WhatsApp أو البريد برسالة جاهزة لتعديلها وإرسالها.", note: "ملاحظات إضافية (اختياري)", consent: ["أوافق على ", "سياسة الخصوصية", " لكي تتواصل معي ROSIC بشأن عرض السعر."], consentError: "يرجى الموافقة على سياسة الخصوصية قبل الإرسال.", zaloButton: "نسخ وفتح Zalo", zaloCopied: "تم نسخ الرسالة — الصقها في Zalo للإرسال.", dialogTitle: "طلب عرض سعر", close: "إغلاق" },
+  fr: { lead: "Renseignez vos informations puis envoyez — WhatsApp ou votre messagerie s’ouvre avec le message prêt à modifier.", note: "Précisions (facultatif)", consent: ["J’accepte la ", "politique de confidentialité", " afin que ROSIC me contacte au sujet de ce devis."], consentError: "Veuillez accepter la politique de confidentialité avant l’envoi.", zaloButton: "Copier et ouvrir Zalo", zaloCopied: "Message copié — collez-le dans Zalo pour l’envoyer.", dialogTitle: "Demander un devis", close: "Fermer" },
+  de: { lead: "Angaben ausfüllen und senden — WhatsApp oder E-Mail öffnet sich mit der vorbereiteten Nachricht zum Bearbeiten.", note: "Weitere Hinweise (optional)", consent: ["Ich stimme der ", "Datenschutzerklärung", " zu, damit ROSIC mich zu diesem Angebot kontaktiert."], consentError: "Bitte stimmen Sie vor dem Senden der Datenschutzerklärung zu.", zaloButton: "Kopieren & Zalo öffnen", zaloCopied: "Nachricht kopiert — in Zalo einfügen und senden.", dialogTitle: "Angebot anfragen", close: "Schließen" },
 };
 
 function deepMerge(base, extra) {

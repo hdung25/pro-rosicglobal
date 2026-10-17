@@ -103,7 +103,7 @@ const MAINTENANCE_MODE = false;
 const MAINTENANCE_COPY = {
   vi: {
     badge: "Sắp ra mắt",
-    eyebrow: "HỒNG TÂM ROSIC GLOBAL · VIỆT NAM",
+    eyebrow: "ROSIC · VIỆT NAM",
     title: "Website của chúng tôi đang được nâng cấp.",
     accent: "Hẹn gặp lại bạn sớm.",
     body: "Chúng tôi đang hoàn thiện trải nghiệm tốt hơn cho khách hàng và đối tác. Cảm ơn bạn đã kiên nhẫn chờ đợi.",
@@ -113,7 +113,7 @@ const MAINTENANCE_COPY = {
   },
   en: {
     badge: "Coming soon",
-    eyebrow: "HỒNG TÂM ROSIC GLOBAL · VIETNAM",
+    eyebrow: "ROSIC · VIETNAM",
     title: "Our website is being upgraded.",
     accent: "We’ll be back soon.",
     body: "We’re carefully polishing a better experience for our partners and customers. Thank you for your patience while we make the next chapter ready.",
@@ -123,7 +123,7 @@ const MAINTENANCE_COPY = {
   },
   zh: {
     badge: "即将上线",
-    eyebrow: "HỒNG TÂM ROSIC GLOBAL · 越南",
+    eyebrow: "ROSIC · 越南",
     title: "我们的网站正在升级。",
     accent: "很快与您见面。",
     body: "我们正在为合作伙伴和客户优化更好的体验。感谢您的耐心等待。",
@@ -133,7 +133,7 @@ const MAINTENANCE_COPY = {
   },
   ko: {
     badge: "곧 공개",
-    eyebrow: "HỒNG TÂM ROSIC GLOBAL · 베트남",
+    eyebrow: "ROSIC · 베트남",
     title: "웹사이트를 새롭게 준비하고 있습니다.",
     accent: "곧 다시 찾아뵙겠습니다.",
     body: "파트너와 고객을 위한 더 나은 경험을 세심하게 준비하고 있습니다. 기다려 주셔서 감사합니다.",
@@ -143,7 +143,7 @@ const MAINTENANCE_COPY = {
   },
   ja: {
     badge: "近日公開",
-    eyebrow: "HỒNG TÂM ROSIC GLOBAL · ベトナム",
+    eyebrow: "ROSIC · ベトナム",
     title: "ウェブサイトをアップグレード中です。",
     accent: "まもなく公開します。",
     body: "パートナーとお客様により良い体験をお届けできるよう、サイトを整えています。お待ちいただきありがとうございます。",
@@ -153,7 +153,7 @@ const MAINTENANCE_COPY = {
   },
   ar: {
     badge: "قريبًا",
-    eyebrow: "HỒNG TÂM ROSIC GLOBAL · فيتنام",
+    eyebrow: "ROSIC · فيتنام",
     title: "موقعنا قيد التطوير.",
     accent: "سنعود قريبًا.",
     body: "نعمل بعناية على تجربة أفضل لشركائنا وعملائنا. شكرًا لصبركم أثناء تجهيز المرحلة القادمة.",
@@ -163,7 +163,7 @@ const MAINTENANCE_COPY = {
   },
   fr: {
     badge: "Bientôt disponible",
-    eyebrow: "HỒNG TÂM ROSIC GLOBAL · VIETNAM",
+    eyebrow: "ROSIC · VIETNAM",
     title: "Notre site est en cours de mise à niveau.",
     accent: "Nous revenons bientôt.",
     body: "Nous préparons avec soin une meilleure expérience pour nos partenaires et nos clients. Merci de votre patience.",
@@ -173,7 +173,7 @@ const MAINTENANCE_COPY = {
   },
   de: {
     badge: "Demnächst verfügbar",
-    eyebrow: "HỒNG TÂM ROSIC GLOBAL · VIETNAM",
+    eyebrow: "ROSIC · VIETNAM",
     title: "Unsere Website wird überarbeitet.",
     accent: "Wir sind bald wieder da.",
     body: "Wir bereiten sorgfältig ein besseres Erlebnis für Partner und Kunden vor. Vielen Dank für Ihre Geduld.",
@@ -190,12 +190,12 @@ function Brand({ footer = false, copy, home = true }) {
     <a
       className={`brand ${footer ? "brand-footer" : ""}`}
       href={home ? "#home" : "/"}
-      aria-label={brandCopy?.homeLabel ?? "Hồng Tâm Rosic Global, trang chủ"}
+      aria-label={brandCopy?.homeLabel ?? "ROSIC, trang chủ"}
     >
       <img
         className="brand-mark"
         src="/brand-mark.svg"
-        alt={brandCopy?.logoAlt ?? "Biểu trưng Hồng Tâm Rosic Global"}
+        alt={brandCopy?.logoAlt ?? "Biểu trưng ROSIC"}
         width="445"
         height="159"
       />
@@ -281,8 +281,8 @@ function MaintenancePage() {
         <div className="maintenance-orbit maintenance-orbit-two" aria-hidden="true" />
         <section className="maintenance-shell" aria-labelledby="maintenance-title">
           <div className="maintenance-topline">
-            <a className="maintenance-brand" href="/" aria-label="Hồng Tâm Rosic Global">
-              <img src="/brand-kit/rosic-logo-stacked.svg" alt="Hồng Tâm Rosic Global" width="600" height="370" />
+            <a className="maintenance-brand" href="/" aria-label="ROSIC">
+              <img src="/brand-kit/rosic-logo-stacked.svg" alt="ROSIC" width="600" height="370" />
             </a>
             <div className="maintenance-utilities">
               <LanguagePicker compact language={language} onChange={setLanguage} />
@@ -794,6 +794,16 @@ function Journal({ onArticle, copy, language, images, text }) {
     </section>
   );
 }
+const LEGACY_BRAND = /H[ỒồOo]NGs+T[ÂâAa]M(?:s+ROSIC)?(?:s+GLOBAL)?|Hong Tam Rosic Global|HONG TAM ROSIC GLOBAL(?! JSC)/giu;
+function rosicContent(content) {
+  if (!content) return content;
+  return Object.fromEntries(Object.entries(content).map(([key, value]) => [key, typeof value === "string" ? value.normalize("NFC").replace(LEGACY_BRAND, "ROSIC").replace(/s{2,}/g, " ") : value]));
+}
+const CMS_CACHE_KEY = "rosic-cms-cache-v1";
+function readCachedCms() {
+  try { return JSON.parse(window.localStorage.getItem(CMS_CACHE_KEY)) ?? null; } catch { return null; }
+}
+
 const BRAND_SLOGAN = "Manufacturing with Heart, Trading with Vision";
 
 function Footer({ onPolicy, language, onLanguage, theme, onThemeChange, copy, catalogCopy, socialLinks, socialQr, groups, onHome }) {
@@ -927,56 +937,59 @@ function SiteApp({ cms, preview = false }) {
   const [selected, setSelected] = useState(null);
   const baseCopy = siteCopyFor(language);
   const catalogCopy = catalogCopyFor(language);
-  let copy = language === "vi" && cms?.content ? {
+  // Text saved in the CMS before the ROSIC naming review still says
+  // "Hồng Tâm"; it is shown under the ROSIC name like the rest of the page.
+  const content = useMemo(() => rosicContent(cms?.content), [cms]);
+  let copy = language === "vi" && content ? {
     ...baseCopy,
-    brand: { ...baseCopy.brand, topbar: cms.content.topbar || baseCopy.brand.topbar },
+    brand: { ...baseCopy.brand, topbar: content.topbar || baseCopy.brand.topbar },
     hero: {
       ...baseCopy.hero,
-      eyebrow: cms.content.heroEyebrow || baseCopy.hero.eyebrow,
-      start: cms.content.heroStart || baseCopy.hero.start,
-      accent: cms.content.heroAccent || baseCopy.hero.accent,
-      first: cms.content.heroBody || baseCopy.hero.first,
+      eyebrow: content.heroEyebrow || baseCopy.hero.eyebrow,
+      start: content.heroStart || baseCopy.hero.start,
+      accent: content.heroAccent || baseCopy.hero.accent,
+      first: content.heroBody || baseCopy.hero.first,
       second: "",
-      cta: cms.content.heroCta || baseCopy.hero.cta,
-      aboutCta: cms.content.brandStoryVersion === 4 ? cms.content.heroCta : null,
+      cta: content.heroCta || baseCopy.hero.cta,
+      aboutCta: content.brandStoryVersion === 4 ? content.heroCta : null,
     },
     about: {
       ...baseCopy.about,
-      title: [cms.content.aboutTitle || baseCopy.about.title[0], ""],
-      first: cms.content.aboutBody || baseCopy.about.first,
+      title: [content.aboutTitle || baseCopy.about.title[0], ""],
+      first: content.aboutBody || baseCopy.about.first,
     },
     catalog: {
       ...baseCopy.catalog,
-      title: cms.content.catalogTitle || baseCopy.catalog.title,
-      body: cms.content.catalogBody || baseCopy.catalog.body,
+      title: content.catalogTitle || baseCopy.catalog.title,
+      body: content.catalogBody || baseCopy.catalog.body,
     },
     journey: {
       ...baseCopy.journey,
-      title: [cms.content.journeyTitleStart || baseCopy.journey.title[0], cms.content.journeyTitleAccent || baseCopy.journey.title[1]],
-      lead: cms.content.journeyLead || baseCopy.journey.lead,
+      title: [content.journeyTitleStart || baseCopy.journey.title[0], content.journeyTitleAccent || baseCopy.journey.title[1]],
+      lead: content.journeyLead || baseCopy.journey.lead,
     },
     partners: {
       ...baseCopy.partners,
-      title: [cms.content.partnersTitleStart || baseCopy.partners.title[0], cms.content.partnersTitleAccent || baseCopy.partners.title[1]],
-      lead: cms.content.partnersLead || baseCopy.partners.lead,
+      title: [content.partnersTitleStart || baseCopy.partners.title[0], content.partnersTitleAccent || baseCopy.partners.title[1]],
+      lead: content.partnersLead || baseCopy.partners.lead,
     },
     journal: {
       ...baseCopy.journal,
-      title: cms.content.journalTitle || baseCopy.journal.title,
-      lead: cms.content.journalLead || baseCopy.journal.lead,
+      title: content.journalTitle || baseCopy.journal.title,
+      lead: content.journalLead || baseCopy.journal.lead,
     },
     footer: {
       ...baseCopy.footer,
-      invitation: cms.content.footerTitle || baseCopy.footer.invitation,
+      invitation: content.footerTitle || baseCopy.footer.invitation,
     },
   } : baseCopy;
   copy = mergeText(copy, cms?.textOverrides?.[language]?.copy);
   copy = { ...copy, nav: { ...copy.nav, privateLabel: catalogCopy.nav.privateLabel } };
   let story = brandStoryFor(language, copy);
-  if (language === "vi" && cms?.content?.brandStoryVersion === 4) {
-    story.title = [cms.content.heroStart || story.title[0], cms.content.heroAccent || story.title[1]];
+  if (language === "vi" && content?.brandStoryVersion === 4) {
+    story.title = [content.heroStart || story.title[0], content.heroAccent || story.title[1]];
     story.slogan = story.title.join(" – ");
-    story.blocks = [cms.content.aboutBody || story.blocks[0], cms.content.aboutVision || story.blocks[1]];
+    story.blocks = [content.aboutBody || story.blocks[0], content.aboutVision || story.blocks[1]];
   }
   story = mergeText(story, cms?.textOverrides?.[language]?.story);
   const { groups, products } = useMemo(() => buildCatalog(cms, language), [cms, language]);
@@ -1140,10 +1153,16 @@ function readPublishedCms() {
 }
 
 function usePublishedCms() {
-  const [cms, setCms] = useState(() => import.meta.env.DEV ? readPublishedCms() : null);
+  // Returning visitors see the last published content at once (no text swap
+  // while /api/content loads); the fresh copy replaces it when it arrives.
+  const [cms, setCms] = useState(() => import.meta.env.DEV ? readPublishedCms() : readCachedCms());
   useEffect(() => {
     const sync = () => {
-      fetch("/api/content").then(r => r.json()).then(result => { if (result.ok) setCms(result.data); }).catch(() => {});
+      fetch("/api/content").then(r => r.json()).then(result => {
+        if (!result.ok) return;
+        setCms(result.data);
+        try { window.localStorage.setItem(CMS_CACHE_KEY, JSON.stringify(result.data)); } catch { /* Storage may be full or blocked. */ }
+      }).catch(() => {});
     };
     sync();
     window.addEventListener("focus", sync);

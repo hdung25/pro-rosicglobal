@@ -10,7 +10,7 @@ export function ProductImageBrand({ className = "" }) {
   return (
     <span className={`product-image-brand ${className}`.trim()} aria-hidden="true">
       <span className="product-image-brand__mark" />
-      <span className="product-image-brand__name">HONG TAM ROSIC GLOBAL</span>
+      <span className="product-image-brand__name">ROSIC</span>
     </span>
   );
 }

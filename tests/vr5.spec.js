@@ -84,8 +84,8 @@ test('VR5 admin edits detailed stories and keeps drafts separate from published 
   await page.route('**/api/admin-auth', route => route.fulfill({ json: { authenticated: true } }));
   await page.goto('/admin/');
   await page.getByRole('button', { name: 'Nội dung trang', exact: true }).click();
-  await page.getByText('story', { exact: true }).click();
-  await page.getByRole('textbox', { name: 'blocks › 0', exact: true }).fill('Câu chuyện VR5 kiểm thử bản nháp.');
+  await page.getByText('Câu chuyện ROSIC', { exact: true }).click();
+  await page.getByRole('textbox', { name: 'blocks › Mục 1', exact: true }).fill('Câu chuyện VR5 kiểm thử bản nháp.');
   const preview = page.frameLocator('iframe[title^="Live Preview"]');
   await expect(preview.locator('.about-pillars')).toContainText('Câu chuyện VR5 kiểm thử bản nháp.');
   expect(await page.evaluate(() => localStorage.getItem('rosic-cms-published-v1'))).toBeNull();

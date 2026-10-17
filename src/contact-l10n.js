@@ -39,7 +39,7 @@ export const CONTACT_COPY = {
     },
     notes: {
       required: "Các mục có dấu * là bắt buộc.",
-      legal: "Khi gửi biểu mẫu, bạn đồng ý để Hồng Tâm Rosic Global sử dụng thông tin này nhằm phản hồi yêu cầu báo giá và điều phối liên hệ phù hợp.",
+      legal: "Khi gửi biểu mẫu, bạn đồng ý để ROSIC sử dụng thông tin này nhằm phản hồi yêu cầu báo giá và điều phối liên hệ phù hợp.",
       privacy: "Không gửi thông tin nhạy cảm hoặc dữ liệu thanh toán qua biểu mẫu này.",
     },
     validation: {
@@ -136,7 +136,7 @@ export const CONTACT_COPY = {
     },
     notes: {
       required: "Fields marked with * are required.",
-      legal: "By submitting this form, you allow Hồng Tâm Rosic Global to use these details to respond to your quotation request and route an appropriate follow-up.",
+      legal: "By submitting this form, you allow ROSIC to use these details to respond to your quotation request and route an appropriate follow-up.",
       privacy: "Please do not submit sensitive information or payment data through this form.",
     },
     validation: {
@@ -233,7 +233,7 @@ export const CONTACT_COPY = {
     },
     notes: {
       required: "带 * 的项目为必填项。",
-      legal: "提交表单即表示您同意 Hồng Tâm Rosic Global 使用这些信息来回复询价并安排合适的后续联系。",
+      legal: "提交表单即表示您同意 ROSIC 使用这些信息来回复询价并安排合适的后续联系。",
       privacy: "请勿通过此表单提交敏感信息或支付数据。",
     },
     validation: {
@@ -330,7 +330,7 @@ export const CONTACT_COPY = {
     },
     notes: {
       required: "* 표시 항목은 필수입니다.",
-      legal: "양식을 제출하면 Hồng Tâm Rosic Global이 견적 문의에 응답하고 적절한 후속 연락을 조율하기 위해 이 정보를 사용하는 데 동의하게 됩니다.",
+      legal: "양식을 제출하면 ROSIC이 견적 문의에 응답하고 적절한 후속 연락을 조율하기 위해 이 정보를 사용하는 데 동의하게 됩니다.",
       privacy: "이 양식으로 민감 정보나 결제 정보를 보내지 마세요.",
     },
     validation: {
@@ -427,7 +427,7 @@ export const CONTACT_COPY = {
     },
     notes: {
       required: "* の付いた項目は必須です。",
-      legal: "フォームを送信すると、Hồng Tâm Rosic Global が見積もりへの回答と適切なフォローアップのためにこの情報を利用することに同意したものとみなされます。",
+      legal: "フォームを送信すると、ROSIC が見積もりへの回答と適切なフォローアップのためにこの情報を利用することに同意したものとみなされます。",
       privacy: "機密情報や支払い情報をこのフォームから送信しないでください。",
     },
     validation: {
@@ -524,7 +524,7 @@ export const CONTACT_COPY = {
     },
     notes: {
       required: "الحقول التي تحمل * مطلوبة.",
-      legal: "بتقديم هذا النموذج، توافق على أن تستخدم Hồng Tâm Rosic Global هذه البيانات للرد على طلب عرض السعر وتنسيق المتابعة المناسبة.",
+      legal: "بتقديم هذا النموذج، توافق على أن تستخدم ROSIC هذه البيانات للرد على طلب عرض السعر وتنسيق المتابعة المناسبة.",
       privacy: "يرجى عدم إرسال معلومات حساسة أو بيانات دفع عبر هذا النموذج.",
     },
     validation: {
@@ -621,7 +621,7 @@ export const CONTACT_COPY = {
     },
     notes: {
       required: "Les champs marqués d'un * sont obligatoires.",
-      legal: "En envoyant ce formulaire, vous autorisez Hồng Tâm Rosic Global à utiliser ces informations pour répondre à votre demande de devis et organiser un suivi adapté.",
+      legal: "En envoyant ce formulaire, vous autorisez ROSIC à utiliser ces informations pour répondre à votre demande de devis et organiser un suivi adapté.",
       privacy: "Ne transmettez pas d'informations sensibles ni de données de paiement via ce formulaire.",
     },
     validation: {
@@ -718,7 +718,7 @@ export const CONTACT_COPY = {
     },
     notes: {
       required: "Mit * markierte Felder sind erforderlich.",
-      legal: "Mit dem Absenden erlauben Sie Hồng Tâm Rosic Global, diese Angaben zur Beantwortung Ihrer Angebotsanfrage und für eine passende weitere Kontaktaufnahme zu verwenden.",
+      legal: "Mit dem Absenden erlauben Sie ROSIC, diese Angaben zur Beantwortung Ihrer Angebotsanfrage und für eine passende weitere Kontaktaufnahme zu verwenden.",
       privacy: "Bitte übermitteln Sie über dieses Formular keine sensiblen Informationen oder Zahlungsdaten.",
     },
     validation: {
@@ -807,7 +807,7 @@ const ROUTING_COPY = {
     noFinalDelivery: "Việc email hoặc tin nhắn được giao thành công được theo dõi tiếp trong hệ thống gửi.",
     rate: "Hệ thống đang giới hạn số lần gửi để bảo vệ biểu mẫu. Yêu cầu này chưa được xác nhận gửi.",
     network: "Yêu cầu này chưa được xác nhận gửi. Vui lòng kiểm tra kết nối, thử lại hoặc dùng phương án liên hệ dự phòng.",
-    fallbackTitle: "Phương án liên hệ dự phòng", fallbackBody: "Lưu bản tóm tắt hoặc gửi trực tiếp cho đội ngũ Hồng Tâm. Các thao tác này không tự động tạo đơn hàng.",
+    fallbackTitle: "Phương án liên hệ dự phòng", fallbackBody: "Lưu bản tóm tắt hoặc gửi trực tiếp cho đội ngũ ROSIC. Các thao tác này không tự động tạo đơn hàng.",
   },
   en: {
     accent: "growing season.", b2b: ["For B2B partners", "Importers, distributors and procurement teams."],
@@ -819,7 +819,7 @@ const ROUTING_COPY = {
     noFinalDelivery: "Final email or message delivery is tracked in the sending system.",
     rate: "The form is temporarily limiting submissions to protect the service. This request was not confirmed as sent.",
     network: "This request was not confirmed as sent. Check your connection, try again, or use a fallback contact option.",
-    fallbackTitle: "Fallback contact options", fallbackBody: "Save the summary or send it directly to the Hồng Tâm team. These actions do not automatically create an order.",
+    fallbackTitle: "Fallback contact options", fallbackBody: "Save the summary or send it directly to the ROSIC team. These actions do not automatically create an order.",
   },
   zh: {
     accent: "全新收获季。", b2b: ["面向 B2B 合作伙伴", "进口商、经销商和采购团队。"],
@@ -831,7 +831,7 @@ const ROUTING_COPY = {
     noFinalDelivery: "邮件或消息的最终送达情况将在发送系统中继续跟踪。",
     rate: "为保护服务，表单暂时限制提交次数。该请求尚未确认发送。",
     network: "该请求尚未确认发送。请检查网络、重试或使用备用联系方式。",
-    fallbackTitle: "备用联系方式", fallbackBody: "保存摘要或直接发送给 Hồng Tâm 团队。这些操作不会自动创建订单。",
+    fallbackTitle: "备用联系方式", fallbackBody: "保存摘要或直接发送给 ROSIC 团队。这些操作不会自动创建订单。",
   },
   ko: {
     accent: "새 수확의 계절.", b2b: ["B2B 파트너를 위해", "수입업체, 유통업체 및 구매팀."],
@@ -843,7 +843,7 @@ const ROUTING_COPY = {
     noFinalDelivery: "이메일 또는 메시지의 최종 전달은 발송 시스템에서 추적됩니다.",
     rate: "서비스 보호를 위해 제출 횟수가 일시적으로 제한됩니다. 요청은 전송 확인되지 않았습니다.",
     network: "요청 전송이 확인되지 않았습니다. 연결을 확인하거나 다시 시도하거나 대체 연락 방법을 이용하세요.",
-    fallbackTitle: "대체 연락 방법", fallbackBody: "요약을 저장하거나 Hồng Tâm 팀에 직접 보내세요. 이 작업은 주문을 자동 생성하지 않습니다.",
+    fallbackTitle: "대체 연락 방법", fallbackBody: "요약을 저장하거나 ROSIC 팀에 직접 보내세요. 이 작업은 주문을 자동 생성하지 않습니다.",
   },
   ja: {
     accent: "新しい収穫の季節。", b2b: ["B2B パートナー向け", "輸入業者、販売代理店、調達チーム。"],
@@ -855,7 +855,7 @@ const ROUTING_COPY = {
     noFinalDelivery: "メールやメッセージの最終配信は送信システムで追跡されます。",
     rate: "サービス保護のため、送信数を一時的に制限しています。この依頼は送信確認されていません。",
     network: "この依頼は送信確認されていません。接続を確認し、再試行するか、代替連絡先をご利用ください。",
-    fallbackTitle: "代替連絡先", fallbackBody: "要約を保存するか、Hồng Tâm チームへ直接送信してください。これらの操作で注文が自動作成されることはありません。",
+    fallbackTitle: "代替連絡先", fallbackBody: "要約を保存するか、ROSIC チームへ直接送信してください。これらの操作で注文が自動作成されることはありません。",
   },
   ar: {
     accent: "موسم حصاد جديد.", b2b: ["لشركاء الأعمال B2B", "المستوردون والموزعون وفرق المشتريات."],
@@ -879,7 +879,7 @@ const ROUTING_COPY = {
     noFinalDelivery: "La livraison finale de l’e-mail ou du message est suivie dans le système d’envoi.",
     rate: "Le formulaire limite temporairement les envois pour protéger le service. Cette demande n’est pas confirmée comme envoyée.",
     network: "Cette demande n’est pas confirmée comme envoyée. Vérifiez votre connexion, réessayez ou utilisez une option de secours.",
-    fallbackTitle: "Options de contact de secours", fallbackBody: "Enregistrez le récapitulatif ou envoyez-le directement à l’équipe Hồng Tâm. Ces actions ne créent pas automatiquement une commande.",
+    fallbackTitle: "Options de contact de secours", fallbackBody: "Enregistrez le récapitulatif ou envoyez-le directement à l’équipe ROSIC. Ces actions ne créent pas automatiquement une commande.",
   },
   de: {
     accent: "neue Saison.", b2b: ["Für B2B-Partner", "Importeure, Distributoren und Einkaufsteams."],
