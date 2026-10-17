@@ -9,17 +9,18 @@ test('brand layout, mobile fit, photo, navigation and fixed controls', async ({ 
   await expect(page.locator('.rosic-values li')).toHaveCount(5);
   await expect(page.locator('.about-pillars article')).toHaveCount(2);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
-  await expect(page.locator('.site-header .brand-slogan')).toHaveCount(1);
+  await expect(page.locator('.site-header .brand-slogan')).toHaveCount(0);
   await expect(page.locator('.hero-landscape img')).toHaveAttribute('src', '/images/rosic-terraces.webp');
   await page.locator('.hero-about-button').click();
   await expect(page).toHaveURL(/#about$/);
-  await page.locator('.floating-back-top').click();
-  await expect(page).toHaveURL(/#home$/);
-  await page.locator('.floating-theme').click();
+  await page.mouse.wheel(0, 1200);
+  await page.locator('.back-to-top').click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await page.locator('.topbar .theme-switch').getByRole('button', { name: 'Tối' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(page.locator('.theme-toggle')).toHaveCount(1);
+  await expect(page.locator('.theme-switch')).toHaveCount(1);
   await page.screenshot({ path: 'artifacts/vr4/home-dark.png' });
-  await page.locator('.floating-theme').click();
+  await page.locator('.topbar .theme-switch').getByRole('button', { name: 'Sáng' }).click();
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -28,33 +29,37 @@ test('brand layout, mobile fit, photo, navigation and fixed controls', async ({ 
   expect(errors).toEqual([]);
 });
 
-test('quick view stays attached to its card, product lightbox and keyboard dismissal', async ({ page }) => {
-  await page.goto('/');
-  const card = page.locator('.official-export-card').first();
-  await card.hover();
-  await expect(page.locator('.product-hover-spec')).toHaveCount(0);
-  await expect(card.locator('.official-export-card__detail')).toBeVisible();
-  await card.getByRole('button').click();
-  await page.locator('.official-export-dialog__visual .image-zoom').click();
+test('quick view stays attached to its group card, product lightbox and keyboard dismissal', async ({ page }) => {
+  await page.goto('/#export-catalog');
+  const card = page.locator('.gcard').first();
+  const trigger = card.getByRole('button', { name: 'Xem nhanh' });
+  await trigger.click();
+  await expect(page.locator('.quick-view')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.quick-view')).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await page.goto('/san-pham/ca-phe/ca-phe-nhan-xanh-s16-clean');
+  await page.locator('.product-detail__media .image-zoom').click();
   await expect(page.locator('.image-lightbox')).toBeVisible();
   await expect.poll(() => page.locator('.image-lightbox img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
   await page.keyboard.press('Escape');
   await expect(page.locator('.image-lightbox')).toHaveCount(0);
-  await expect(page.locator('.official-export-dialog__content')).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.locator('.official-export-dialog__content')).toHaveCount(0);
 });
 
-test('every public catalogue category contains at least one product', async ({ page }) => {
+test('every public product group has products, except the dried fruit list still being prepared', async ({ page }) => {
   await page.goto('/#products');
-  const tabs = page.locator('.catalog-section .category-tabs button');
-  await expect(tabs.first()).toBeVisible();
-  const count = await tabs.count();
-  expect(count).toBeGreaterThan(5);
+  const chips = page.locator('.v6-finder .chip');
+  await expect(chips.first()).toBeVisible();
+  const count = await chips.count();
+  expect(count).toBe(10);
   for (let index = 0; index < count; index += 1) {
-    await tabs.nth(index).click();
-    await expect(page.locator('.catalog-section .product-card').first()).toBeVisible();
-    await expect(page.locator('.catalog-section .empty-state')).toHaveCount(0);
+    await chips.nth(index).click();
+    if ((await chips.nth(index).textContent()).includes('Trái cây sấy')) {
+      await expect(page.locator('.v6-finder .v6-empty')).toContainText('Danh sách đang được bổ sung');
+    } else {
+      await expect(page.locator('.v6-finder .pcard').first()).toBeVisible();
+      await expect(page.locator('.v6-finder .v6-empty')).toHaveCount(0);
+    }
   }
 });
 
@@ -89,9 +94,9 @@ test('live admin preview uses draft data on desktop/mobile and respects blank so
   await page.getByRole('button', { name: 'Cài đặt', exact: true }).click();
   await expect(page.getByLabel('Facebook', { exact: true })).toHaveValue('https://www.facebook.com/share/1Dq8KnnGEK/');
   await page.getByLabel('Facebook', { exact: true }).fill('https://www.facebook.com/rosic-example');
-  await expect(preview.locator('.footer-socials a[aria-label="Facebook"]')).toHaveAttribute('href', 'https://www.facebook.com/rosic-example');
+  await expect(preview.locator('.footer-invitation [data-channel="facebook"] a')).toHaveAttribute('href', 'https://www.facebook.com/rosic-example');
   await page.getByLabel('Facebook', { exact: true }).fill('');
-  await expect(preview.locator('.footer-socials a[aria-label="Facebook"]')).toHaveCount(0);
+  await expect(preview.locator('.footer-invitation [data-channel="facebook"] a')).toHaveCount(0);
   await page.screenshot({ path: 'artifacts/vr4/admin-live-preview.png' });
 });
 

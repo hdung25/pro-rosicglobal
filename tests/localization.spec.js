@@ -42,21 +42,22 @@ test("every supported locale supplies human-facing theme and editorial copy", as
   }
 });
 
-test("English localizes the general catalogue, quote choices, and numeric export references", async ({ page }) => {
+test("English localizes the catalogue, quote choices, and numeric specifications", async ({ page }) => {
   await page.addInitScript(() => window.localStorage.clear());
   await page.goto("/");
   await page.locator(".header-language select").selectOption("en");
 
-  await expect(page.locator("#products h3").first()).toHaveText("Mango");
-  await expect(page.locator("#products")).not.toContainText("Xoài chín vàng");
+  await page.locator("#products").scrollIntoViewIfNeeded();
+  await expect(page.locator("#products .pcard__title").first()).toHaveText("Green Robusta S18 – Cleaned");
+  await expect(page.locator("#products")).not.toContainText("Cà phê nhân xanh");
 
-  const productSelect = page.locator("#contact-product");
-  await expect(productSelect.locator("option").first()).toHaveText("Mixed seasonal order");
+  const productSelect = page.locator("#quote-product");
+  await expect(productSelect.locator("option").first()).toHaveText("Several products / not decided");
   await expect(productSelect.locator("option").filter({ hasText: "Black pepper" })).toHaveCount(2);
 
-  await page.locator(".official-export-card").filter({ hasText: "Star anise" }).getByRole("button").click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toContainText("Reference figures");
-  await expect(dialog).toContainText("13.5%");
-  await expect(dialog).toContainText("2.5 cm");
+  await page.goto("/san-pham/hoa-hoi/hoi-vu-thu");
+  await page.locator(".header-language select").selectOption("en");
+  await expect(page.locator(".spec-table")).toContainText("Moisture");
+  await expect(page.locator(".spec-table")).toContainText("13.5%");
+  await expect(page.locator(".spec-table")).toContainText("2.5 cm");
 });

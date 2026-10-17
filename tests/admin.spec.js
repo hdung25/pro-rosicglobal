@@ -106,10 +106,10 @@ test("dynamic categories add, reorder, protect assigned products and delete", as
   await page.getByRole("button", { name: "Đưa lên trước" }).click();
   await expect(page.locator('.admin-category-list button').nth(8)).toContainText("Hạt mới VR4");
   const preview = page.frameLocator('iframe');
-  await expect(preview.locator('.official-export-card')).toHaveCount(10);
-  await expect(preview.locator('.official-export-card').nth(8)).toContainText("Hạt mới VR4");
+  await expect(preview.locator('.gcard')).toHaveCount(10);
+  await expect(preview.locator('.gcard').nth(8)).toContainText("Hạt mới VR4");
   await preview.locator('.topbar-language select').selectOption('en');
-  await expect(preview.locator('.official-export-card').nth(8)).toContainText("Hạt mới VR4");
+  await expect(preview.locator('.gcard').nth(8)).toContainText("Hạt mới VR4");
   await preview.locator('.topbar-language select').selectOption('vi');
   await page.getByRole("button", { name: "Sản phẩm", exact: true }).click();
   await page.getByRole("button", { name: "Thêm sản phẩm", exact: true }).click();
@@ -124,7 +124,7 @@ test("dynamic categories add, reorder, protect assigned products and delete", as
   page.once('dialog', dialog => dialog.accept());
   await page.getByTitle("Xóa danh mục", { exact: true }).click();
   await expect(page.locator('.admin-category-list button')).toHaveCount(9);
-  await expect(preview.locator('.official-export-card')).toHaveCount(9);
+  await expect(preview.locator('.gcard')).toHaveCount(9);
 });
 
 test("admin waits for saved server data before allowing new edits", async ({ page }) => {

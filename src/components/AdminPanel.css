@@ -367,3 +367,8 @@
   .admin-login-card { padding: 28px 22px; }
 }
 @media (prefers-reduced-motion: reduce) { .admin-form { animation: none; } }
+
+/* v6: technical specifications shown on each product page. */
+.admin-spec-fields { display: grid; gap: 12px; margin: 18px 0; padding: 16px; border: 1px solid var(--admin-line, #dfe3da); border-radius: 10px; }
+.admin-spec-fields legend { padding: 0 6px; font-size: 13px; font-weight: 700; }
+.admin-spec-fields .admin-field-hint { margin: 0; font-size: 12px; line-height: 1.6; color: #66705f; }

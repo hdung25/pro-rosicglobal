@@ -7,6 +7,12 @@
   "theme_color": "#193B30",
   "icons": [
     {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
       "src": "/icons/rosic-192.png",
       "sizes": "192x192",
       "type": "image/png",
@@ -31,7 +37,7 @@
   "shortcuts": [
     {
       "name": "Sản phẩm · Products",
-      "url": "/#products"
+      "url": "/san-pham"
     },
     {
       "name": "Báo giá · Quotation",

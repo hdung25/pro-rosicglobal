@@ -1,45 +1,17 @@
-import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
-import {
-  AlertCircle,
-  ArrowDownToLine,
-  ArrowUpRight,
-  Check,
-  Copy,
-  LoaderCircle,
-  Mail,
-  MessageCircle,
-} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowUpRight, Check, Copy, Mail, RotateCcw } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
+import { SiZalo } from "react-icons/si";
 import { mergeText } from "../cms/content-overrides";
-import { quoteFlowCopyFor } from "../quote-flow-copy";
 import { CONTACT } from "../contact-config";
 import SocialChannels from "./SocialChannels";
 import { safeSocialLink, SOCIAL_DEFAULTS, whatsappQuoteLink } from "../social-config";
 import { contactCopyFor, routingCopyFor } from "../contact-l10n";
+import { catalogCopyFor } from "../catalog-copy";
 
-const GENERAL_REQUEST = "Đơn hàng tổng hợp theo mùa vụ";
-const PARTNERSHIP_REQUEST = "Hợp tác vùng trồng & cung ứng";
 const FALLBACK_EMAIL = "info@rosicglobal.com";
 const FALLBACK_PHONE = "+84962284872";
-
-const PRODUCT_GROUPS = [
-  ["", "unspecified"],
-  ["Hạt & ngũ cốc", "nuts"],
-  ["Gia vị xuất khẩu", "spices"],
-  ["Cà phê", "coffee"],
-  ["Cơm dừa & nông sản chế biến", "processed"],
-  ["Trái cây sấy", "driedFruit"],
-  ["Trái cây tươi", "freshFruit"],
-  ["Rau củ theo mùa", "vegetables"],
-  ["Hợp tác vùng trồng & cung ứng", "partnership"],
-];
-
-const TIMELINES = [
-  ["", "unspecified"],
-  ["Cần báo giá trước", "quoteFirst"],
-  ["Trong 2 tuần", "twoWeeks"],
-  ["Trong 30 ngày", "thirtyDays"],
-  ["Theo mùa vụ / kế hoạch dài hạn", "seasonal"],
-];
+const GENERAL = "general";
 
 function validEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -51,475 +23,222 @@ function validPhone(value) {
 }
 
 function createSubmissionId() {
-  const uuid = globalThis.crypto?.randomUUID?.();
-  return uuid || `quote-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+  return globalThis.crypto?.randomUUID?.() || `quote-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
 }
 
-function inferProductGroup(title, products) {
-  const product = products.find((item) => (item.sourceTitle ?? item.title) === title);
-  if (product?.sourceGroup || product?.group) return product.sourceGroup ?? product.group;
-  const normalized = String(title || "").toLocaleLowerCase("vi");
-  if (normalized.includes("điều")) return "Hạt & ngũ cốc";
-  if (normalized.includes("quế") || normalized.includes("tiêu") || normalized.includes("hồi")) return "Gia vị xuất khẩu";
-  if (normalized.includes("cà phê")) return "Cà phê";
-  if (normalized.includes("dừa")) return "Cơm dừa & nông sản chế biến";
-  if (normalized.includes("sấy")) return "Trái cây sấy";
-  if (normalized.includes("xoài") || normalized.includes("thanh long") || normalized.includes("dưa") || normalized.includes("bơ")) return "Trái cây tươi";
-  if (normalized.includes("rau")) return "Rau củ theo mùa";
-  if (title === PARTNERSHIP_REQUEST) return "Hợp tác vùng trồng & cung ứng";
-  return "";
+/** Turn the selected option key into a readable product line for the message. */
+function describeSelection(key, products, groups, general) {
+  if (!key || key === GENERAL) return general;
+  if (key.startsWith("group:")) return groups.find((group) => `group:${group.id}` === key)?.title || general;
+  const product = products.find((item) => item.id === key);
+  return product ? `${product.code} · ${product.title}` : general;
 }
 
-function contactView(language, overrides) {
-  const copy = mergeText(contactCopyFor(language), overrides?.contact);
-  const routing = mergeText(routingCopyFor(language), overrides?.routing);
-  return {
-    copy,
-    routing,
-    heading: [copy.heading, routing.accent],
-    fields: {
-      name: [copy.fields.name.label, copy.fields.name.placeholder],
-      phone: [copy.fields.phone.label, copy.fields.phone.placeholder],
-      email: [copy.fields.email.label, copy.fields.email.placeholder],
-      product: copy.fields.product.label,
-      productGroup: routing.productGroup,
-      market: [copy.fields.market.label, copy.fields.market.placeholder],
-      quantity: [copy.fields.quantity.label, copy.fields.quantity.placeholder],
-      timeline: copy.fields.timeline.label,
-      message: [copy.fields.message.label, copy.fields.message.placeholder],
-    },
-    result: {
-      accepted: [copy.success.heading, `${copy.success.body} ${routing.noFinalDelivery}`],
-      partial: [copy.error.heading, copy.delivery.partiallyAccepted],
-      configuration: [copy.fallback.heading, copy.fallback.body],
-      failed: [copy.error.heading, copy.delivery.deliveryFailed],
-      rate: [copy.error.heading, routing.rate],
-      network: [copy.error.heading, routing.network],
-      generic: [copy.error.heading, copy.error.body],
-      requestId: copy.success.requestId,
-      channelTitle: copy.success.deliveryTitle,
-      channels: copy.channels,
-      status: {
-        sent: copy.delivery.sent,
-        queued: copy.delivery.queued,
-        accepted_by_make: copy.delivery.sent,
-        accepted_by_resend: copy.delivery.queued,
-        not_configured: copy.delivery.notConfigured,
-        failed: copy.delivery.failed,
-        not_reported: copy.delivery.pending,
-      },
-      profileHelp: copy.catalog.help,
-      fallbackTitle: routing.fallbackTitle,
-      fallbackBody: routing.fallbackBody,
-      email: copy.actions.openEmail,
-      whatsapp: copy.channels.whatsapp,
-      download: copy.actions.download,
-      copy: copy.actions.copy,
-      copied: copy.actions.copied,
-      copyFailed: copy.actions.copyFailed,
-      tryAgain: copy.actions.tryAgain,
-      profileUnavailable: copy.catalog.comingSoon,
-    },
-  };
+function composeMessage(values, form) {
+  const { lines } = form;
+  const details = [
+    [lines.product, values.productLine],
+    [lines.quantity, values.quantity],
+    [lines.market, values.market],
+  ].filter(([, value]) => value).map(([label, value]) => `- ${label}: ${value}`);
+  const contact = [
+    [lines.name, values.name],
+    [lines.phone, values.phone],
+    [lines.email, values.email],
+  ].filter(([, value]) => value).map(([label, value]) => `${label}: ${value}`);
+  return [form.greeting, "", form.intro, ...details, "", ...contact, "", form.closing].join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
-function formatRequest(request, view) {
-  const { labels, defaultMessage } = view.copy.summary;
-  const localLabels = { ...labels, productGroup: view.fields.productGroup };
-  const optional = ["productGroup", "market", "quantity", "timeline"]
-    .filter((field) => request[field])
-    .map((field) => `${localLabels[field]}: ${request[field]}`);
-  return [
-    "HONG TAM ROSIC GLOBAL - QUOTE REQUEST",
-    "",
-    `${localLabels.name}: ${request.name}`,
-    `${localLabels.phone}: ${request.phone}`,
-    `${localLabels.email}: ${request.email}`,
-    `${localLabels.product}: ${request.product}`,
-    ...optional,
-    "",
-    `${localLabels.message}:`,
-    request.message || defaultMessage,
-    "",
-    `${view.copy.consent.whatsapp}: ${request.whatsappOptIn ? "Yes" : "No"}`,
-  ].join("\n");
-}
-
-function channelStatus(channels, key) {
-  const channel = channels?.[key];
-  return typeof channel === "string" ? channel : channel?.status || "not_reported";
-}
-
-function safeHttpsUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" ? url.toString() : "";
-  } catch {
-    return "";
-  }
-}
-
-function resultType(payload) {
-  const status = payload?.status;
-  if (status === "accepted") return "accepted";
-  if (status === "partially_accepted") return "partial";
-  if (status === "configuration_required") return "configuration";
-  if (status === "delivery_failed") return "failed";
-  if (status === "rate_limited") return "rate";
-  return "generic";
-}
-
+/**
+ * One-step quotation request (customer item 19): the visitor fills in their
+ * details, the WhatsApp/email message is prepared live in an editable box,
+ * and one click on "Send" opens the chosen app with that message.
+ */
 export default function Contact({
   sectionId = "contact",
-  prefilledProduct = "",
-  prefillKey = 0,
+  prefillKey = "",
+  prefillNonce = 0,
   products = [],
+  groups = [],
   language = "vi",
   socialLinks = SOCIAL_DEFAULTS,
   socialQr,
   textOverrides,
+  compact = false,
 }) {
-  const view = contactView(language, textOverrides);
-  const { copy, routing, fields } = view;
+  const copy = mergeText(contactCopyFor(language), textOverrides?.contact);
+  const routing = mergeText(routingCopyFor(language), textOverrides?.routing);
+  const form = catalogCopyFor(language).form;
   const formRef = useRef(null);
-  const resultPanel = useRef(null);
-  const appliedPrefill = useRef("");
-  const productTitles = useMemo(
-    () => products.map((item) => item.sourceTitle ?? item.title),
-    [products],
-  );
-  const initialProduct = productTitles.includes(prefilledProduct) ? prefilledProduct : GENERAL_REQUEST;
-  const [product, setProduct] = useState(initialProduct);
-  const [productGroup, setProductGroup] = useState(() => inferProductGroup(initialProduct, products));
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [copyStatus, setCopyStatus] = useState("");
-  const [formStartedAt, setFormStartedAt] = useState(() => new Date().toISOString());
-  const [clientSubmissionId, setClientSubmissionId] = useState(createSubmissionId);
-  const [delivery, setDelivery] = useState("whatsapp");
-  const direct = mergeText(quoteFlowCopyFor(language), textOverrides?.quoteFlow);
+  const messageRef = useRef(null);
+  const validKeys = useMemo(() => new Set([GENERAL, ...products.map((item) => item.id), ...groups.map((group) => `group:${group.id}`)]), [products, groups]);
+  const [values, setValues] = useState({ name: "", phone: "", email: "", quantity: "", market: "", product: validKeys.has(prefillKey) ? prefillKey : GENERAL });
+  const [message, setMessage] = useState("");
+  const [edited, setEdited] = useState(false);
+  const [status, setStatus] = useState("");
+  const [errors, setErrors] = useState({});
+  const [startedAt] = useState(() => new Date().toISOString());
+
+  // Prefill the product being viewed (item 20) — also when the visitor
+  // presses "Request a quotation" again for another product on the same page.
+  const validKeysRef = useRef(validKeys);
+  useEffect(() => { validKeysRef.current = validKeys; }, [validKeys]);
+  useEffect(() => {
+    if (!prefillKey || !validKeysRef.current.has(prefillKey)) return undefined;
+    const frame = window.requestAnimationFrame(() => setValues((current) => ({ ...current, product: prefillKey })));
+    return () => window.cancelAnimationFrame(frame);
+  }, [prefillKey, prefillNonce]);
+
+  const productLine = describeSelection(values.product, products, groups, form.general);
+  const composed = composeMessage({ ...values, productLine }, form);
+  const text = edited ? message : composed;
 
   const configuredEmail = socialLinks.email?.replace(/^mailto:/, "");
   const email = validEmail(configuredEmail || "") ? configuredEmail : validEmail(CONTACT.email) ? CONTACT.email : FALLBACK_EMAIL;
   const phone = validPhone(CONTACT.phone) ? CONTACT.phone : FALLBACK_PHONE;
   const zalo = safeSocialLink(socialLinks.zalo ?? CONTACT.zalo);
-  const whatsappNumber = phone.replace(/\D/g, "");
+  const whatsappBase = safeSocialLink(socialLinks.whatsapp) || `https://wa.me/${phone.replace(/\D/g, "")}`;
+  const whatsapp = whatsappQuoteLink(whatsappBase, text);
+  const subject = `${language === "vi" ? "Yêu cầu báo giá" : "Quotation request"} – ${productLine}`;
+  const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
 
-  useEffect(() => {
-    const identity = `${prefillKey}:${prefilledProduct}`;
-    if (!prefilledProduct || appliedPrefill.current === identity || !productTitles.includes(prefilledProduct)) return;
-    appliedPrefill.current = identity;
-    const frame = window.requestAnimationFrame(() => {
-      setProduct(prefilledProduct);
-      const inferred = inferProductGroup(prefilledProduct, products);
-      if (inferred) setProductGroup(inferred);
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [prefillKey, prefilledProduct, productTitles, products]);
+  const update = (field) => (event) => {
+    const value = event.target.value;
+    setValues((current) => ({ ...current, [field]: value }));
+    setStatus("");
+    if (errors[field]) setErrors((current) => ({ ...current, [field]: "" }));
+  };
 
-  useEffect(() => {
-    if (result) resultPanel.current?.focus({ preventScroll: true });
-  }, [result]);
-
-  function newAttempt() {
-    setResult(null);
-    setCopyStatus("");
-    setClientSubmissionId(createSubmissionId());
-    setFormStartedAt(new Date().toISOString());
+  function validate() {
+    const next = {};
+    const name = values.name.trim();
+    if (!(/^[\p{L}\p{M}][\p{L}\p{M}\p{Zs}.'’-]*$/u.test(name) && Array.from(name).length >= 2)) next.name = copy.validation.name;
+    if (!validPhone(values.phone.trim())) next.phone = copy.validation.phone;
+    if (values.email.trim() && !validEmail(values.email.trim())) next.email = copy.validation.email;
+    setErrors(next);
+    const first = Object.keys(next)[0];
+    if (first) formRef.current?.elements.namedItem(first)?.focus();
+    return !first;
   }
 
-  function onFormChange(event) {
-    const field = event.target.name;
-    if (result) newAttempt();
-    if (fieldErrors[field]) {
-      event.target.setCustomValidity?.("");
-      setFieldErrors((current) => {
-        const next = { ...current };
-        delete next[field];
-        return next;
-      });
-    }
-  }
-
-  function checkName(input) {
-    const value = input.value.trim();
-    const valid = /^[\p{L}\p{M}][\p{L}\p{M}\p{Zs}.'’-]*$/u.test(value) && Array.from(value).length >= 2;
-    input.setCustomValidity(value && !valid ? copy.validation.name : "");
-  }
-
-  function checkPhone(input) {
-    const value = input.value.trim();
-    input.setCustomValidity(value && !validPhone(value) ? copy.validation.phone : "");
-  }
-
-  function applyServerErrors(errors) {
-    if (!errors || typeof errors !== "object" || !formRef.current) return false;
-    const supported = Object.entries(errors).filter(([field]) =>
-      ["name", "phone", "email", "product", "productGroup", "market", "quantity", "timeline", "message"].includes(field),
-    );
-    if (!supported.length) return false;
-    const form = formRef.current;
-    const localized = supported.map(([field, message]) => [
-      field,
-      copy.validation[field] || String(message),
-    ]);
-    setFieldErrors(Object.fromEntries(localized));
-    localized.forEach(([field, message]) => {
-      const control = form.elements.namedItem(field);
-      if (control && "setCustomValidity" in control) control.setCustomValidity(message);
-    });
-    window.requestAnimationFrame(() => {
-      const control = form.elements.namedItem(localized[0][0]);
-      control?.focus?.();
-      control?.reportValidity?.();
-    });
-    return true;
-  }
-
-  async function onSubmit(event) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const name = form.elements.namedItem("name");
-    const phoneControl = form.elements.namedItem("phone");
-    if (name instanceof HTMLInputElement) checkName(name);
-    if (phoneControl instanceof HTMLInputElement) checkPhone(phoneControl);
-    if (!form.reportValidity()) return;
-
-    const fieldsData = new FormData(form);
-    const request = {
-      name: String(fieldsData.get("name") || "").trim(),
-      phone: String(fieldsData.get("phone") || "").trim(),
-      email: String(fieldsData.get("email") || "").trim(),
-      product: product || GENERAL_REQUEST,
-      productGroup: productGroup || "",
-      market: String(fieldsData.get("market") || "").trim(),
-      quantity: String(fieldsData.get("quantity") || "").trim(),
-      timeline: String(fieldsData.get("timeline") || "").trim(),
-      message: String(fieldsData.get("message") || "").trim(),
-      whatsappOptIn: fieldsData.get("whatsappOptIn") === "on",
-      honeypot: String(fieldsData.get("honeypot") || ""),
-      formStartedAt: new Date(formStartedAt).toISOString(),
-      clientSubmissionId,
-    };
-
-    const matchedProduct = products.find(item => (item.sourceTitle ?? item.title) === request.product);
-    if (matchedProduct?.code) request.product = `${matchedProduct.code} · ${request.product}`;
-    // A direct hand-off needs no API credentials. Never claim delivery here.
-    if (delivery !== "server") {
-      if (request.honeypot) return;
-      setResult({ type: "direct", request, response: {}, httpStatus: 0 });
-      setCopyStatus("");
-      return;
-    }
-
-    setSubmitting(true);
-    setResult(null);
-    setCopyStatus("");
+  // Optional lead capture when the server channel is configured; never blocks
+  // or replaces the visitor's own WhatsApp/email message.
+  function recordLead(channel) {
+    if (import.meta.env.VITE_QUOTE_SERVER_ENABLED !== "true") return;
     try {
-      const response = await fetch("/api/quote", {
+      const id = createSubmissionId();
+      fetch("/api/quote", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": clientSubmissionId,
-        },
-        body: JSON.stringify(request),
-      });
-      let payload = {};
-      try {
-        payload = await response.json();
-      } catch {
-        payload = {};
-      }
-      if (response.status === 422 && applyServerErrors(payload.errors)) return;
-      if (payload.errors && applyServerErrors(payload.errors)) return;
-      setResult({ type: resultType(payload), request, response: payload, httpStatus: response.status });
-    } catch {
-      setResult({ type: "network", request, response: {}, httpStatus: 0 });
-    } finally {
-      setSubmitting(false);
-    }
+        keepalive: true,
+        headers: { "Content-Type": "application/json", "Idempotency-Key": id },
+        body: JSON.stringify({ name: values.name.trim(), phone: values.phone.trim(), email: values.email.trim(), product: productLine, productGroup: "", market: values.market.trim(), quantity: values.quantity.trim(), timeline: "", message: text, whatsappOptIn: channel === "whatsapp", honeypot: formRef.current?.elements.namedItem("honeypot")?.value || "", formStartedAt: startedAt, clientSubmissionId: id }),
+      }).catch(() => {});
+    } catch { /* The visitor's own channel is the source of truth. */ }
   }
 
-  function retrySubmission() {
-    setResult(null);
-    setCopyStatus("");
-    window.requestAnimationFrame(() => formRef.current?.querySelector('button[type="submit"]')?.focus());
+  function send(channel) {
+    if (!validate()) return;
+    if (formRef.current?.elements.namedItem("honeypot")?.value) return;
+    recordLead(channel);
+    if (channel === "whatsapp" && whatsapp.href) window.open(whatsapp.href, "_blank", "noopener,noreferrer");
+    if (channel === "email") window.location.assign(mailto);
+    setStatus(form.sent);
   }
 
-  async function copyRequest() {
-    if (!result?.request) return;
+  async function copyMessage() {
     try {
-      await navigator.clipboard.writeText(formatRequest(result.request, view));
-      setCopyStatus(view.result.copied);
+      await navigator.clipboard.writeText(text);
+      setStatus(form.copied);
     } catch {
-      setCopyStatus(view.result.copyFailed);
+      messageRef.current?.select();
     }
   }
 
-  function downloadRequest() {
-    if (!result?.request) return;
-    const file = new Blob(["\uFEFF", formatRequest(result.request, view)], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(file);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "yeu-cau-bao-gia-hong-tam.txt";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
-  }
-
-  const response = result?.response || {};
-  const channels = response.deliveries || response.channels || {};
-  const hasChannels = Object.keys(channels).length > 0;
-  const summary = result?.request ? formatRequest(result.request, view) : "";
-  const [resultTitle, resultBody] = result?.type === "direct" ? [direct.title, direct.body] : result ? view.result[result.type] || view.result.generic : [];
-  const catalogProfileUrl = safeHttpsUrl(response.catalogProfile?.url || response.catalogProfileUrl);
-  const mailto = `mailto:${email}?subject=${encodeURIComponent(`Quote request - ${result?.request?.product || GENERAL_REQUEST}`)}&body=${encodeURIComponent(summary)}`;
-  const whatsappBase = safeSocialLink(socialLinks.whatsapp) || `https://wa.me/${whatsappNumber}`;
-  const whatsappRequest = whatsappQuoteLink(whatsappBase, summary);
-  const whatsapp = whatsappRequest.href;
+  const field = (name, label, props = {}) => (
+    <div className={`quote-field${errors[name] ? " has-error" : ""}`}>
+      <label htmlFor={`quote-${name}`}>{label}{props.required && <span aria-hidden="true"> *</span>}</label>
+      <input id={`quote-${name}`} name={name} value={values[name]} onChange={update(name)} aria-invalid={errors[name] ? "true" : undefined} aria-describedby={errors[name] ? `quote-${name}-error` : undefined} {...props} />
+      {errors[name] && <p id={`quote-${name}-error`} className="quote-error">{errors[name]}</p>}
+    </div>
+  );
 
   return (
-    <section id={sectionId} className="contact-section section-pad" aria-labelledby="contact-heading">
+    <section id={sectionId || undefined} className={`contact-section section-pad${compact ? " contact-section--compact" : ""}`} aria-labelledby={`${sectionId || "contact"}-heading`}>
       <div className="container contact-grid">
         <div className="contact-intro">
-          <h2 id="contact-heading" className="section-heading">{view.heading[0]}<br /><span>{view.heading[1]}</span></h2>
+          <h2 id={`${sectionId || "contact"}-heading`} className="section-heading">{copy.heading}<br /><span>{routing.accent}</span></h2>
           <p>{copy.intro}</p>
-          <ul className="contact-points">
+          {!compact && <ul className="contact-points">
             <li><ArrowUpRight size={20} aria-hidden="true" /><span><strong>{routing.b2b[0]}</strong><br />{routing.b2b[1]}</span></li>
             <li><ArrowUpRight size={20} aria-hidden="true" /><span><strong>{routing.needs[0]}</strong><br />{routing.needs[1]}</span></li>
-          </ul>
+          </ul>}
           <div className="contact-channels">
             <a href={`mailto:${email}`}><Mail size={18} aria-hidden="true" />{email}</a>
-            <a href={`tel:${phone.replace(/[^+\d]/g, "")}`}>{phone}</a>
-            {zalo && <a href={zalo} target="_blank" rel="noopener noreferrer">{copy.channels.zalo} <ArrowUpRight size={16} aria-hidden="true" /></a>}
+            <a href={`tel:${phone.replace(/[^+\d]/g, "")}`}><FaWhatsapp size={17} aria-hidden="true" />{phone}</a>
+            {zalo && <a href={zalo} target="_blank" rel="noopener noreferrer"><SiZalo size={18} aria-hidden="true" />{copy.channels.zalo}</a>}
           </div>
-          <p className="form-note">{copy.notes.legal} {copy.notes.privacy}</p>
-          <SocialChannels links={socialLinks} qr={socialQr} language={language} />
+          <p className="form-note">{copy.notes.privacy}</p>
+          {!compact && <SocialChannels links={socialLinks} qr={socialQr} language={language} />}
         </div>
 
-        <div className="contact-form">
-          <h3>{copy.formTitle}</h3>
-          <form ref={formRef} onSubmit={onSubmit} onChange={onFormChange} aria-busy={submitting}>
-            <label className="field" htmlFor="quote-delivery">{direct.channel}<select id="quote-delivery" value={delivery} onChange={event => setDelivery(event.target.value)}><option value="whatsapp">WhatsApp</option><option value="zalo">Zalo</option><option value="email">Email</option>{import.meta.env.VITE_QUOTE_SERVER_ENABLED === "true" && <option value="server">Email API</option>}</select></label>
-            <p className="form-note">{direct.help}</p>
-            <div className="form-grid">
-              <Field label={fields.name[0]} id="contact-name" error={fieldErrors.name} required>
-                <input id="contact-name" name="name" type="text" autoComplete="name" placeholder={fields.name[1]} required maxLength={100} onInput={(event) => checkName(event.currentTarget)} />
-              </Field>
-              <Field label={fields.phone[0]} id="contact-phone" error={fieldErrors.phone} required>
-                <input id="contact-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder={fields.phone[1]} required minLength={8} maxLength={25} onInput={(event) => checkPhone(event.currentTarget)} />
-              </Field>
-              <Field label={fields.email[0]} id="contact-email" error={fieldErrors.email} required>
-                <input id="contact-email" name="email" type="email" autoComplete="email" placeholder={fields.email[1]} required maxLength={200} />
-              </Field>
-              <Field label={fields.product} id="contact-product" error={fieldErrors.product}>
-                <select id="contact-product" name="product" value={product} onChange={(event) => {
-                  const next = event.target.value;
-                  setProduct(next);
-                  const inferred = inferProductGroup(next, products);
-                  if (inferred) setProductGroup(inferred);
-                }}>
-                  <option value={GENERAL_REQUEST}>{routing.generalRequest}</option>
-                  {products.map((item) => <option key={item.id} value={item.sourceTitle ?? item.title}>{item.title}</option>)}
-                  <option value={PARTNERSHIP_REQUEST}>{routing.partnershipRequest}</option>
+        <div className="contact-form quote-card">
+          <h3>{form.title}</h3>
+          <p className="quote-lead">{form.lead}</p>
+          <form ref={formRef} noValidate onSubmit={(event) => { event.preventDefault(); send("whatsapp"); }}>
+            <div className="quote-grid">
+              {field("name", copy.fields.name.label, { required: true, autoComplete: "name", maxLength: 100 })}
+              {field("phone", copy.fields.phone.label, { required: true, type: "tel", inputMode: "tel", autoComplete: "tel", maxLength: 25 })}
+              {field("email", copy.fields.email.label, { type: "email", autoComplete: "email", maxLength: 200 })}
+              <div className="quote-field">
+                <label htmlFor="quote-product">{form.product}</label>
+                <select id="quote-product" name="product" value={values.product} onChange={update("product")}>
+                  <option value={GENERAL}>{form.general}</option>
+                  {groups.map((group) => {
+                    const items = products.filter((item) => item.category === group.id);
+                    return (
+                      <optgroup key={group.id} label={group.title}>
+                        <option value={`group:${group.id}`}>{group.title}{items.length ? ` (${items.length})` : ""}</option>
+                        {items.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}
+                      </optgroup>
+                    );
+                  })}
                 </select>
-              </Field>
-              <Field label={fields.productGroup} id="contact-product-group" error={fieldErrors.productGroup}>
-                <select id="contact-product-group" name="productGroup" value={productGroup} onChange={(event) => setProductGroup(event.target.value)}>
-                  {PRODUCT_GROUPS.map(([value, key], index) => <option key={key} value={value}>{routing.groups[index]}</option>)}
-                </select>
-              </Field>
-              <Field label={fields.market[0]} id="contact-market" error={fieldErrors.market}>
-                <input id="contact-market" name="market" type="text" list="contact-market-options" placeholder={fields.market[1]} maxLength={160} />
-                <datalist id="contact-market-options">{routing.marketOptions.map((market) => <option key={market} value={market} />)}</datalist>
-              </Field>
-              <Field label={fields.quantity[0]} id="contact-quantity" error={fieldErrors.quantity}>
-                <input id="contact-quantity" name="quantity" type="text" placeholder={fields.quantity[1]} maxLength={160} />
-              </Field>
-              <Field label={fields.timeline} id="contact-timeline" error={fieldErrors.timeline}>
-                <select id="contact-timeline" name="timeline">{TIMELINES.map(([value, key], index) => <option key={key} value={value}>{routing.timelines[index]}</option>)}</select>
-              </Field>
-              <Field label={fields.message[0]} id="contact-message" error={fieldErrors.message} full>
-                <textarea id="contact-message" name="message" rows={4} maxLength={4000} placeholder={fields.message[1]} />
-              </Field>
-              <div className="field field-full form-consent">
-                <label htmlFor="contact-whatsapp-opt-in" className="checkbox-label">
-                  <input id="contact-whatsapp-opt-in" name="whatsappOptIn" type="checkbox" />
-                  <span>{copy.consent.whatsapp}</span>
-                </label>
-                <p className="form-note form-consent-note">{copy.consent.help}</p>
+              </div>
+              {field("quantity", form.quantity, { maxLength: 160, autoComplete: "off" })}
+              {field("market", form.market, { maxLength: 160, autoComplete: "off" })}
+              <div className="quote-field quote-field--full">
+                <label htmlFor="quote-message">{form.message}</label>
+                <textarea
+                  id="quote-message"
+                  ref={messageRef}
+                  name="message"
+                  rows={9}
+                  maxLength={4000}
+                  value={text}
+                  onChange={(event) => { setEdited(true); setMessage(event.target.value); setStatus(""); }}
+                  aria-describedby="quote-message-help"
+                />
+                <p id="quote-message-help" className="quote-help">
+                  {edited && composed !== message ? form.edited : form.messageHelp}
+                  {edited && <button type="button" className="quote-link" onClick={() => { setEdited(false); setMessage(""); }}><RotateCcw size={13} aria-hidden="true" />{form.resetMessage}</button>}
+                </p>
               </div>
               <div className="contact-honeypot" aria-hidden="true">
                 <label htmlFor="contact-website">Website</label>
                 <input id="contact-website" name="honeypot" type="text" tabIndex={-1} autoComplete="off" />
               </div>
             </div>
-            <button type="submit" className="button button-primary" disabled={submitting}>
-              {submitting ? <LoaderCircle className="quote-spinner" size={18} aria-hidden="true" /> : <ArrowUpRight size={18} aria-hidden="true" />}
-              {submitting ? copy.actions.sending : direct.submit}
-            </button>
-            <p id="contact-form-note" className="form-note">{copy.notes.required} {copy.notes.legal}</p>
-          </form>
-
-          {result && (
-            <div className={`request-result request-result--${result.type}`} ref={resultPanel} tabIndex={-1} role="region" aria-labelledby="request-result-title">
-              <h4 id="request-result-title">
-                {result.type === "accepted" ? <Check size={19} aria-hidden="true" /> : <AlertCircle size={19} aria-hidden="true" />}
-                {resultTitle}
-              </h4>
-              <p>{resultBody}</p>
-              {result.type === "direct" && delivery === "whatsapp" && !whatsappRequest.prefilled && <p className="form-note">{language === "vi" ? "Link WhatsApp này dùng lời nhắn mặc định của tài khoản. Hãy sao chép bản yêu cầu bên dưới rồi dán vào cuộc trò chuyện để giữ đủ mã sản phẩm và nội dung." : "This WhatsApp link uses the account’s default message. Copy the request below and paste it into the chat to include the product code and all details."}</p>}
-              {result.type === "direct" && <div className="request-actions"><a className="button button-primary" href={delivery === "email" ? mailto : delivery === "zalo" ? zalo : whatsapp} target={delivery === "email" ? undefined : "_blank"} rel="noopener noreferrer">{direct.open} {delivery === "email" ? "Email" : delivery === "zalo" ? "Zalo" : "WhatsApp"} <ArrowUpRight size={17} /></a></div>}
-              {response.requestId && <p className="request-id"><strong>{view.result.requestId}:</strong> {response.requestId}</p>}
-              {hasChannels && <section className="delivery-statuses" aria-labelledby="delivery-status-title">
-                <h5 id="delivery-status-title">{view.result.channelTitle}</h5>
-                {["make", "customerEmail", "salesEmail"].map((key) => {
-                  const status = channelStatus(channels, key);
-                  return <div className="delivery-status" key={key} data-status={status}><span>{view.result.channels[key]}</span><strong>{view.result.status[status] || view.result.status.not_reported}</strong></div>;
-                })}
-              </section>}
-              <pre className="request-summary">{summary}</pre>
-              {result.type !== "direct" && <div className="request-actions quote-profile-action">
-                {catalogProfileUrl
-                  ? <a className="button button-primary" href={catalogProfileUrl} target="_blank" rel="noopener noreferrer">Download Our Catalog/Profile <ArrowUpRight size={17} aria-hidden="true" /></a>
-                  : <button type="button" className="button button-outline quote-profile-placeholder" disabled aria-describedby="catalog-profile-help">Download Our Catalog/Profile</button>}
-                {!catalogProfileUrl && <p id="catalog-profile-help" className="form-note quote-profile-help">{view.result.profileHelp}</p>}
-              </div>}
-              <section className="quote-fallback" aria-labelledby="quote-fallback-title">
-                <h5 id="quote-fallback-title">{result.type === "direct" ? direct.channel : view.result.fallbackTitle}</h5>
-                <div className="request-actions">
-                  <a className="button button-outline" href={mailto}><Mail size={17} aria-hidden="true" />{view.result.email}</a>
-                  {whatsapp && <a className="button button-outline" href={whatsapp} target="_blank" rel="noopener noreferrer"><MessageCircle size={17} aria-hidden="true" />{view.result.whatsapp}</a>}
-                  {zalo && <a className="button button-outline" href={zalo} target="_blank" rel="noopener noreferrer">Zalo ↗</a>}
-                  <button type="button" className="button button-outline" onClick={downloadRequest}><ArrowDownToLine size={17} aria-hidden="true" />{view.result.download}</button>
-                  <button type="button" className="button button-outline" onClick={copyRequest}><Copy size={17} aria-hidden="true" />{view.result.copy}</button>
-                  {result.type !== "accepted" && <button type="button" className="button button-outline" onClick={retrySubmission}>{view.result.tryAgain}</button>}
-                </div>
-                <p className="form-note" role="status" aria-live="polite">{copyStatus}</p>
-              </section>
+            <div className="quote-actions">
+              <button type="submit" className="button button-primary quote-send quote-send--whatsapp"><FaWhatsapp size={19} aria-hidden="true" />{form.sendWhatsapp}</button>
+              <button type="button" className="button button-outline quote-send" onClick={() => send("email")}><Mail size={18} aria-hidden="true" />{form.sendEmail}</button>
+              <button type="button" className="button button-outline quote-icon" onClick={copyMessage} aria-label={form.copy} title={form.copy}><Copy size={18} aria-hidden="true" /></button>
             </div>
-          )}
+            {zalo && <a className="quote-zalo" href={zalo} target="_blank" rel="noopener noreferrer"><SiZalo size={16} aria-hidden="true" />{form.zalo}</a>}
+            <p className="quote-status" role="status" aria-live="polite">{status && <><Check size={15} aria-hidden="true" />{status}</>}</p>
+            <p className="form-note">{copy.notes.required} {copy.notes.legal}</p>
+          </form>
         </div>
       </div>
     </section>
-  );
-}
-
-function Field({ label, id, error, required = false, full = false, children }) {
-  const control = isValidElement(children)
-    ? cloneElement(children, {
-        "aria-invalid": error ? "true" : undefined,
-        "aria-describedby": error ? `${id}-error` : undefined,
-      })
-    : children;
-  return (
-    <div className={`field${full ? " field-full" : ""}`}>
-      <label htmlFor={id}>{label}{required && <> <span aria-hidden="true">*</span></>}</label>
-      {control}
-      {error && <p id={`${id}-error`} className="field-error">{error}</p>}
-    </div>
   );
 }

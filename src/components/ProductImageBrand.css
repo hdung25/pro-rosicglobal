@@ -1,20 +1,52 @@
+/* The frame is the positioning context; the brand fills it and centres the
+   logo + name block on both axes, independent of the image's aspect ratio. */
 .product-image-brand {
   position: absolute;
   z-index: 3;
-  inset: 50% auto auto 50%;
-  width: min(34%, 150px);
-  aspect-ratio: 445 / 159;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  width: auto;
+  height: auto;
   padding: 0;
-  background: url("/brand-mark.svg") center / contain no-repeat;
-  opacity: 0.16;
-  filter: brightness(0) invert(1) drop-shadow(0 1px 8px rgb(0 0 0 / 0.16));
-  transform: translate(-50%, -50%);
+  font-size: clamp(6px, 2.4cqi, 13px);
+  background: none;
+  opacity: 0.62;
+  filter: drop-shadow(0 1px 2px rgb(255 255 255 / 0.55));
+  transform: none;
   pointer-events: none;
   user-select: none;
+  container-type: normal;
 }
 
-@media (max-width: 600px) {
-  .product-image-brand {
-    width: min(32%, 105px);
-  }
+.product-image-brand::before,
+.product-image-brand::after {
+  content: none !important;
+  display: none !important;
+}
+
+.product-image-brand__mark {
+  display: block;
+  width: min(34%, 190px);
+  aspect-ratio: 445 / 159;
+  background: url("/brand-mark.svg") center / contain no-repeat;
+}
+
+.product-image-brand__name {
+  display: block;
+  color: #193b30;
+  font: 700 1em/1.2 "Be Vietnam Pro", sans-serif;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgb(255 255 255 / 0.9);
+}
+
+/* Container-relative sizing: frames that host the watermark declare a size
+   container so the name scales with the picture, not the viewport. */
+.media-frame,
+.lightbox-frame {
+  container-type: inline-size;
 }

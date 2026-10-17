@@ -10,6 +10,14 @@
     {
       "source": "/admin",
       "destination": "/index.html"
+    },
+    {
+      "source": "/san-pham",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/san-pham/:path*",
+      "destination": "/index.html"
     }
   ],
   "headers": [

@@ -1,4 +1,4 @@
-import { createElement, lazy, Suspense, useEffect, useRef, useState } from "react";
+import { createElement, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion as Motion,
@@ -18,31 +18,29 @@ import {
   Globe2,
   Menu,
   X,
-  Search,
   Plus,
   Minus,
+  Moon,
+  Sun,
   ShieldCheck,
   BadgeCheck,
   HeartHandshake,
   Users,
+  Boxes,
+  PenTool,
+  ClipboardCheck,
+  Ship,
 } from "lucide-react";
 import { FaLinkedinIn, FaWhatsapp, FaFacebookF, FaWeixin, FaTiktok } from "react-icons/fa6";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import { SiZalo } from "react-icons/si";
-import { productSrcSet, vr5ProductImage } from "./product-images";
+import { productSrcSet } from "./product-images";
 import DeferredContent from "./components/DeferredContent";
-import Lightbox from "./components/Lightbox";
 import ContentProtection from "./components/ContentProtection";
-import OfficialExportCatalog from "./components/OfficialExportCatalog";
 import { LanguagePicker } from "./components/LanguagePicker";
-import { ProductImageBrand } from "./components/ProductImageBrand";
-import { ThemeToggle } from "./components/ThemeToggle";
 import { useSiteLanguage } from "./language";
 import { useSiteTheme } from "./theme";
-import { PRODUCTS, CATEGORIES, ARTICLES, JOURNEY } from "./data";
-import { EXPORT_CATEGORIES, EXPORT_SPEC_NOTICE } from "./export-catalog";
-import { localizeExportCategory } from "./export-catalog-l10n";
-import { localizeProducts } from "./product-l10n";
+import { ARTICLES, JOURNEY } from "./data";
 import {
   localizeArticle,
   localizeJourneyItem,
@@ -50,26 +48,32 @@ import {
 } from "./site-copy";
 
 import { ROSIC_VALUES, brandStoryFor } from "./brand-story";
-import { CATEGORY_ICONS, categoryIconKey } from "./category-icons";
+import "./components/ThemeToggle.css";
 import "./brand-story.css";
 import "./vr4.css";
 import "./customer-refinements.css";
 import "./vr5.css";
 import "./mobile-polish.css";
+import "./catalog-v6.css";
 import { mergeText } from "./cms/content-overrides";
 import SocialChannels from "./components/SocialChannels";
 import InstallApp from "./components/InstallApp";
 import { SOCIAL_DEFAULTS, configuredSocial, configuredSocialQr } from "./social-config";
-import { upgradeProducts } from "./vr5-catalog";
+import { buildCatalog, groupPath } from "./catalog-v6";
+import { catalogCopyFor } from "./catalog-copy";
+import { navigate, useLinkInterception, useRoute, useScrollRestoration } from "./router";
+import { GroupIcon, GroupPage, GroupsSection, NotFound, ProductFinder, ProductPage } from "./components/CatalogV6";
 
 const AdminPanel = lazy(() => import("./components/AdminPanel"));
 const CatalogDemo = lazy(() => import("./components/CatalogDemo"));
 const Contact = lazy(() => import("./components/Contact"));
 const Feedback = lazy(() => import("./components/Feedback"));
 
+// Four links either side of the centred logo keep the header balanced.
 const NAV = [
   { key: "home", label: "Trang chủ", href: "#home" },
   { key: "products", label: "Sản phẩm", href: "#products" },
+  { key: "privateLabel", label: "Nhãn hiệu riêng", href: "#private-label" },
   { key: "about", label: "Về chúng tôi", href: "#about" },
   { key: "partners", label: "Đối tác", href: "#testimonials" },
   { key: "journey", label: "Hành trình", href: "#journey" },
@@ -176,26 +180,84 @@ const MAINTENANCE_COPY = {
   },
 };
 
-function Brand({ footer = false, copy }) {
+// Logo lock-up: mark + ROSIC set in Cormorant Garamond SemiBold, no slogan.
+function Brand({ footer = false, copy, home = true }) {
   const brandCopy = copy?.brand;
   return (
     <a
       className={`brand ${footer ? "brand-footer" : ""}`}
-      href="#home"
+      href={home ? "#home" : "/"}
       aria-label={brandCopy?.homeLabel ?? "Hồng Tâm Rosic Global, trang chủ"}
     >
       <img
         className="brand-mark"
         src="/brand-mark.svg"
-        alt={brandCopy?.logoAlt ?? "Biểu trưng Hồng Tâm"}
+        alt={brandCopy?.logoAlt ?? "Biểu trưng Hồng Tâm Rosic Global"}
         width="445"
         height="159"
       />
-      <span className="brand-name">
-        ROSIC
-      </span>
-      <span className="brand-slogan">Manufacturing with Heart, Trading with Vision</span>
+      <span className="brand-name">ROSIC</span>
     </a>
+  );
+}
+
+/** Labelled light/dark switch: two clear options instead of an unlabeled icon. */
+function ThemeSwitch({ theme, onThemeChange, labels, className = "" }) {
+  return (
+    <div className={`theme-switch ${className}`.trim()} role="group" aria-label={labels.label}>
+      <button type="button" aria-pressed={theme !== "dark"} onClick={() => onThemeChange("light")}>
+        <Sun size={14} aria-hidden="true" /><span>{labels.light}</span>
+      </button>
+      <button type="button" aria-pressed={theme === "dark"} onClick={() => onThemeChange("dark")}>
+        <Moon size={14} aria-hidden="true" /><span>{labels.dark}</span>
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Back-to-top sits in the bottom corner and steps aside whenever a call to
+ * action, the quotation form or the footer is on screen, so it never covers
+ * an arrow or a button (customer item 3).
+ */
+function BackToTop({ label, path }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    let frame = 0;
+    // The button occupies the bottom ~90px of the viewport; hide it while any
+    // CTA area overlaps that band.
+    const measure = () => {
+      frame = 0;
+      const band = window.innerHeight - 96;
+      const blocked = [...document.querySelectorAll(".contact-form, .site-footer, .private-label__cta, .finder-more, .quote-actions")]
+        .some((node) => {
+          const rect = node.getBoundingClientRect();
+          return rect.top < window.innerHeight && rect.bottom > band;
+        });
+      setVisible(window.scrollY > 700 && !blocked);
+    };
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(measure); };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    measure();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [path]);
+  return (
+    <button
+      type="button"
+      className={`back-to-top${visible ? " is-visible" : ""}`}
+      aria-label={label}
+      title={label}
+      tabIndex={visible ? 0 : -1}
+      aria-hidden={!visible}
+      onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })}
+    >
+      <ArrowUp size={19} aria-hidden="true" />
+    </button>
   );
 }
 
@@ -266,31 +328,29 @@ function Reveal({ children, className = "", delay = 0 }) {
     </Motion.div>
   );
 }
-function Header({ language, onLanguage, theme, onThemeChange, copy, exportCategories = EXPORT_CATEGORIES, onFilter }) {
+function Header({ language, onLanguage, theme, onThemeChange, copy, catalogCopy, groups, onHome }) {
   const [open, setOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const triggerRef = useRef(null);
+  const href = (hash) => (onHome ? hash : `/${hash}`);
+  // The product menu opens on click and stays open until the visitor picks an
+  // item, clicks elsewhere or presses Escape (customer item 8). It no longer
+  // closes on hover-out or scroll.
   useEffect(() => {
-    const close = () => setProductsOpen(false);
-    const outside = event => { if (!dropdownRef.current?.contains(event.target)) close(); };
-    const escape = event => { if (event.key === "Escape" && productsOpen) { close(); triggerRef.current?.focus(); } };
+    if (!productsOpen) return undefined;
+    const outside = (event) => { if (!dropdownRef.current?.contains(event.target)) setProductsOpen(false); };
+    const escape = (event) => { if (event.key === "Escape") { setProductsOpen(false); triggerRef.current?.focus(); } };
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
-    window.addEventListener("hashchange", close);
-    window.addEventListener("scroll", close, { passive: true });
-    window.addEventListener("resize", close);
     return () => {
       document.removeEventListener("pointerdown", outside);
       document.removeEventListener("keydown", escape);
-      window.removeEventListener("hashchange", close);
-      window.removeEventListener("scroll", close);
-      window.removeEventListener("resize", close);
     };
   }, [productsOpen]);
-  const chooseCategory = id => { onFilter?.(id); setProductsOpen(false); setOpen(false); };
   const [active, setActive] = useState("home");
   useEffect(() => {
+    if (!onHome) return undefined;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries)
@@ -308,12 +368,19 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
     observeSections();
     window.addEventListener("rosic:content-ready", observeSections);
     return () => { observer.disconnect(); window.removeEventListener("rosic:content-ready", observeSections); };
-  }, []);
+  }, [onHome]);
+  const current = onHome ? active : "products";
+  const isCurrent = (item) => current === item.href.slice(1) || (item.key === "products" && current === "export-catalog");
+  const link = (item) => (
+    <a key={item.key} href={href(item.href)} aria-current={isCurrent(item) ? "location" : undefined}>
+      {navLabel(copy, item)}
+    </a>
+  );
   return (
     <>
       <div className="topbar">
         <div className="topbar-inner container">
-          <span aria-hidden="true" />
+          <ThemeSwitch className="topbar-theme" theme={theme} onThemeChange={onThemeChange} labels={catalogCopy.theme} />
           <span className="topbar-message">{copy.brand.topbar}</span>
           <LanguagePicker
             compact
@@ -326,49 +393,46 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
       </div>
       <header className="site-header">
         <div className="nav-shell container">
-      <aside className="floating-tools" aria-label={copy.footer.tools ?? "Display controls"}>
-        <ThemeToggle className="floating-theme" theme={theme} onThemeChange={onThemeChange} labels={copy.theme} />
-        <a className="floating-back-top" href="#home" aria-label={copy.footer.backTop}><ArrowUp size={18} /></a>
-      </aside>
           <nav className="nav-left" aria-label={copy.primaryNavigation}>
             {NAV.slice(0, 4).map((item) => item.key === "products" ? (
-              <div className="nav-dropdown" key={item.href} ref={dropdownRef}
-                onMouseLeave={() => setProductsOpen(false)}
-                onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setProductsOpen(false); }}>
-                <button ref={triggerRef} className="products-menu-trigger" aria-expanded={productsOpen} aria-controls="product-menu"
-                  onClick={() => setProductsOpen(value => !value)}
-                  onKeyDown={event => { if (event.key === "ArrowDown") { event.preventDefault(); setProductsOpen(true); requestAnimationFrame(() => dropdownRef.current?.querySelector(".dropdown-panel a")?.focus()); } }}
-                  aria-current={active === "products" ? "location" : undefined}>
-                  {navLabel(copy, item)} <ChevronDown size={12} />
+              <div className={`nav-dropdown${productsOpen ? " is-open" : ""}`} key={item.key} ref={dropdownRef}>
+                <button
+                  ref={triggerRef}
+                  type="button"
+                  className="products-menu-trigger"
+                  aria-expanded={productsOpen}
+                  aria-controls="product-menu"
+                  aria-current={isCurrent(item) ? "location" : undefined}
+                  onClick={() => setProductsOpen((value) => !value)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "ArrowDown") return;
+                    event.preventDefault();
+                    setProductsOpen(true);
+                    requestAnimationFrame(() => dropdownRef.current?.querySelector(".mega-menu a")?.focus());
+                  }}
+                >
+                  {navLabel(copy, item)} <ChevronDown size={13} aria-hidden="true" />
                 </button>
-                <div id="product-menu" className="dropdown-panel" hidden={!productsOpen}>
-                  <a className="dropdown-all" href="#products" onClick={() => chooseCategory("all")}>{copy.tabs.all} <ArrowUpRight size={15} /></a>
-                  {exportCategories.map((category) => (
-                    <a key={category.id} href="#products" onClick={() => chooseCategory(category.id)}>
-                      {createElement(CATEGORY_ICONS[categoryIconKey(category)], { size: 22, strokeWidth: 1.5, "aria-hidden": true })}
-                      <span>{localizeExportCategory(category, language).shortTitle ?? localizeExportCategory(category, language).title}</span>
-                    </a>
-                  ))}
+                <div id="product-menu" className="mega-menu" hidden={!productsOpen}>
+                  <p className="mega-menu__title">{catalogCopy.nav.productsMenu}</p>
+                  <div className="mega-menu__grid">
+                    {groups.map((group) => (
+                      <a key={group.id} href={groupPath(group.id)} onClick={() => setProductsOpen(false)}>
+                        <span className="mega-menu__icon"><GroupIcon group={group} size={20} /></span>
+                        <span className="mega-menu__text"><strong>{group.title}</strong><small>{catalogCopy.groups.count(group.count)}</small></span>
+                      </a>
+                    ))}
+                  </div>
+                  <a className="mega-menu__all" href="/san-pham" onClick={() => setProductsOpen(false)}>
+                    {catalogCopy.nav.allProducts}<ArrowRight size={16} aria-hidden="true" />
+                  </a>
                 </div>
               </div>
-            ) : (
-              <a key={item.href} href={item.href} aria-current={active === item.href.slice(1) ? "location" : undefined}>
-                {navLabel(copy, item)}
-              </a>
-            ))}
+            ) : link(item))}
           </nav>
-          <Brand copy={copy} language={language} />
+          <Brand copy={copy} language={language} home={onHome} />
           <nav className="nav-right" aria-label={copy.productNavigation}>
-            {NAV.slice(4).map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={item.key === "contact" ? "nav-contact" : undefined}
-                aria-current={active === item.href.slice(1) ? "location" : undefined}
-              >
-                {navLabel(copy, item)}
-              </a>
-            ))}
+            {NAV.slice(4).map(link)}
           </nav>
           <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger asChild>
@@ -384,7 +448,7 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
                   {copy.brand.mobileDescription}
                 </Dialog.Description>
                 <div className="mobile-menu-top">
-                  <Brand copy={copy} language={language} />
+                  <Brand copy={copy} language={language} home={onHome} />
                   <Dialog.Close asChild>
                     <button className="icon-button" aria-label={copy.closeMenu}>
                       <X />
@@ -394,8 +458,8 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
                 <nav>
                   {NAV.map((item, index) => (
                     <a
-                      key={item.href}
-                      href={item.href}
+                      key={item.key}
+                      href={href(item.href)}
                       style={{ "--menu-index": index }}
                       onClick={() => setOpen(false)}
                     >
@@ -405,28 +469,25 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, exportCatego
                     </a>
                   ))}
                 </nav>
-                <div className="mobile-category-menu" aria-label={copy.nav.products}>
-                  {exportCategories.map(category => <a key={category.id} href="#products" onClick={() => chooseCategory(category.id)}>
-                    {createElement(CATEGORY_ICONS[categoryIconKey(category)], { size: 18, strokeWidth: 1.5, "aria-hidden": true })}
-                    <span>{localizeExportCategory(category, language).shortTitle ?? category.title}</span>
-                  </a>)}
+                <p className="mobile-category-title">{catalogCopy.nav.productsMenu}</p>
+                <div className="mobile-category-menu">
+                  {groups.map((group) => (
+                    <a key={group.id} href={groupPath(group.id)} onClick={() => setOpen(false)}>
+                      <GroupIcon group={group} size={18} />
+                      <span>{group.title}</span>
+                    </a>
+                  ))}
                 </div>
-                <LanguagePicker
-                  compact
-                  className="mobile-language"
-                  language={language}
-                  onChange={onLanguage}
-                  label={copy.language}
-                />
-                <ThemeToggle
-                  className="mobile-theme"
-                  theme={theme}
-                  onThemeChange={onThemeChange}
-                  labels={copy.theme}
-                />
-                <p>
-                  {copy.brand.topbar}
-                </p>
+                <div className="mobile-menu-tools">
+                  <ThemeSwitch theme={theme} onThemeChange={onThemeChange} labels={catalogCopy.theme} />
+                  <LanguagePicker
+                    compact
+                    className="mobile-language"
+                    language={language}
+                    onChange={onLanguage}
+                    label={copy.language}
+                  />
+                </div>
               </Dialog.Content>
             </Dialog.Portal>
           </Dialog.Root>
@@ -540,7 +601,7 @@ function Marquee({ copy, categories }) {
             {words.map((category) => (
               <span key={category.id || category.title}>
                 {category.shortTitle ?? category.title}
-                {createElement(CATEGORY_ICONS[categoryIconKey(category)], { className: "marquee-flower", "aria-hidden": true, strokeWidth: 1.5 })}
+                <GroupIcon group={category} className="marquee-flower" />
               </span>
             ))}
           </div>
@@ -598,145 +659,31 @@ function About({ copy, story, image = "/images/vietnam-produce-w960-hong-tam-ros
     </section>
   );
 }
-const EXPORT_CATEGORY_PRODUCT_IDS = Object.freeze({
-  "cashew-kernel": ["cashews"],
-  "black-pepper": ["pepper"],
-  "coffee-bean": ["coffee"],
-  "fresh-fruit": ["mango", "dragonfruit", "melon", "avocado", "pineapple", "passionfruit", "banana", "pomelo", "durian"],
-  "other": ["rice", "cordyceps", "vegetables", "sweetpotato"],
-});
+const PRIVATE_LABEL_ICONS = [Boxes, PenTool, ClipboardCheck, Ship];
 
-function matchesCatalogCategory(product, category) {
-  if (category === "all") return true;
-  if (product.category === category) return true;
-  if (category === "nuts" && product.category === "cashew-kernel") return true;
-  if (category === "processed" && product.category === "coffee-bean") return true;
-  if (category === "fresh-fruit" && product.category === "fruit") return true;
-  return EXPORT_CATEGORY_PRODUCT_IDS[category]?.includes(product.id) ?? false;
-}
-
-function Catalog({ category, setCategory, onProduct, copy, products, categories = CATEGORIES }) {
-  const [query, setQuery] = useState("");
-  const normalize = (value) =>
-    value
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/đ/g, "d");
-  const visible = products.filter(
-    (product) =>
-      matchesCatalogCategory(product, category) &&
-      normalize([product.title, product.sourceTitle, product.code, product.group].join(" ")).includes(normalize(query.trim())),
-  );
-  const families = [];
-  for (const product of visible) {
-    const family = families.find(item => item.image === product.image && item.category === product.category);
-    if (family) family.products.push(product);
-    else families.push({ image: product.image, category: product.category, products: [product] });
-  }
-  const renderCard = (product, shared = false) => (
-              <article
-                className="product-card"
-                key={product.id}
-              >
-                <button
-                  className="product-open"
-                  onClick={() => onProduct(product)}
-                  aria-label={copy.catalog.viewProduct(product.title)}
-                >
-                  {!shared && <div className="product-image">
-                    <img
-                      src={product.image}
-                      srcSet={productSrcSet(product.image)}
-                      sizes="(max-width: 600px) 45vw, (max-width: 1000px) 30vw, 320px"
-                      alt={product.alt}
-                      loading="lazy"
-                      width="640"
-                      height="640"
-                    />
-                    {!product.imageAsset?.watermarked && <ProductImageBrand />}
-                    <span className="product-detail-tab product-quick-view">
-                      {copy.catalog.quickView ?? "Quick View Product"} <ArrowUpRight size={17} />
-                    </span>
-                  </div>
-                  }
-                  <div className="product-meta">
-                    <span>{product.isCategory ? copy.footer.products : (copy.catalog.productCode ?? "Product Code")}</span>
-                    <span>{product.code || (product.id.startsWith("export-") ? "—" : `ROS-${String(products.findIndex((item) => item.id === product.id) + 1).padStart(3, "0")}`)}</span>
-                  </div>
-                  <h3>{product.title}</h3><p className="product-card-description">{product.short || product.description}</p>
-                  <span className="product-view-link">
-                    {copy.catalog.viewLabel ?? "View Product"} <ArrowUpRight size={15} />
-                  </span>
-                </button>
-              </article>
-  );
+/** "Nhãn hiệu riêng" — the OEM/ODM offer now has its own header link and section. */
+function PrivateLabel({ copy, image = "/images/vietnam-processed-foods-w960-hong-tam-rosic.webp" }) {
+  const content = copy.privateLabel;
   return (
-    <section className="catalog-section section-pad">
-      <div className="container">
-        <Reveal className="section-intro">
-          <p className="eyebrow">{copy.catalog.eyebrow}</p>
-          <h2 className="section-heading">{copy.catalog.title}</h2>
-          <p>{copy.catalog.body}</p>
+    <section className="private-label section-pad" aria-labelledby="private-label-title">
+      <div className="container private-label__grid">
+        <Reveal className="private-label__media">
+          <img src={image} srcSet={productSrcSet(image)} sizes="(max-width: 900px) 90vw, 560px" alt={content.imageAlt} loading="lazy" width="960" height="960" />
         </Reveal>
-        <div className="catalog-tools">
-          <div className="category-tabs" aria-label={copy.catalog.filter}>
-            {categories.map((item) => (
-              <button
-                key={item.id}
-                className={category === item.id ? "active" : ""}
-                aria-pressed={category === item.id}
-                onClick={() => setCategory(item.id)}
-              >
-                {copy.tabs[item.id] ?? item.label}
-              </button>
+        <Reveal className="private-label__copy">
+          <p className="eyebrow">{content.eyebrow}</p>
+          <h2 id="private-label-title" className="section-heading">{content.title}</h2>
+          <p className="private-label__lead">{content.lead}</p>
+          <ol className="private-label__steps">
+            {content.steps.map((step, index) => (
+              <li key={step.title}>
+                <span className="private-label__icon">{createElement(PRIVATE_LABEL_ICONS[index], { size: 20, strokeWidth: 1.6, "aria-hidden": true })}</span>
+                <span><strong>{step.title}</strong>{step.body}</span>
+              </li>
             ))}
-          </div>
-          <label className="product-search">
-            <Search size={18} />
-            <input
-              aria-label={copy.catalog.search}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={copy.catalog.search}
-              type="search"
-            />
-          </label>
-        </div>
-        <p className="sr-only" role="status">
-          {copy.catalog.resultCount(visible.length)}
-        </p>
-        <div className="product-grid">
-          
-          {families.map(family => family.products.length === 1 ? renderCard(family.products[0]) : (
-            <div className="product-family" key={`${family.category}-${family.image}`}>
-              <div className="product-family-photo">
-                <img src={family.image} srcSet={productSrcSet(family.image)} sizes="(max-width: 700px) 90vw, 380px" alt={family.products[0].alt} width="640" height="640" loading="lazy" />
-                {!family.products[0].imageAsset?.watermarked && <ProductImageBrand />}
-              </div>
-              <div className="product-family-options">{family.products.map(product => renderCard(product, true))}</div>
-            </div>
-          ))}
-        </div>
-        {!visible.length && (
-          <div className="empty-state">
-            <Search size={32} />
-            <h3>{copy.catalog.noResultTitle}</h3>
-            <p>{copy.catalog.noResultBody}</p>
-            <button
-              className="button button-outline"
-              onClick={() => {
-                setQuery("");
-                setCategory("all");
-              }}
-            >
-              {copy.catalog.reset} <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-        <p className="catalog-note">
-          {copy.catalog.note}
-        </p>
+          </ol>
+          <a className="button button-primary private-label__cta" href="#contact">{content.cta}<ArrowUpRight size={18} aria-hidden="true" /></a>
+        </Reveal>
       </div>
     </section>
   );
@@ -891,12 +838,13 @@ function Journal({ onArticle, copy, language, images, text }) {
     </section>
   );
 }
-function Footer({ onPolicy, onFilter, language, onLanguage, copy, socialLinks, socialQr, categories = CATEGORIES }) {
+function Footer({ onPolicy, language, onLanguage, copy, socialLinks, socialQr, groups, onHome }) {
+  const href = (hash) => (onHome ? hash : `/${hash}`);
   return (
     <footer className="site-footer">
       <div className="container footer-main">
         <div>
-          <Brand footer copy={copy} language={language} />
+          <Brand footer copy={copy} language={language} home={onHome} />
           <p className="footer-tagline">
             {copy.footer.tagline[0]}
             <br />
@@ -906,27 +854,20 @@ function Footer({ onPolicy, onFilter, language, onLanguage, copy, socialLinks, s
         <div className="footer-column">
           <h3>{copy.footer.explore}</h3>
           {NAV.filter((item) => item.href !== "#home").map((item) => (
-            <a key={item.href} href={item.href}>
+            <a key={item.key} href={href(item.href)}>
               {navLabel(copy, item)}
             </a>
           ))}
         </div>
         <div className="footer-column">
           <h3>{copy.footer.products}</h3>
-          <a href="#export-catalog">{copy.exportCatalog}</a>
-          {categories.slice(1, 5).map((category) => (
-            <a
-              key={category.id}
-              href="#products"
-              onClick={() => onFilter(category.id)}
-            >
-              {copy.tabs[category.id] ?? category.label}
-            </a>
+          {groups.map((group) => (
+            <a key={group.id} href={groupPath(group.id)}>{group.title}</a>
           ))}
         </div>
         <div className="footer-invitation">
           <span>{copy.footer.invitation}</span>
-          <a href="#contact">
+          <a href={href("#contact")}>
             {copy.footer.greeting} <ArrowUpRight />
           </a>
           <p>{copy.brand.topbar}</p>
@@ -945,7 +886,7 @@ function Footer({ onPolicy, onFilter, language, onLanguage, copy, socialLinks, s
         <span className="footer-copyright">Copyright © HONG TAM ROSIC GLOBAL JSC. All rights reserved.</span>
         <div className="footer-bottom-actions">
           <button onClick={onPolicy}>{copy.footer.privacy}</button>
-          <a href="#home">
+          <a href={onHome ? "#home" : "/"}>
             {copy.footer.backTop} <ArrowUp size={14} />
           </a>
         </div>
@@ -953,7 +894,7 @@ function Footer({ onPolicy, onFilter, language, onLanguage, copy, socialLinks, s
     </footer>
   );
 }
-function DetailDialog({ selected, onClose, onQuote, copy, language, products, onProduct }) {
+function DetailDialog({ selected, onClose, copy }) {
   const lastFocused = useRef(null);
   useEffect(() => {
     if (selected) lastFocused.current = document.activeElement;
@@ -968,7 +909,7 @@ function DetailDialog({ selected, onClose, onQuote, copy, language, products, on
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-overlay" />
         <Dialog.Content
-          className={`detail-dialog ${selected?.type === "product" ? "product-dialog" : "article-dialog"}`}
+          className="detail-dialog article-dialog"
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             lastFocused.current?.focus({ preventScroll: true });
@@ -980,47 +921,7 @@ function DetailDialog({ selected, onClose, onQuote, copy, language, products, on
           >
             <X />
           </Dialog.Close>
-          {selected?.type === "product" ? (
-            <>
-              <div className="detail-image-wrap">
-                <Lightbox src={selected.data.image} alt={selected.data.alt} language={language} watermarked={selected.data.imageAsset?.watermarked} />
-                {!selected.data.imageAsset?.watermarked && <ProductImageBrand />}
-              </div>
-              <div className="detail-body">
-                <nav className="product-switcher" aria-label={language === "vi" ? "Chuyển sản phẩm" : "Switch product"}><label>{language === "vi" ? "Chuyển sản phẩm" : "Switch product"}<select value={selected.data.id} onChange={event => onProduct(products.find(product => product.id === event.target.value))}>{products.map(product => <option key={product.id} value={product.id}>{product.code} · {product.title}</option>)}</select></label></nav><p className="eyebrow">{selected.data.group}</p>
-                <Dialog.Title>{selected.data.title}</Dialog.Title>
-                <Dialog.Description>
-                  {selected.data.description}
-                </Dialog.Description>
-                <div className="product-detail-facts">
-                  <div>
-                    <span>{copy.dialog.productGroup}</span>
-                    <strong>{selected.data.group}</strong>
-                  </div>
-                  <div>
-                    <span>{copy.dialog.format}</span>
-                    <strong>{selected.data.catalogSpec?.forms || copy.dialog.formatValue}</strong>
-                  </div>
-                </div>
-                {selected.data.code && <p className="detail-product-code">{copy.catalog.productCode}: <strong>{selected.data.code}</strong></p>}
-                {selected.data.catalogSpec?.specGroups?.length > 0 && <div className="catalog-spec-groups">
-                  {selected.data.catalogSpec.specGroups.map((group, groupIndex) => <section key={groupIndex}>
-                    <h3>{group.title}</h3><dl>{(group.items || []).map((item, itemIndex) => <div key={itemIndex}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>
-                  </section>)}
-                  <p className="form-note">{selected.data.catalogSpec.notice || EXPORT_SPEC_NOTICE}</p>
-                </div>}
-                <p className="form-note">
-                  {copy.dialog.imageNote}
-                </p>
-                <button
-                  className="button button-primary"
-                  onClick={() => onQuote(selected.data.sourceTitle ?? selected.data.title)}
-                >
-                  {copy.dialog.request} <ArrowUpRight size={18} />
-                </button>
-              </div>
-            </>
-          ) : selected?.type === "article" ? (
+          {selected?.type === "article" ? (
             <>
               <img
                 className="article-cover"
@@ -1059,19 +960,30 @@ function DetailDialog({ selected, onClose, onQuote, copy, language, products, on
     </Dialog.Root>
   );
 }
+
+const DEFAULT_TITLE = "Hồng Tâm Rosic Global | Nông sản Việt Nam xuất khẩu";
+
+/** Page title + description for group and product pages (search results). */
+function usePageMeta(title, description) {
+  useEffect(() => {
+    document.title = title ? `${title} | Hồng Tâm Rosic Global` : DEFAULT_TITLE;
+    const meta = document.querySelector('meta[name="description"]');
+    const previous = meta?.getAttribute("content");
+    if (meta && description) meta.setAttribute("content", description);
+    return () => { if (meta && previous) meta.setAttribute("content", previous); };
+  }, [title, description]);
+}
+
 function SiteApp({ cms, preview = false }) {
   const [language, setLanguage] = useSiteLanguage("vi");
   const { theme, setTheme } = useSiteTheme();
-  const [category, setCategory] = useState("all");
-  const [catalogVisit, setCatalogVisit] = useState(0);
-  const navigateCategory = id => { setCategory(id); setCatalogVisit(value => value + 1); };
+  const route = useRoute();
+  useLinkInterception();
+  useScrollRestoration();
   const [selected, setSelected] = useState(null);
-  const [prefilledProduct, setPrefilledProduct] = useState({
-    title: "",
-    id: 0,
-  });
-  const reduced = useReducedMotion();
+  const [prefill, setPrefill] = useState({ key: "", nonce: 0 });
   const baseCopy = siteCopyFor(language);
+  const catalogCopy = catalogCopyFor(language);
   let copy = language === "vi" && cms?.content ? {
     ...baseCopy,
     brand: { ...baseCopy.brand, topbar: cms.content.topbar || baseCopy.brand.topbar },
@@ -1116,6 +1028,7 @@ function SiteApp({ cms, preview = false }) {
     },
   } : baseCopy;
   copy = mergeText(copy, cms?.textOverrides?.[language]?.copy);
+  copy = { ...copy, nav: { ...copy.nav, privateLabel: catalogCopy.nav.privateLabel } };
   let story = brandStoryFor(language, copy);
   if (language === "vi" && cms?.content?.brandStoryVersion === 4) {
     story.title = [cms.content.heroStart || story.title[0], cms.content.heroAccent || story.title[1]];
@@ -1123,69 +1036,28 @@ function SiteApp({ cms, preview = false }) {
     story.blocks = [cms.content.aboutBody || story.blocks[0], cms.content.aboutVision || story.blocks[1]];
   }
   story = mergeText(story, cms?.textOverrides?.[language]?.story);
-  const localizedProducts = cms?.products
-    ? localizeProducts((cms.catalogVersion === 5 ? cms.products : upgradeProducts(cms.products)).filter(product => product.status !== "draft"), language)
-    : localizeProducts(PRODUCTS, language);
-  const sourceExportCategories = (Array.isArray(cms?.categories) ? cms.categories.filter(item => item.status !== "draft") : EXPORT_CATEGORIES).map(item => ({ ...item, image: vr5ProductImage(item.image) }));
-  const localizedExportCategories = sourceExportCategories.map((categoryItem) =>
-    localizeExportCategory(categoryItem, language),
-  );
-  const supplementalExportProducts = localizedExportCategories
-    .filter((categoryItem) => !localizedProducts.some((product) => matchesCatalogCategory(product, categoryItem.id)))
-    .map((categoryItem) => ({
-      id: `export-${categoryItem.id}`,
-      title: categoryItem.shortTitle ?? categoryItem.title,
-      sourceTitle: categoryItem.sourceTitle ?? categoryItem.title,
-      category: categoryItem.id,
-      group: categoryItem.title,
-      image: categoryItem.image,
-      alt: categoryItem.alt,
-      short: categoryItem.description,
-      description: categoryItem.overview ?? categoryItem.description,
-      imageAsset: categoryItem.imageAsset,
-      isCategory: true,
-      code: `ROS-${String(70 + Number(categoryItem.number || sourceExportCategories.findIndex(item => item.id === categoryItem.id) + 1)).padStart(3, "0")}`,
-    }));
-  const catalogProducts = [...localizedProducts, ...supplementalExportProducts].map(product => ({
-    ...product,
-    image: vr5ProductImage(product.image),
-    catalogSpec: (() => {
-      const base = localizedExportCategories.find(group => group.id === product.category) || localizedExportCategories.find(group => matchesCatalogCategory(product, group.id));
-      if (!/^(robusta-|arabica-|cashew-)/.test(product.id) || !base) return base;
-      return { ...base, forms: product.title, specGroups: [{ title: language === "vi" ? "Quy cách sản phẩm được chọn" : "Selected product specification", items: [
-        { label: language === "vi" ? "Sản phẩm" : "Product", value: product.title },
-        { label: language === "vi" ? "Mã" : "Code", value: product.code },
-        { label: language === "vi" ? "Xác nhận theo đơn hàng" : "Confirm per order", value: product.description },
-      ] }] };
-    })(),
-  }));
-  const catalogCategories = [
-    ...CATEGORIES.filter((item) => (item.id !== "fruit" || !sourceExportCategories.some(group => group.id === "fresh-fruit")) && (item.id === "all" || catalogProducts.some((product) => matchesCatalogCategory(product, item.id)))),
-    ...localizedExportCategories
-      .filter((item) => !CATEGORIES.some((existing) => existing.id === item.id))
-      .map((item) => ({ id: item.id, label: item.shortTitle ?? item.title })),
-  ];
+  const { groups, products } = useMemo(() => buildCatalog(cms, language), [cms, language]);
   const socialLinks = configuredSocial(cms?.social, cms?.socialConfigVersion);
   const socialQr = configuredSocialQr(cms?.socialQr, socialLinks);
+
+  const onHome = route.kind === "home";
+  // Built-in groups and groups added in Admin both resolve by slug.
+  const activeGroup = route.groupSlug ? groups.find((item) => item.slug === route.groupSlug) : null;
+  const product = route.kind === "product" && activeGroup ? products.find((item) => item.id === route.productId && item.category === activeGroup.id) : null;
+  usePageMeta(product?.title ?? activeGroup?.title, product ? `${product.code} · ${product.description}` : activeGroup?.description);
+
   useEffect(() => {
+    if (!onHome) return undefined;
     const scrollHome = () => {
       if (window.location.hash === "#home")
         window.scrollTo({ top: 0, behavior: "instant" });
     };
     const onHomeLink = (event) => {
-      if (
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      )
-        return;
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       if (!event.target.closest('a[href="#home"]')) return;
       event.preventDefault();
-      if (window.location.hash !== "#home")
-        window.history.pushState(null, "", "#home");
-      window.scrollTo({ top: 0, behavior: reduced ? "instant" : "smooth" });
+      if (window.location.hash !== "#home") window.history.pushState(null, "", "#home");
+      window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     };
     scrollHome();
     document.addEventListener("click", onHomeLink);
@@ -1194,105 +1066,106 @@ function SiteApp({ cms, preview = false }) {
       document.removeEventListener("click", onHomeLink);
       window.removeEventListener("hashchange", scrollHome);
     };
-  }, [reduced]);
-  const { scrollYProgress } = useScroll();
-  const scaleX = scrollYProgress;
-  const quote = (title) => {
-    setSelected(null);
-    setPrefilledProduct((previous) => ({ title, id: previous.id + 1 }));
-    requestAnimationFrame(() => {
-      document
-        .querySelector("#contact")
-        ?.scrollIntoView({ behavior: reduced ? "instant" : "smooth" });
-      window.history.replaceState(null, "", "#contact");
-    });
-  };
-  return (
-    <MotionConfig reducedMotion="user">
-      <div className="site-app" lang={language} dir={language === "ar" ? "rtl" : "ltr"}>
-      <ContentProtection disabled={preview} />
+  }, [onHome]);
+  // A "/san-pham" deep link opens the home page at the product finder.
+  useEffect(() => {
+    if (route.kind === "home" && route.hash) navigate(`/#${route.hash}`, { replace: true });
+  }, [route.kind, route.hash]);
 
-      <a className="skip-link" href="#main">
-        {copy.skip}
-      </a>
-      <Motion.div
-        className="reading-progress"
-        style={{ scaleX }}
-        aria-hidden="true"
-      />
-      <Header
+  const { scrollYProgress } = useScroll();
+  const quote = (key) => setPrefill((previous) => ({ key, nonce: previous.nonce + 1 }));
+  const contact = (key, compact = false) => (
+    <Suspense fallback={<section className="deferred-contact" aria-busy="true" />}>
+      <Contact
+        sectionId={onHome ? null : "contact"}
+        prefillKey={prefill.key || key}
+        prefillNonce={prefill.nonce}
+        products={products}
+        groups={groups}
         language={language}
-        onLanguage={setLanguage}
-        theme={theme}
-        onThemeChange={setTheme}
-        copy={copy}
-        exportCategories={sourceExportCategories}
-        onFilter={navigateCategory}
-      />
-      <main id="main">
-        <Hero copy={copy} story={story} image={cms?.content?.heroImage === "/images/hero.webp" ? undefined : cms?.content?.heroImage} />
-        <Marquee copy={copy} categories={localizedExportCategories} />
-        <RosicValues story={story} language={language} values={mergeText(ROSIC_VALUES, cms?.textOverrides?.[language]?.values)} />
-        <About copy={copy} story={story} image={cms?.content?.aboutImage === "/images/produce.webp" ? undefined : cms?.content?.aboutImage} />
-        <DeferredContent><OfficialExportCatalog
-          sectionId={null}
-          language={language}
-          textOverrides={cms?.textOverrides?.[language]?.exportCatalogue}
-          categoriesData={sourceExportCategories}
-          products={catalogProducts}
-          onProduct={data => setSelected({ type: "product", data })}
-          products={catalogProducts}
-          onProduct={data => setSelected({ type: "product", data })}
-          onRequestQuote={({ sourceTitle, title }) => quote(sourceTitle ?? title)}
-        />
-        <Catalog
-          key={catalogVisit}
-          categories={catalogCategories}
-          category={category}
-          setCategory={setCategory}
-          onProduct={(data) => setSelected({ type: "product", data })}
-          copy={copy}
-          products={catalogProducts}
-        />
-        <Journey copy={copy} language={language} text={cms?.textOverrides?.[language]?.journey} images={cms?.content?.journeyImages} />
-        <Partners copy={copy} language={language} textOverrides={cms?.textOverrides?.[language]?.feedback} />
-        <Journal
-          text={cms?.textOverrides?.[language]?.articles}
-          copy={copy}
-          language={language}
-          images={cms?.content?.articleImages}
-          onArticle={(data) => setSelected({ type: "article", data })}
-        />
-        <Suspense fallback={<section className="deferred-contact" aria-busy="true" />}><Contact
-          sectionId={null}
-          prefilledProduct={prefilledProduct.title}
-          prefillKey={prefilledProduct.id}
-          products={[...catalogProducts, ...localizedExportCategories]}
-          language={language}
-          socialLinks={socialLinks}
-          socialQr={socialQr}
-          textOverrides={cms?.textOverrides?.[language]}
-        /></Suspense></DeferredContent>
-      </main>
-      <Footer
-        categories={catalogCategories}
-        onPolicy={() => setSelected({ type: "policy" })}
-        onFilter={setCategory}
-        language={language}
-        onLanguage={setLanguage}
-        copy={copy}
         socialLinks={socialLinks}
         socialQr={socialQr}
+        textOverrides={cms?.textOverrides?.[language]}
+        compact={compact}
       />
-      <DetailDialog
-        language={language}
-        selected={selected}
-        products={catalogProducts}
-        onProduct={data => setSelected({ type: "product", data })}
-        onClose={() => setSelected(null)}
-        onQuote={quote}
-        copy={copy}
-      />
+    </Suspense>
+  );
+
+  let page;
+  if (onHome) {
+    page = (
+      <>
+        <Hero copy={copy} story={story} image={cms?.content?.heroImage === "/images/hero.webp" ? undefined : cms?.content?.heroImage} />
+        <Marquee copy={copy} categories={groups} />
+        <RosicValues story={story} language={language} values={mergeText(ROSIC_VALUES, cms?.textOverrides?.[language]?.values)} />
+        <About copy={copy} story={story} image={cms?.content?.aboutImage === "/images/produce.webp" ? undefined : cms?.content?.aboutImage} />
+        <DeferredContent>
+          <GroupsSection groups={groups} products={products} copy={catalogCopy} />
+          <ProductFinder groups={groups} products={products} copy={catalogCopy} />
+          <PrivateLabel copy={catalogCopy} />
+          <Journey copy={copy} language={language} text={cms?.textOverrides?.[language]?.journey} images={cms?.content?.journeyImages} />
+          <Partners copy={copy} language={language} textOverrides={cms?.textOverrides?.[language]?.feedback} />
+          <Journal
+            text={cms?.textOverrides?.[language]?.articles}
+            copy={copy}
+            language={language}
+            images={cms?.content?.articleImages}
+            onArticle={(data) => setSelected({ type: "article", data })}
+          />
+          {contact("")}
+        </DeferredContent>
+      </>
+    );
+  } else if (route.kind === "group" && activeGroup) {
+    page = <GroupPage key={activeGroup.id} group={activeGroup} groups={groups} products={products} copy={catalogCopy} language={language} onQuote={quote} contact={contact(`group:${activeGroup.id}`, true)} />;
+  } else if (product) {
+    const related = products.filter((item) => item.category === product.category && item.id !== product.id);
+    page = <ProductPage key={product.id} product={product} group={activeGroup} related={related} copy={catalogCopy} language={language} onQuote={quote} socialLinks={socialLinks} contact={contact(product.id, true)} />;
+  } else {
+    page = <NotFound copy={catalogCopy} title={route.kind === "product" ? catalogCopy.product.notFound : catalogCopy.group.notFound} />;
+  }
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <div className={`site-app${onHome ? "" : " site-app--subpage"}`} lang={language} dir={language === "ar" ? "rtl" : "ltr"}>
+        <ContentProtection disabled={preview} />
+        <a className="skip-link" href="#main">
+          {copy.skip}
+        </a>
+        <Motion.div
+          className="reading-progress"
+          style={{ scaleX: scrollYProgress }}
+          aria-hidden="true"
+        />
+        <Header
+          language={language}
+          onLanguage={setLanguage}
+          theme={theme}
+          onThemeChange={setTheme}
+          copy={copy}
+          catalogCopy={catalogCopy}
+          groups={groups}
+          onHome={onHome}
+        />
+        <main id="main" key={route.path}>
+          {page}
+        </main>
+        <Footer
+          groups={groups}
+          onHome={onHome}
+          onPolicy={() => setSelected({ type: "policy" })}
+          language={language}
+          onLanguage={setLanguage}
+          copy={copy}
+          socialLinks={socialLinks}
+          socialQr={socialQr}
+        />
+        <BackToTop label={catalogCopy.backTop} path={route.path} />
+        <DetailDialog
+          selected={selected}
+          onClose={() => setSelected(null)}
+          copy={copy}
+        />
       </div>
     </MotionConfig>
   );

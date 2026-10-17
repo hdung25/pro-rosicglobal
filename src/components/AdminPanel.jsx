@@ -28,9 +28,9 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { validateCatalog } from "../../lib/catalog-validation";
-import { upgradeProducts } from "../vr5-catalog";
-import { ARTICLES, JOURNEY, PRODUCTS } from "../data";
+import { ARTICLES, JOURNEY } from "../data";
 import { EXPORT_CATEGORIES } from "../export-catalog";
+import { CATALOG_VERSION, DEFAULT_PRODUCTS, GROUP_INTRO, GROUP_NAMES, GROUPS, SPEC_KEYS, SPEC_LABELS } from "../catalog-v6";
 import { IMAGE_PRESETS, processCmsImage } from "../cms/image-processing";
 import "./AdminPanel.css";
 import { brandStoryFor } from "../brand-story";
@@ -89,17 +89,48 @@ const SOCIAL_FIELDS = [
   { key: "zalo", label: "Zalo · Hotline", placeholder: "https://zalo.me/84962284872" },
 ];
 
-const seedProducts = PRODUCTS.map((product, index) => ({
-  ...product,
-  code: product.code || `ROS-${String(index + 1).padStart(3, "0")}`,
-  status: "published",
-}));
+// Catalogue v6: nine groups (menu = page = filter chips) and their sub-products.
+const seedProducts = DEFAULT_PRODUCTS.map((product) => ({ ...product }));
 
-const seedCategories = EXPORT_CATEGORIES.map((category) => ({
-  ...category,
-  code: `CAT-${category.number}`,
-  status: "published",
-}));
+const seedCategories = GROUPS.map((group, index) => {
+  const base = EXPORT_CATEGORIES.find((category) => category.id === group.id) ?? {};
+  return {
+    ...base,
+    id: group.id,
+    number: String(index + 1).padStart(2, "0"),
+    title: base.title && base.title !== "Other" ? base.title : GROUP_NAMES.vi[group.id],
+    shortTitle: GROUP_NAMES.vi[group.id],
+    description: GROUP_INTRO[group.id]?.vi ?? base.description,
+    image: group.image,
+    code: `CAT-${String(index + 1).padStart(2, "0")}`,
+    status: "published",
+  };
+});
+
+const SPEC_FIELDS = SPEC_KEYS.filter((key) => key !== "code");
+
+/** Pre-v6 products used the retired fruit/vegetable taxonomy; replace them
+ *  with the v6 list but keep any photo the team uploaded for the same id. */
+function migrateProducts(saved) {
+  if (saved?.catalogVersion >= CATALOG_VERSION && Array.isArray(saved.products)) return saved.products;
+  const uploaded = Object.fromEntries((saved?.products || []).filter((item) => item.image?.startsWith("/media/")).map((item) => [item.id, item]));
+  return seedProducts.map((product) => (uploaded[product.id] ? { ...product, image: uploaded[product.id].image, imageAsset: uploaded[product.id].imageAsset } : product));
+}
+
+/** Keep edited categories and custom ones, add any missing v6 group, retire
+ *  the "Other" label and (once, from older data) refresh built-in group intros
+ *  so they describe the new sub-product lists. */
+function migrateCategories(saved) {
+  const list = Array.isArray(saved?.categories) ? saved.categories : seedCategories;
+  const upgrading = !(saved?.catalogVersion >= CATALOG_VERSION);
+  const merged = [...list, ...seedCategories.filter((seed) => !list.some((item) => item.id === seed.id))];
+  return merged.map((item) => {
+    let next = item;
+    if (item.id === "other" && (!item.shortTitle || item.shortTitle === "Other")) next = { ...next, title: GROUP_NAMES.vi.other, shortTitle: GROUP_NAMES.vi.other };
+    if (upgrading && GROUP_INTRO[item.id]) next = { ...next, description: GROUP_INTRO[item.id].vi };
+    return next;
+  });
+}
 
 const emptyProduct = (index) => ({
   id: `product-${Date.now()}`,
@@ -111,6 +142,8 @@ const emptyProduct = (index) => ({
   alt: "Hình ảnh sản phẩm",
   short: "Mô tả ngắn của sản phẩm.",
   description: "Thông tin chi tiết sản phẩm.",
+  specs: {},
+  translations: {},
   status: "draft",
 });
 
@@ -120,9 +153,9 @@ function readState() {
     if (saved?.products && saved?.content) {
       return {
         ...saved,
-        products: (saved.catalogVersion === 5 ? saved.products : upgradeProducts(saved.products)).map(item => ({ ...item, image: vr5ProductImage(item.image) })),
-        catalogVersion: 5,
-        categories: (Array.isArray(saved.categories) ? saved.categories : seedCategories).map(item => ({ ...item, image: vr5ProductImage(item.image) })),
+        products: migrateProducts(saved).map(item => ({ ...item, image: vr5ProductImage(item.image) })),
+        catalogVersion: CATALOG_VERSION,
+        categories: migrateCategories(saved).map(item => ({ ...item, image: vr5ProductImage(item.image) })),
         content: { ...DEFAULT_CONTENT, ...saved.content, ...(saved.content.brandStoryVersion === 4 ? {} : { brandStoryVersion: 4, heroStart: DEFAULT_CONTENT.heroStart, heroAccent: DEFAULT_CONTENT.heroAccent, heroCta: DEFAULT_CONTENT.heroCta, aboutBody: DEFAULT_CONTENT.aboutBody }) },
         social: configuredSocial(saved.social, saved.socialConfigVersion),
         socialQr: configuredSocialQr(saved.socialQr, configuredSocial(saved.social, saved.socialConfigVersion)),
@@ -134,7 +167,7 @@ function readState() {
   } catch {
     // Corrupt browser data falls back to a safe seed.
   }
-  return { catalogVersion: 5, products: seedProducts, categories: seedCategories, content: DEFAULT_CONTENT, social: DEFAULT_SOCIAL, socialQr: configuredSocialQr(null, DEFAULT_SOCIAL), socialConfigVersion: SOCIAL_CONFIG_VERSION, settings: DEFAULT_SETTINGS, media: [], updatedAt: null };
+  return { catalogVersion: CATALOG_VERSION, products: seedProducts, categories: seedCategories, content: DEFAULT_CONTENT, social: DEFAULT_SOCIAL, socialQr: configuredSocialQr(null, DEFAULT_SOCIAL), socialConfigVersion: SOCIAL_CONFIG_VERSION, settings: DEFAULT_SETTINGS, media: [], updatedAt: null };
 }
 
 const NAV_ITEMS = [
@@ -349,7 +382,7 @@ function AdminWorkspace({ onLogout }) {
   };
   const uploadProductImage = (file) => {
     const targetId = selectedId;
-    const name = selected?.imageEnglishName?.trim() || (selected ? localizeProducts([selected], "en")[0].title : "product");
+    const name = selected?.imageEnglishName?.trim() || selected?.translations?.en?.title?.trim() || (selected ? localizeProducts([selected], "en")[0].title : "product");
     return processImage(file, "product", (src, asset) => updateData(current => ({ ...current, products: current.products.map(product => product.id === targetId ? { ...product, image: src, imageAsset: asset, alt: product.alt || product.title } : product) })), name);
   };
   const uploadCategoryImage = (file) => {
@@ -482,7 +515,14 @@ function AdminWorkspace({ onLogout }) {
                       </div>
                       <Field label="Mô tả ngắn"><textarea rows="3" value={selected.short} onChange={(e) => updateProduct("short", e.target.value)} /></Field>
                       <Field label="Thông tin chi tiết"><textarea rows="6" value={selected.description} onChange={(e) => updateProduct("description", e.target.value)} /></Field>
-                      <AdminProductTranslation product={selected} onChange={updateProduct} />
+                      <fieldset className="admin-spec-fields">
+                        <legend>Thông số kỹ thuật (hiển thị trên trang chi tiết)</legend>
+                        <p className="admin-field-hint">Mã sản phẩm lấy từ ô “Mã sản phẩm”. Để trống mục nào thì trang chi tiết hiện “Không áp dụng”.</p>
+                        {SPEC_FIELDS.map((key) => (
+                          <Field key={key} label={SPEC_LABELS.vi[key]}><input value={selected.specs?.[key] || ""} onChange={(e) => updateProduct("specs", { ...selected.specs, [key]: e.target.value })} /></Field>
+                        ))}
+                      </fieldset>
+                      <AdminProductTranslation product={selected} onChange={updateProduct} specKeys={SPEC_FIELDS} specLabels={SPEC_LABELS.vi} />
                       <Field label="Mô tả ảnh (SEO/Accessibility)"><input value={selected.alt} onChange={(e) => updateProduct("alt", e.target.value)} /></Field>
                     </div>
                   ) : <Empty icon={Package} title="Chưa có sản phẩm" body="Thêm sản phẩm đầu tiên để bắt đầu." />}

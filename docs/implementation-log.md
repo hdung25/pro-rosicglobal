@@ -187,3 +187,42 @@ Bản cuối mobile/PWA: dpl_9PB76T3vScHLhqiWC6iVFzTmrZWi, https://pro-rosicglob
 Phản hồi: mảng nền vuông của picker ở topbar không hòa với giao diện tối. Sửa rule ghi đè nền dark bằng control trong suốt ở cả hai theme; thêm chevron rõ chức năng, vùng chạm 44px, topbar 48px tránh cắt control, hover nhẹ và focus ring vàng nằm trong bo tròn để không bị overflow topbar cắt. Áp dụng nhất quán cho header/menu/footer. Kiểm local desktop 1440px và mobile 390px: nền rgba(0,0,0,0), vùng chạm cao 44px, đổi EN thành công; đã xem ảnh thực. Lint/build đạt; không thay đổi dữ liệu CMS.
 
 Đã deploy dpl_27SPSLug3v2An4wgmv42dyX76mft lên rosicglobal.com, bundle index-9LDtDwKE.js. Kiểm trên website thật ở 320/390/1440px bằng Chrome và WebKit: nền picker trong suốt, chevron hiện, vùng chạm 44px và đổi EN thành công. Bằng chứng language-dark-verification.json và language-dark-production-*.png.
+
+## Phản hồi khách 17/10/2026 — Danh mục v6, trang nhóm/chi tiết, form một bước
+
+| Mục khách nêu | Xử lý | Vị trí trong mã |
+| --- | --- | --- |
+| A1 Bo góc | Một biến `--r: 10px` cho khung, nút, chip đang chọn, form báo giá, CTA ở cả sáng/tối; bỏ các góc 0/4/6/8/12/999px lẫn lộn. | `src/catalog-v6.css` mục 1 |
+| A2 Nút sáng/tối (AR) | Nút nổi bị xóa; công tắc "Sáng / Tối" có nhãn chuyển lên topbar, không còn đè chữ khi RTL. | `ThemeSwitch` trong `src/App.jsx` |
+| A3 Lên đầu trang | Nút ở góc dưới, tự ẩn khi form báo giá, CTA, footer hoặc thanh báo giá nằm trong vùng nút. | `BackToTop` trong `src/App.jsx` |
+| A4 Logo | Bỏ slogan dưới logo; chữ ROSIC dùng Cormorant Garamond SemiBold. | `Brand`, `@fontsource/cormorant-garamond` |
+| A5 Thanh điều hướng | 4 mục mỗi bên logo, khoảng cách hai bên bằng nhau, thêm "Nhãn hiệu riêng" (OEM/ODM) có section riêng. | `NAV`, `PrivateLabel` |
+| A6 Watermark | Logo + tên là một khối căn giữa trong khung ôm sát ảnh: thẻ, Xem nhanh, trang chi tiết, phóng to. | `ProductImageBrand`, `Lightbox`, `ProductMedia` |
+| A7 Mã sản phẩm | Bản tiếng Việt dùng "Mã sản phẩm". | `src/catalog-copy.js` |
+| B8 Menu Sản phẩm | Bấm mở, giữ mở đến khi chọn / bấm ra ngoài / Esc. | `Header` |
+| B9 Bấm nhóm | Mở trang riêng `/san-pham/<nhóm>`: banner nhóm → danh sách sản phẩm con → nhóm khác → form. | `GroupPage` |
+| B10 Danh mục khớp nhau | Menu, thẻ nhóm, chip lọc, footer, form cùng một danh sách 9 nhóm. | `GROUPS` trong `src/catalog-v6.js` |
+| B11–12 Xem nhanh | Hiện đủ sản phẩm con (ảnh, tên, mã, nút xem chi tiết); đóng lại giữ nguyên vị trí cuộn. | `QuickView` |
+| C13 Thông số | 8 dòng: mã, độ ẩm, tạp chất, độ dày/quy cách, màu sắc, đóng gói, hệ số xếp container, quy chuẩn. | `SpecTable` |
+| C14 Nút báo giá | Nút trong trang + thanh "Yêu cầu báo giá" bám đáy khi cuộn. | `StickyQuote` |
+| C15 Sản phẩm cùng nhóm | Cuối trang chỉ hiện sản phẩm cùng nhóm. | `ProductPage` |
+| D16–17 Tìm kiếm | Không gợi ý khi gõ; chỉ tìm khi Enter/nút Tìm; xóa hết chữ thì hiện lại tất cả và bỏ chip đã chọn. | `ProductFinder` |
+| E19–20 Form | Một bước: điền thông tin → tin nhắn soạn sẵn, sửa được → Gửi WhatsApp/Email. Tự điền sản phẩm đang xem; bỏ chữ mẫu trong ô nhập. | `src/components/Contact.jsx` |
+| F Sản phẩm con | Cà phê 8, Hạt tiêu 6, Hoa hồi 4, Quế 9, Cơm dừa 4, Hạt điều 9 (giữ VR5), Trái cây tươi 9 (giữ nguyên), Trái cây sấy (đang bổ sung), Lương thực 2. | `src/catalog-v6.js` |
+| Favicon | Favicon tròn, nền xanh rừng, logo vàng, render từ vector ở 16/32/48/96/192/512 px. | `scripts/generate-favicons.mjs` |
+
+Ghi chú vận hành:
+
+- Dữ liệu CMS cũ (không có `catalogVersion: 6`) được thay bằng danh mục v6 khi hiển thị và khi mở Admin; ảnh đã tải lên `/media/...` cho cùng mã sản phẩm được giữ lại. Cần **mở Admin và bấm Xuất bản một lần** để lưu danh mục v6 lên máy chủ.
+- Rau củ, khoai lang, đông trùng hạ thảo không nằm trong danh sách khách gửi nên không còn hiển thị; có thể thêm lại trong Admin.
+- Thông số là chỉ tiêu tham chiếu theo tiêu chuẩn ngành (TCVN, ISO, ASTA, CODEX); khách cần rà lại trước khi công bố chính thức.
+- Vercel rewrite `/san-pham/*` → `index.html`; sitemap có 61 URL (`node --import ./scripts/resolve-src.mjs scripts/generate-sitemap.mjs`).
+- Admin: nhóm do Admin thêm vẫn có trang riêng `/san-pham/<id>`, xuất hiện trong menu/chip; thứ tự nhóm theo Admin khi dữ liệu đã là v6. Ô "Thông số kỹ thuật" (7 mục) và bản dịch thông số có trong form sản phẩm.
+
+Kiểm thử (bản build production, `vite preview`):
+
+| Kiểm tra | Kết quả |
+| --- | --- |
+| `tests/customer-feedback-oct.spec.js` — mỗi mục khách nêu một test, gồm WCAG AA sáng/tối | Đạt |
+| Bộ Playwright đầy đủ (trừ PWA cần server 4173) | 161/161 đạt (bản gốc trước thay đổi: 116 đạt, 5 lỗi sẵn có); các test giao diện cũ (hộp thoại sản phẩm, bộ lọc cũ, nút nổi, form nhiều bước) được viết lại cho giao diện mới thay vì xóa |
+| Sửa thêm khi kiểm thử | Tương phản nút Sáng/Tối, chữ ROSIC trên mobile, số bước Hành trình (tối), nút WhatsApp (tối); tràn ngang 3px ở màn 280px; Back khôi phục đúng vị trí cuộn (React 19 xử lý `popstate` đồng bộ) |

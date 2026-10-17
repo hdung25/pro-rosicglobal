@@ -5,7 +5,7 @@
  * image paths and any future technical metadata. This module only overlays
  * human-facing copy so a locale change never changes product identity.
  */
-const PRODUCT_NAMES = {
+export const PRODUCT_NAMES = {
   en: {
     mango: "Mango",
     dragonfruit: "Red-fleshed dragon fruit",
