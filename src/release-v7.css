@@ -284,13 +284,13 @@ html[data-theme] .site-app .group-strip .gcard__media {
   padding: 0;
   border: 1px solid var(--line);
   border-radius: var(--r);
-  color: var(--ink);
+  color: var(--gold-ink);
   background: var(--surface);
   cursor: pointer;
-  transition: border-color 160ms ease, color 160ms ease;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
 }
 .social-icon:hover,
-.social-icon:focus-visible { border-color: var(--gold); color: var(--gold-ink); }
+.social-icon:focus-visible { border-color: var(--gold); color: var(--gold-ink); background: var(--soft); }
 .social-popup { width: min(380px, calc(100vw - 24px)); justify-items: center; text-align: center; border-radius: var(--r); }
 .social-popup h2 { display: inline-flex; align-items: center; gap: 10px; padding: 0; font-size: 18px; }
 .social-popup__icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--r); color: var(--gold-ink); background: var(--soft); }
@@ -321,7 +321,8 @@ html[data-theme] .social-qr-close { border-radius: var(--r); }
 .site-app .footer-tagline { margin: 0; color: var(--muted); font: 600 16px/1.4 var(--logo-font); letter-spacing: 0.02em; }
 .site-app .footer-invitation { display: grid; gap: 14px; padding-inline-start: 0; border: 0; }
 .site-app .footer-invitation > span { color: var(--muted); font-size: 12px; }
-.site-app .footer-invitation .footer-cta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 0 0 12px; border-bottom: 1px solid var(--line); font-size: 24px; }
+/* Footer CTA: the same primary button as the rest of the site. */
+html[data-theme] .site-app .footer-invitation .footer-cta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 48px; margin: 0; padding: 0 20px; border: 0; border-radius: var(--r); font-size: 15px; font-weight: 600; text-decoration: none; }
 .site-app .footer-tools { justify-self: start; }
 .site-app .footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 @media (max-width: 1000px) {
@@ -415,4 +416,48 @@ html[data-theme] :is(.site-app, .quote-dialog) .quote-field .quote-consent__labe
 @media (max-width: 400px) {
   .site-app .hero-copy h1,
   .site-app .hero-copy .title-accent { font-size: clamp(34px, 11.5vw, 48px); }
+}
+
+/* ---------------------------------------------------------------------
+   Phones, 19/10 review: the light/dark and language cells sit inside the
+   header as icon cells, so the slim top bar keeps the slogan; footer
+   social icons stay on one tidy row (two rows of three on narrow phones).
+   --------------------------------------------------------------------- */
+.header-tools, .header-top { display: none; }
+@media (max-width: 760px) {
+  :root { --topbar-h: 30px; --top-h: 96px; }
+  .site-app .topbar .topbar-tools { display: none; }
+  .site-app .topbar .topbar-inner { justify-content: center; }
+  .site-app .topbar-message { display: block; overflow: hidden; max-width: 100%; font-size: 10.5px; letter-spacing: 0.04em; text-overflow: ellipsis; white-space: nowrap; }
+  html[data-theme] .site-app .header-tools {
+    display: inline-grid;
+    position: absolute;
+    inset-inline-start: 12px;
+    top: 50%;
+    grid-template-columns: repeat(2, 44px);
+    gap: 6px;
+    transform: translateY(-50%);
+  }
+  html[data-theme] .site-app :is(.header-tools .tool-cell, .header-top) {
+    display: inline-grid;
+    place-items: center;
+    position: relative;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    color: var(--gold-ink);
+    background: var(--surface);
+  }
+  html[data-theme] .site-app .header-tools .theme-cell > span { display: none; }
+  html[data-theme] .site-app .header-tools .language-cell .language-picker-flag { width: 20px; height: 20px; margin: 0; }
+  html[data-theme] .site-app .header-tools .language-cell select { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; opacity: 0; font-size: 16px; cursor: pointer; }
+  html[data-theme] .site-app .header-tools .language-cell .language-picker-chevron { display: none; }
+  html[data-theme] .site-app .nav-shell .header-top { position: absolute; top: 50%; inset-inline-end: 54px; transform: translateY(-50%); }
+  .site-app .footer-social { display: grid; grid-template-columns: repeat(6, 44px); gap: 8px; justify-content: start; }
+}
+@media (max-width: 379px) {
+  .site-app .footer-social { grid-template-columns: repeat(3, 44px); }
 }

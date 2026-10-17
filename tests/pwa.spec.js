@@ -29,15 +29,9 @@ test('production PWA serves an honest offline screen and never caches Admin or A
   await context.close();
 });
 
-test('installation guide is accessible, fits a small screen and restores focus', async ({ page }) => {
+test('the footer no longer offers an add-to-home-screen pin', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto('/');
-  await page.locator('.install-app-button').click();
-  const dialog = page.locator('.install-app-dialog');
-  await expect(dialog).toBeVisible();
-  const scan = await new AxeBuilder({ page }).include('.install-app-dialog').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
-  expect(scan.violations).toEqual([]);
-  expect(await dialog.evaluate(el => el.getBoundingClientRect().width)).toBeLessThanOrEqual(320);
-  await page.keyboard.press('Escape');
-  await expect(page.locator('.install-app-button')).toBeFocused();
+  await page.locator('.site-footer').scrollIntoViewIfNeeded();
+  await expect(page.locator('.install-app-button')).toHaveCount(0);
 });

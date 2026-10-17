@@ -57,7 +57,6 @@ import "./catalog-v6.css";
 import "./release-v7.css";
 import { mergeText } from "./cms/content-overrides";
 import SocialChannels from "./components/SocialChannels";
-import InstallApp from "./components/InstallApp";
 import { SOCIAL_DEFAULTS, configuredSocial, configuredSocialQr } from "./social-config";
 import { buildCatalog, groupPath } from "./catalog-v6";
 import { catalogCopyFor } from "./catalog-copy";
@@ -246,9 +245,9 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: reduce ? "instant" : "smooth" });
 }
 
-function TopTools({ theme, onThemeChange, language, onLanguage, copy, catalogCopy, className = "", alwaysShowTop = false }) {
+function TopTools({ theme, onThemeChange, language, onLanguage, copy, catalogCopy, className = "", alwaysShowTop = false, withTop = true }) {
   const scrolled = useScrolledPast();
-  const showTop = alwaysShowTop || scrolled;
+  const showTop = withTop && (alwaysShowTop || scrolled);
   return (
     <div className={`top-tools${showTop ? " has-top" : ""} ${className}`.trim()}>
       <ThemeToggleCell theme={theme} onThemeChange={onThemeChange} labels={{ ...copy.theme, ...catalogCopy.theme }} />
@@ -259,6 +258,16 @@ function TopTools({ theme, onThemeChange, language, onLanguage, copy, catalogCop
         </button>
       )}
     </div>
+  );
+}
+
+function HeaderTopButton({ label }) {
+  const scrolled = useScrolledPast();
+  if (!scrolled) return null;
+  return (
+    <button type="button" className="tool-cell top-cell header-top" onClick={scrollToTop} aria-label={label} title={label}>
+      <ArrowUp size={16} aria-hidden="true" />
+    </button>
   );
 }
 
@@ -445,6 +454,11 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, catalogCopy,
               </div>
             ) : link(item))}
           </nav>
+          {/* Phones: the display tools sit inside the header (icon cells) so
+              the slim top bar keeps the slogan; "back to top" joins the menu
+              button once the page is scrolled. */}
+          <TopTools {...tools} className="header-tools" withTop={false} />
+          <HeaderTopButton label={catalogCopy.backTop} />
           <Brand copy={copy} language={language} home={onHome} />
           <nav className="nav-right" aria-label={copy.productNavigation}>
             {NAV.slice(4).map(link)}
@@ -809,11 +823,10 @@ function Footer({ onPolicy, language, onLanguage, theme, onThemeChange, copy, ca
         </div>
         <div className="footer-invitation">
           <span>{copy.footer.invitation}</span>
-          <a className="footer-cta" href={href("#contact")}>
-            {copy.footer.greeting} <ArrowUpRight />
+          <a className="button button-primary footer-cta" href={href("#contact")}>
+            {copy.footer.greeting} <ArrowUpRight size={18} aria-hidden="true" />
           </a>
           <TopTools theme={theme} onThemeChange={onThemeChange} language={language} onLanguage={onLanguage} copy={copy} catalogCopy={catalogCopy} className="footer-tools" alwaysShowTop />
-          <InstallApp language={language} />
         </div>
       </div>
       <div className="container footer-bottom">

@@ -49,10 +49,9 @@ for (const [width, height] of screens) {
       await expect(page.locator('.social-qr-dialog img')).toBeVisible();
       await page.locator('.social-qr-close').tap();
     }
-    await page.locator('.install-app-button').tap();
-    await expect(page.locator('.install-app-dialog')).toContainText('iPhone / iPad');
-    await page.locator('.install-app-dialog .social-qr-close').tap();
-    const undersized = await page.locator('.menu-toggle, .topbar .tool-cell, .crumbs a, .product-detail__actions :is(a, button), .footer-column a, .footer-social .social-icon, .footer-tools .tool-cell, .install-app-button').evaluateAll(elements => elements.filter(e => {
+    // The "add to home screen" pin was removed from the footer (review 19/10).
+    await expect(page.locator('.install-app-button')).toHaveCount(0);
+    const undersized = await page.locator('.menu-toggle, .topbar .tool-cell, .header-tools .tool-cell, .header-top, .crumbs a, .product-detail__actions :is(a, button), .footer-column a, .footer-social .social-icon, .footer-tools .tool-cell, .footer-cta').evaluateAll(elements => elements.filter(e => {
       const box = e.getBoundingClientRect();
       return box.width && box.height && (box.width < 43.9 || box.height < 43.9);
     }).map(e => ({ text: e.textContent.trim(), height: e.getBoundingClientRect().height, width: e.getBoundingClientRect().width })));
@@ -92,10 +91,17 @@ test('Arabic compact header keeps menu and display controls apart', async ({ pag
   await page.locator('.menu-toggle').click();
   await expect(page.locator('.mobile-menu')).toBeVisible();
   await page.locator('.mobile-menu-top button').click();
+  // Phones: the display cells sit in the header, on the opposite side of the menu button.
   const toggle = await page.locator('.menu-toggle').boundingBox();
-  const theme = page.locator('.topbar .theme-cell');
+  const brand = await page.locator('.site-header .brand').boundingBox();
+  const theme = page.locator('.header-tools .theme-cell');
   const themeBox = await theme.boundingBox();
-  expect(themeBox.y + themeBox.height).toBeLessThanOrEqual(toggle.y);
+  const language = await page.locator('.header-tools .language-cell').boundingBox();
+  const apart = (a, b) => a.x + a.width <= b.x || b.x + b.width <= a.x;
+  for (const box of [themeBox, language]) {
+    expect(apart(box, toggle)).toBe(true);
+    expect(apart(box, brand)).toBe(true);
+  }
   const current = await page.locator('html').getAttribute('data-theme');
   await theme.click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', current === 'dark' ? 'light' : 'dark');

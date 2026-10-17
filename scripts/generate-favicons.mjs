@@ -13,22 +13,24 @@ const FOREST = "#193B30";
 const GOLD = "#E2B653";
 
 // brand-mark viewBox is "10 9 445 159"; centre it in a 512 canvas at the given width.
-function mark(width, cx = 256, cy = 256) {
+function mark(width, cx = 256, cy = 256, color = GOLD, stroke = 0) {
   const scale = width / 445;
   const height = 159 * scale;
   const x = cx - width / 2 - 10 * scale;
   const y = cy - height / 2 - 9 * scale;
-  return `<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${scale.toFixed(4)})"><path d="${path}" fill="${GOLD}" fill-rule="evenodd"/></g>`;
+  const outline = stroke ? ` stroke="${color}" stroke-width="${stroke}" stroke-linejoin="round"` : "";
+  return `<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${scale.toFixed(4)})"><path d="${path}" fill="${color}" fill-rule="evenodd"${outline}/></g>`;
 }
 
-const roundWith = (width) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>Hồng Tâm Rosic Global</title><circle cx="256" cy="256" r="256" fill="${FOREST}"/>${mark(width)}</svg>\n`;
+const roundWith = (width, color = GOLD, stroke = 0) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>Hồng Tâm Rosic Global</title><circle cx="256" cy="256" r="256" fill="${FOREST}"/>${mark(width, 256, 256, color, stroke)}</svg>\n`;
 const round = roundWith(400);
-// At 16–48 px the mark is drawn larger so its strokes stay crisp in a browser tab.
-const roundSmall = roundWith(452);
+// At 16–48 px the mark is drawn wider, in a brighter gold and with heavier
+// strokes, so it still reads in a light or dark browser tab and in search.
+const roundSmall = roundWith(476, "#F2C75C", 10);
 // Square artwork for platforms that apply their own mask (iOS, Android maskable).
 const square = (markWidth) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="${FOREST}"/>${mark(markWidth)}</svg>\n`;
 
-fs.writeFileSync("public/favicon.svg", round);
+fs.writeFileSync("public/favicon.svg", roundSmall);
 fs.writeFileSync("public/favicon-rosic.svg", round);
 fs.writeFileSync("public/brand-kit/rosic-favicon.svg", round);
 fs.writeFileSync("public/icons/rosic-app.svg", square(380));
