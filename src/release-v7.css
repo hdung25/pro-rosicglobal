@@ -406,7 +406,9 @@ html[data-theme] :is(.site-app, .quote-dialog) .quote-field .quote-consent__labe
   .site-app .about-photo,
   .site-app .about-copy,
   .site-app .footer-brand { min-width: 0; max-width: 100%; }
-  .site-app .footer-brand { flex-wrap: wrap; justify-content: center; }
+  /* Logo, slogan and icons share one left edge, as on desktop. */
+  .site-app .footer-brand { flex-wrap: wrap; justify-content: flex-start; align-items: flex-start; text-align: start; }
+  .site-app .footer-brand .footer-tagline { text-align: start; }
   .site-app .about-pillars :is(h3, p) { overflow-wrap: break-word; }
   .site-app :is(.about-copy, .partners-section, .private-label) .button { max-width: 100%; height: auto; min-height: 44px; white-space: normal; text-align: center; line-height: 1.3; padding-block: 10px; }
 }

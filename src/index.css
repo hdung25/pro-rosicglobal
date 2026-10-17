@@ -1869,7 +1869,7 @@ a[aria-current="location"]:after {
   align-items: flex-start;
 }
 .brand-footer .brand-mark {
-  margin-left: 34px;
+  margin-left: 0;
 }
 .footer-tagline {
   font-size: 11px;
@@ -2611,7 +2611,7 @@ a[aria-current="location"]:after {
     font-size: 10px;
   }
   .brand-footer .brand-mark {
-    margin-left: 30px;
+    margin-left: 0;
   }
   .footer-column h3 {
     font-size: 11px;
