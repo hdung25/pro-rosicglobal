@@ -14,7 +14,7 @@ test('production PWA serves an honest offline screen and never caches Admin or A
   expect(manifest.icons.some(icon => icon.purpose === 'maskable')).toBe(true);
   for (const icon of manifest.icons) expect((await context.request.get(icon.src)).status()).toBe(200);
   const cached = await page.evaluate(async () => {
-    const cache = await caches.open('rosic-offline-v1');
+    const cache = await caches.open('rosic-offline-v2');
     return (await cache.keys()).map(request => new URL(request.url).pathname);
   });
   expect(cached.sort()).toEqual(['/icons/rosic-192.png','/icons/rosic-512.png','/offline.html'].sort());

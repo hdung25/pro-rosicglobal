@@ -24,7 +24,7 @@ for (const width of [1440, 390, 320]) {
     expect(height).toBeLessThan(width > 1000 ? 650 : 1350);
     await footer.screenshot({ path: `artifacts/vr5/refined-footer-${width}.png` });
     await footer.getByRole('button', { name: 'WhatsApp', exact: true }).click();
-    await expect(page.locator('.social-qr-dialog img')).toHaveAttribute('src', '/images/social/rosic-whatsapp-official.png');
+    await expect(page.locator('.social-popup__qr img')).toHaveAttribute('src', '/images/social/rosic-whatsapp-official.png');
     await page.keyboard.press('Escape');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });

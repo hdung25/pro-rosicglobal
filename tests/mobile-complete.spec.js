@@ -46,7 +46,7 @@ for (const [width, height] of screens) {
     await page.keyboard.press('Escape');
     for (const key of ['email','whatsapp','linkedin','facebook','zalo','wechat']) {
       await page.locator(`.footer-social .social-icon[data-channel="${key}"]`).tap();
-      await expect(page.locator('.social-qr-dialog img')).toBeVisible();
+      await expect(page.locator('.social-popup__qr img')).toBeVisible();
       await page.locator('.social-qr-close').tap();
     }
     // The "add to home screen" pin was removed from the footer (review 19/10).

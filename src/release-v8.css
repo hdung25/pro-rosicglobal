@@ -1,0 +1,320 @@
+/* =====================================================================
+   Release v8 — customer review (18 Oct 2026, 16 items). Loaded last.
+   Visual properties of the shared systems below (CTA, headings, social
+   icons) use !important on purpose: earlier layers style the same elements
+   with many different selectors, and this layer is the single source.
+   ===================================================================== */
+
+:root {
+  --cta-bg: #f4d780;
+  --cta-ink: #193b30;
+  --cta-border: #dcb85a;
+  --cta-hover: #f9e6a8;
+  --cta-h: 46px;
+}
+:root[data-theme="dark"] { --cta-border: #f4d780; --cta-hover: #fff0c2; }
+
+/* ---------------------------------------------------------------------
+   Item 1 — top bar: the light/dark, language and "back to top" cells sit
+   in the bar itself (no white boxes), in both themes.
+   --------------------------------------------------------------------- */
+.site-app .topbar .top-tools { grid-template-columns: repeat(2, 92px); gap: 2px; }
+.site-app .topbar .top-tools.has-top { grid-template-columns: repeat(2, 92px) var(--tool-h); }
+html[data-theme] .site-app .topbar .top-tools .tool-cell,
+html[data-theme] .site-app .header-tools .tool-cell,
+html[data-theme] .site-app .nav-shell .header-top {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+html[data-theme] .site-app .topbar .top-tools .language-cell select { padding-inline-end: 24px; }
+html[data-theme] .site-app :is(.topbar .top-tools .tool-cell, .header-tools .tool-cell, .nav-shell .header-top):is(:hover, :focus-within, :focus-visible) {
+  border-color: transparent;
+  background: var(--soft);
+}
+
+/* ---------------------------------------------------------------------
+   Item 3 — hero photo: no reveal animation (it started at 30 % opacity and
+   replayed when the page script took over), so it is sharp at first paint.
+   --------------------------------------------------------------------- */
+.site-app .hero-landscape { animation: none !important; clip-path: none !important; opacity: 1 !important; }
+.site-app .hero-landscape > img { will-change: auto; }
+
+/* ---------------------------------------------------------------------
+   Items 4, 7, 10, 11 — one call-to-action style everywhere, in both
+   themes: brand-gold fill, forest text, the same frame, height and type.
+   --------------------------------------------------------------------- */
+html[data-theme] :is(.site-app, .detail-dialog, .quote-dialog, .social-qr-dialog) :is(
+  .button, .text-link, .pcard__cta, .footer-cta, .hero-about-button, .social-popup__open, .finder-search__submit
+) {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: var(--cta-h) !important;
+  height: auto !important;
+  padding: 10px 20px !important;
+  border: 1px solid var(--cta-border) !important;
+  border-radius: var(--r) !important;
+  color: var(--cta-ink) !important;
+  background: var(--cta-bg) !important;
+  box-shadow: none !important;
+  font: 600 14px/1.3 "Be Vietnam Pro", sans-serif !important;
+  letter-spacing: 0 !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  white-space: normal;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+html[data-theme] :is(.site-app, .detail-dialog, .quote-dialog, .social-qr-dialog) :is(
+  .button, .text-link, .footer-cta, .hero-about-button, .social-popup__open, .finder-search__submit
+):is(:hover, :focus-visible),
+html[data-theme] .site-app :is(.pcard__link:hover, .pcard__link:focus-visible, .journal-card button:hover, .journal-card button:focus-visible) :is(.pcard__cta, .text-link) {
+  border-color: var(--cta-border) !important;
+  background: var(--cta-hover) !important;
+  color: var(--cta-ink) !important;
+}
+html[data-theme] :is(.site-app, .detail-dialog, .quote-dialog, .social-qr-dialog) :is(.button, .text-link, .footer-cta, .social-popup__open, .finder-search__submit):focus-visible {
+  outline: 2px solid var(--gold-ink);
+  outline-offset: 2px;
+}
+html[data-theme] :is(.site-app, .detail-dialog, .quote-dialog, .social-qr-dialog) :is(.button, .text-link, .pcard__cta, .footer-cta, .hero-about-button, .social-popup__open) svg { color: currentColor; flex: 0 0 auto; }
+/* Channel buttons keep the channel's colour on the icon only. */
+html[data-theme] :is(.site-app, .quote-dialog) .quote-send--whatsapp svg { color: #128c4a; }
+html[data-theme] :is(.site-app, .quote-dialog) .quote-send--zalo .zalo-icon { width: 20px; height: 20px; border-radius: 5px; }
+/* Cards: the CTA spans the card's text column. */
+html[data-theme] .site-app .pcard__cta { width: 100%; margin-top: auto; }
+html[data-theme] .site-app .journal-card .text-link { align-self: flex-start; margin-top: 4px; }
+html[data-theme] .site-app .related__head .text-link { flex: 0 0 auto; }
+@media (max-width: 760px) {
+  html[data-theme] .site-app .pcard__cta { gap: 6px; padding: 8px 8px !important; font-size: 13px !important; white-space: nowrap; }
+}
+
+/* Item 7 — group strip: no "View specifications" button; the circle shows
+   the same watermark (mark + ROSIC) as every product picture. */
+.site-app .gcard__media .product-image-brand__mark { width: min(34%, 190px); }
+.site-app .gcard__media .product-image-brand__name { display: block; }
+.site-app .gcard__link { gap: 14px; }
+.site-app .gcard__link:hover .gcard__name { color: var(--gold-ink); }
+
+/* Item 11 — the two contact points are statements, not links. */
+.site-app .contact-points li > svg { color: var(--gold-ink); }
+
+/* ---------------------------------------------------------------------
+   Item 5 — every title uses the logo face (Cormorant Garamond).
+   --------------------------------------------------------------------- */
+html[data-theme] :is(.site-app, .detail-dialog, .quote-dialog, .social-qr-dialog) :is(h1, h2, h3, h4):not(.sr-only),
+html[data-theme] .site-app :is(.pcard__title, .gcard__name, .step-title, .quote-bar__text strong) {
+  font-family: var(--logo-font) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.005em !important;
+}
+html[data-theme] .site-app .feedback-heading h3 { font-size: clamp(30px, 3vw, 42px); line-height: 1.15; }
+html[data-theme] .site-app .feedback-author h4 { font-size: 19px; line-height: 1.25; }
+html[data-theme] .site-app .quality-note h3 { font-size: 22px; line-height: 1.25; }
+html[data-theme] .site-app .pcard__title { font-size: 19px; line-height: 1.25; }
+html[data-theme] .site-app .gcard__name { font-size: 19px; line-height: 1.25; }
+html[data-theme] .site-app .step-title { font-size: clamp(22px, 2vw, 26px); line-height: 1.25; }
+html[data-theme] .site-app .v6-empty h3 { font-size: 26px; }
+html[data-theme] .site-app .contact-form h3 { font-size: clamp(28px, 2.4vw, 34px); }
+html[data-theme] .detail-dialog .article-section h3 { font-size: 22px; line-height: 1.3; }
+html[data-theme] .social-qr-dialog h2 { font-size: 24px !important; }
+html[data-theme] .site-app .quote-bar__text strong { font-size: 18px; }
+
+/* ---------------------------------------------------------------------
+   Item 6 — journey photo: the image carries its own rounded corners and
+   the caption sits below it, so no frame edge or corner shows through.
+   --------------------------------------------------------------------- */
+html[data-theme] .site-app .journey-visual {
+  aspect-ratio: auto;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.site-app .journey-photo { display: grid; gap: 12px; height: auto; }
+html[data-theme] .site-app .journey-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1.12;
+  object-fit: cover;
+  border-radius: var(--r);
+}
+html[data-theme] .site-app .journey-image-caption {
+  position: static;
+  padding: 0 2px;
+  border: 0;
+  color: var(--muted);
+  background: none;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+@media (max-width: 900px) {
+  html[data-theme] .site-app .journey-photo img { aspect-ratio: 1.22; }
+}
+
+/* ---------------------------------------------------------------------
+   Items 12–14 — footer.
+   --------------------------------------------------------------------- */
+/* Slogan on one line and the channel icons on one row at every width. */
+html[data-theme] .site-app .footer-tagline { white-space: nowrap; }
+html[data-theme] .site-app :is(.footer-social, .contact-social) {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+html[data-theme] .site-app .footer-brand .footer-social { justify-self: stretch; flex: 1 1 100%; }
+/* 44 px touch targets; the gap narrows so six icons still share one row
+   down to a 320 px screen. */
+html[data-theme] .site-app :is(.footer-social, .contact-social) { flex-wrap: wrap; gap: clamp(3px, calc((100% - 264px) / 5), 8px); }
+html[data-theme] .site-app :is(.footer-social, .contact-social) .social-icon { flex: 0 0 44px; width: 44px; height: 44px; }
+/* Invitation, CTA and display tools always stack in one column. */
+html[data-theme] .site-app .footer-invitation { grid-template-columns: minmax(0, 1fr); align-items: start; }
+html[data-theme] .site-app .footer-invitation > * { grid-column: 1; grid-row: auto; }
+@media (min-width: 761px) and (max-width: 1100px) {
+  html[data-theme] .site-app .footer-main > .footer-invitation { grid-column: auto; padding-top: 30px; border-top: 0; }
+}
+@media (min-width: 1101px) {
+  .site-app .footer-main {
+    grid-template-columns: minmax(330px, 1.25fr) minmax(150px, 0.7fr) minmax(200px, 0.9fr) minmax(250px, 1fr);
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .site-app .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  html[data-theme] .site-app .footer-tagline { font-size: clamp(10.5px, 4.1vw, 16px); }
+}
+
+/* The first column heading is the Home link; the product list has no
+   heading of its own (it repeated the menu), so it starts level with it. */
+html[data-theme] .site-app .footer-column h3 { margin: 0 0 6px; font-size: 20px; line-height: 1.2; }
+html[data-theme] .site-app .footer-column h3 a { color: var(--ink); font-size: inherit; text-decoration: none; }
+html[data-theme] .site-app .footer-column h3 a:is(:hover, :focus-visible) { color: var(--gold-ink); }
+.site-app .footer-column--groups { padding-top: 30px; }
+@media (max-width: 760px) {
+  .site-app .footer-column--groups { padding-top: 50px; }
+}
+
+/* Item 13 — copyright: one line on wide screens, a clean break between its
+   two sentences on phones. */
+.site-app .footer-copyright { margin: 0; }
+@media (max-width: 600px) {
+  .site-app .footer-copyright { display: grid; gap: 2px; width: 100%; text-align: center; }
+  .site-app .footer-bottom-actions { width: 100%; justify-content: center; }
+}
+
+/* Item 12 — channel icons in each network's own colour, in both themes. */
+:is(.social-icon, .social-popup__icon)[data-channel="whatsapp"] { --channel: #25d366; }
+:is(.social-icon, .social-popup__icon)[data-channel="zalo"] { --channel: #0068ff; }
+:is(.social-icon, .social-popup__icon)[data-channel="wechat"] { --channel: #07c160; }
+:is(.social-icon, .social-popup__icon)[data-channel="email"] { --channel: #c5221f; }
+:is(.social-icon, .social-popup__icon)[data-channel="linkedin"] { --channel: #0a66c2; }
+:is(.social-icon, .social-popup__icon)[data-channel="facebook"] { --channel: #1877f2; }
+:is(.social-icon, .social-popup__icon)[data-channel="tiktok"] { --channel: #111111; }
+html[data-theme] :is(.social-icon, .social-popup__icon)[data-channel] {
+  border: 1px solid var(--channel) !important;
+  color: #fff !important;
+  background: var(--channel) !important;
+}
+/* Zalo's own app icon is already a blue tile: it fills the cell. */
+html[data-theme] :is(.social-icon, .social-popup__icon)[data-channel="zalo"] { overflow: hidden; padding: 0; }
+:is(.social-icon, .social-popup__icon)[data-channel="zalo"] .zalo-icon { display: block; width: 100%; height: 100%; object-fit: cover; }
+html[data-theme] .social-icon[data-channel]:is(:hover, :focus-visible) { filter: brightness(1.1); }
+html[data-theme] .social-icon[data-channel]:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+:root[data-theme="dark"] :is(.social-icon, .social-popup__icon)[data-channel="tiktok"] { border-color: #ffffff40 !important; }
+
+/* ---------------------------------------------------------------------
+   Item 13 — reading dialogs (privacy, articles) on phones: the close
+   button stays in its corner without covering the title, and the text
+   scrolls inside the dialog.
+   --------------------------------------------------------------------- */
+html[data-theme] .detail-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+html[data-theme] .detail-dialog > .dialog-close {
+  position: sticky;
+  top: 12px;
+  z-index: 6;
+  flex: 0 0 auto;
+  align-self: flex-end;
+  margin: 12px 12px -56px;
+}
+html[data-theme] .detail-dialog > :not(.dialog-close) { flex: 0 0 auto; }
+html[data-theme] .detail-dialog .detail-body > h2 { padding-inline-end: 52px; }
+@media (max-width: 600px) {
+  html[data-theme] .detail-dialog { top: 12px; left: 12px; width: calc(100vw - 24px); transform: none; }
+  html[data-theme] .detail-dialog .detail-body { padding: 28px 20px 32px; }
+}
+
+/* ---------------------------------------------------------------------
+   Item 8 — product image lightbox. The frame used size containment, so it
+   collapsed to 0 × 0 and only the close button showed. Sizes now come
+   from the viewport; tapping a reduced picture shows it at full size in a
+   scrollable view.
+   --------------------------------------------------------------------- */
+html[data-theme] .image-lightbox { inset: 0; padding: 60px 12px 52px; }
+.lightbox-scroller {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+html[data-theme] .lightbox-frame {
+  position: relative;
+  display: block;
+  container-type: normal;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--r);
+  background: none;
+  cursor: zoom-in;
+}
+html[data-theme] .lightbox-frame:disabled { cursor: default; opacity: 1; }
+html[data-theme] .lightbox-frame > img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(1100px, calc(100vw - 24px));
+  max-height: calc(100dvh - 112px);
+  object-fit: contain;
+}
+html[data-theme] .image-lightbox.is-zoomed .lightbox-scroller { place-items: start; }
+html[data-theme] .image-lightbox.is-zoomed .lightbox-frame { margin: auto; cursor: zoom-out; }
+html[data-theme] .image-lightbox.is-zoomed .lightbox-frame > img { max-width: none; max-height: none; }
+.lightbox-frame .product-image-brand { font-size: 13px; }
+.lightbox-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r);
+  color: #fff;
+  background: rgb(0 0 0 / 0.45);
+  font-size: 12px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  white-space: nowrap;
+}
+html[data-theme] .lightbox-close { position: absolute; top: 8px; inset-inline-end: 8px; z-index: 6; }

@@ -43,7 +43,7 @@ const guard = `<script>
     </script>`;
 const block = `${start}${shell}${end}`;
 const next = html.includes(start)
-  ? html.replace(new RegExp(`${start}[\s\S]*?${end}`), () => block)
+  ? html.replace(new RegExp(`${start}[\\s\\S]*?${end}`), () => block)
   : html.replace('<div id="root"></div>', () => `<div id="root">${block}</div>\n    ${guard}`);
 fs.writeFileSync(file, next);
 console.log(`shell written (${shell.length} bytes)`);

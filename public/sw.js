@@ -1,4 +1,4 @@
-const CACHE = 'rosic-offline-v1';
+const CACHE = 'rosic-offline-v2';
 const FILES = ['/offline.html', '/icons/rosic-192.png', '/icons/rosic-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)));

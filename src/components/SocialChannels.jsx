@@ -4,12 +4,12 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowUpRight, X } from "lucide-react";
 import { FaFacebookF, FaLinkedinIn, FaTiktok, FaWeixin, FaWhatsapp } from "react-icons/fa6";
 import { HiOutlineEnvelope } from "react-icons/hi2";
-import { SiZalo } from "react-icons/si";
+import { ZaloIcon } from "./ZaloIcon";
 import { SOCIAL_DEFAULTS, SOCIAL_QR_WINDOWS, safeSocialLink } from "../social-config";
 
 const CHANNELS = [
   ["whatsapp", "WhatsApp", FaWhatsapp],
-  ["zalo", "Zalo", SiZalo],
+  ["zalo", "Zalo", ZaloIcon],
   ["wechat", "WeChat", FaWeixin],
   ["email", "Email", HiOutlineEnvelope],
   ["linkedin", "LinkedIn", FaLinkedinIn],
@@ -20,6 +20,12 @@ const CHANNELS = [
 const COPY = {
   vi: { open: "Mở", scan: "Quét mã để kết nối", close: "Đóng", group: "Kênh liên hệ chính thức" },
   en: { open: "Open", scan: "Scan to connect", close: "Close", group: "Official channels" },
+  zh: { open: "打开", scan: "扫码联系", close: "关闭", group: "官方联系渠道" },
+  ko: { open: "열기:", scan: "QR 코드를 스캔해 연결하세요", close: "닫기", group: "공식 연락 채널" },
+  ja: { open: "開く:", scan: "QRコードを読み取って接続", close: "閉じる", group: "公式連絡チャネル" },
+  ar: { open: "فتح", scan: "امسح الرمز للتواصل", close: "إغلاق", group: "قنوات التواصل الرسمية" },
+  fr: { open: "Ouvrir", scan: "Scannez pour nous contacter", close: "Fermer", group: "Canaux officiels" },
+  de: { open: "Öffnen:", scan: "Zum Verbinden scannen", close: "Schließen", group: "Offizielle Kanäle" },
 };
 
 function useQr(href, supplied) {
@@ -46,7 +52,7 @@ function Channel({ id, name, icon, href, qr, copy }) {
       <Dialog.Portal>
         <Dialog.Overlay className="social-qr-overlay" />
         <Dialog.Content className="social-qr-dialog social-popup" aria-describedby={undefined}>
-          <Dialog.Title><span className="social-popup__icon">{createElement(icon, { size: 20, "aria-hidden": true })}</span>{name}</Dialog.Title>
+          <Dialog.Title><span className="social-popup__icon" data-channel={id}>{createElement(icon, { size: 20, "aria-hidden": true })}</span>{name}</Dialog.Title>
           {image && (
             <figure className="social-popup__qr">
               <span className="social-popup__code">{qrWindow ? <img src={image} alt={`QR ${name}`} style={crop} /> : <img src={image} alt={`QR ${name}`} />}</span>

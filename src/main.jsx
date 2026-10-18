@@ -3,9 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { installTranslateGuard } from './translate-guard'
+import { seedHistory } from './router'
 
 // Keep pages working when the visitor's browser translates them.
 installTranslateGuard()
+// Back from a product opened via a search result returns to its group.
+seedHistory()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

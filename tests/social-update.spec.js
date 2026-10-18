@@ -48,7 +48,7 @@ test('Admin can edit every link, keep TikTok pending and clear an obsolete offic
   await page.getByLabel('WhatsApp · Kênh chính', { exact: true }).fill('https://wa.me/message/OTHERBUSINESS');
   await expect(page.getByLabel('QR chính thức · WhatsApp · Kênh chính', { exact: true })).toHaveValue('');
   await preview.locator('.contact-intro .social-icon[data-channel="whatsapp"]').click();
-  await expect(preview.locator('.social-qr-dialog img')).toHaveAttribute('src', /^data:image\/png/);
+  await expect(preview.locator('.social-popup__qr img')).toHaveAttribute('src', /^data:image\/png/);
   await preview.locator('.social-qr-close').click();
   await page.getByLabel('TikTok', { exact: true }).fill('');
   await expect(preview.locator('.footer-social [data-channel="tiktok"]')).toHaveCount(0);

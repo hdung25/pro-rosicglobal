@@ -1,8 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ArrowUpRight, Check, Mail, X } from "lucide-react";
+import { Building2, Check, ClipboardList, Mail, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
-import { SiZalo } from "react-icons/si";
+import { ZaloIcon } from "./ZaloIcon";
 import { mergeText } from "../cms/content-overrides";
 import { CONTACT } from "../contact-config";
 import SocialChannels from "./SocialChannels";
@@ -220,7 +220,7 @@ export function QuoteForm({
       <div className="quote-actions">
         <button type="submit" className="button button-primary quote-send quote-send--whatsapp"><FaWhatsapp size={19} aria-hidden="true" />{form.sendWhatsapp}</button>
         <button type="button" className="button button-outline quote-send" onClick={() => send("email")}><Mail size={18} aria-hidden="true" />{form.sendEmail}</button>
-        {zalo && <button type="button" className="button button-outline quote-send quote-send--zalo" onClick={() => send("zalo")}><SiZalo size={18} aria-hidden="true" />{form.zaloButton}</button>}
+        {zalo && <button type="button" className="button button-outline quote-send quote-send--zalo" onClick={() => send("zalo")}><ZaloIcon size={18} aria-hidden="true" />{form.zaloButton}</button>}
       </div>
       <p className="quote-status" role="status" aria-live="polite">{status && <><Check size={15} aria-hidden="true" />{status}</>}</p>
       <p className="form-note">{copy.notes.required}</p>
@@ -273,8 +273,8 @@ export default function Contact({
           <h2 id="contact-heading" className="section-heading">{copy.heading}<br /><span>{routing.accent}</span></h2>
           <p>{copy.intro}</p>
           <ul className="contact-points">
-            <li><ArrowUpRight size={20} aria-hidden="true" /><span><strong>{routing.b2b[0]}</strong><br />{routing.b2b[1]}</span></li>
-            <li><ArrowUpRight size={20} aria-hidden="true" /><span><strong>{routing.needs[0]}</strong><br />{routing.needs[1]}</span></li>
+            <li><Building2 size={20} strokeWidth={1.6} aria-hidden="true" /><span><strong>{routing.b2b[0]}</strong><br />{routing.b2b[1]}</span></li>
+            <li><ClipboardList size={20} strokeWidth={1.6} aria-hidden="true" /><span><strong>{routing.needs[0]}</strong><br />{routing.needs[1]}</span></li>
           </ul>
           <div className="contact-channels">
             <a href={`mailto:${email}`}><Mail size={18} aria-hidden="true" />{email}</a>

@@ -56,8 +56,8 @@ function SectionHead({ eyebrow, title, lead, id }) {
 
 /**
  * Home: the single strip of group pictures (items 19–21, 30). Each card shows
- * only the group's representative image, its name and "View specifications";
- * the whole card opens the group page. On phones the strip swipes sideways
+ * only the group's representative image (with the same watermark as every
+ * product picture) and its name; the whole card opens the group page. On phones the strip swipes sideways
  * without a grey scrollbar.
  */
 export function GroupsSection({ groups, copy }) {
@@ -71,7 +71,6 @@ export function GroupsSection({ groups, copy }) {
               <a className="gcard__link" href={groupPath(group.id)}>
                 <ProductMedia src={group.image} alt={group.alt} watermarked={group.imageAsset?.watermarked} className="gcard__media" sizes="(max-width: 600px) 40vw, 180px" />
                 <span className="gcard__name">{group.title}</span>
-                <span className="gcard__cta">{copy.groups.viewSpec}<ArrowRight size={15} aria-hidden="true" /></span>
               </a>
             </li>
           ))}

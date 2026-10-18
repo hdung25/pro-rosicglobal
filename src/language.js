@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export const LANGUAGES = [
   { code: "vi", label: "Tiếng Việt", shortLabel: "VN", flag: "/flags/vn.svg" },
-  { code: "en", label: "English", shortLabel: "EN", flag: "/flags/gb.svg" },
+  { code: "en", label: "English (US)", shortLabel: "US", flag: "/flags/us.svg" },
   { code: "zh", label: "中文", shortLabel: "CN", flag: "/flags/cn.svg" },
   { code: "ko", label: "한국어", shortLabel: "KO", flag: "/flags/kr.svg" },
   { code: "ja", label: "日本語", shortLabel: "JA", flag: "/flags/jp.svg" },

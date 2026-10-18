@@ -188,7 +188,7 @@ test("Product finder heading is the CMS text and is not clipped (item 18)", asyn
   expect(await heading.evaluate((node) => node.scrollHeight <= node.clientHeight + 1)).toBe(true);
 });
 
-test("Group strip: image, name and 'Xem quy cách' only; no marquee, no Quick View; opens the group page (items 19–21, 29, 30)", async ({ page }) => {
+test("Group strip: image (with the product watermark) and name only; no CTA, no marquee, no Quick View; opens the group page (items 19–21, 29, 30; review 18/10 item 7)", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".marquee-section")).toHaveCount(0);
   await page.goto("/#export-catalog");
@@ -196,7 +196,8 @@ test("Group strip: image, name and 'Xem quy cách' only; no marquee, no Quick Vi
   await expect(cards).toHaveCount(LISTED.length);
   await expect(page.locator(".group-strip").getByRole("button")).toHaveCount(0);
   await expect(cards.first().locator("img")).toHaveCount(1);
-  await expect(cards.first().locator(".gcard__cta")).toHaveText("Xem quy cách");
+  await expect(cards.first().locator(".gcard__cta")).toHaveCount(0);
+  await expect(cards.first().locator(".product-image-brand__name")).toBeVisible();
   await expect(cards.first().locator("p")).toHaveCount(0);
   await cards.filter({ hasText: "Quế" }).locator("a").click();
   await expect(page).toHaveURL(/\/san-pham\/que$/);

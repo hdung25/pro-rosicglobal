@@ -40,6 +40,24 @@ export function useRoute() {
   return { path, ...parseRoute(path) };
 }
 
+/**
+ * A visitor who lands on a product or group page straight from a search
+ * engine has no site page behind it, so Back would leave the site. Put the
+ * parent page underneath first: product → its group, group → the product
+ * list (customer review, item 9). Runs once per landing; history.state is set
+ * afterwards, so reloads and in-site navigation are left alone.
+ */
+export function seedHistory() {
+  if (typeof window === "undefined" || window.history.state !== null) return;
+  const route = parseRoute(window.location.pathname);
+  if (route.kind !== "product" && route.kind !== "group") return;
+  const parent = route.kind === "product" ? `/san-pham/${route.groupSlug}` : "/san-pham";
+  const here = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  // The product list is reached by its #products anchor, not a stored position.
+  window.history.replaceState(route.kind === "product" ? { scrollY: 0 } : {}, "", parent);
+  window.history.pushState({ scrollY: 0 }, "", here);
+}
+
 function rememberScroll() {
   window.history.replaceState({ ...(window.history.state || {}), scrollY: window.scrollY }, "");
 }

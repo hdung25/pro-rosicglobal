@@ -14,6 +14,7 @@ import { PRODUCTS } from "./data";
 import { VR5_VARIANTS } from "./vr5-catalog";
 import { localizeExportCategory } from "./export-catalog-l10n";
 import { PRODUCT_NAMES } from "./product-l10n";
+import { SPEC_NOTICE_I18N, translateCatalogText } from "./catalog-i18n";
 
 export const CATALOG_VERSION = 6;
 
@@ -99,6 +100,7 @@ export const SPEC_LABELS = {
 export const SPEC_NOTICE = {
   vi: "Thông số là chỉ tiêu tham chiếu để bắt đầu báo giá. Quy cách cuối cùng được xác nhận bằng hợp đồng, mẫu duyệt và COA của từng lô hàng.",
   en: "Figures are reference specifications for an enquiry. Final specifications are confirmed by contract, approved sample and the COA of each lot.",
+  ...SPEC_NOTICE_I18N,
 };
 
 /* ------------------------------------------------------------------ */
@@ -472,20 +474,26 @@ export function localizeCatalogProduct(product, language) {
   const pick = (key) => (vi ? product[key] : translation[key]?.trim?.() ? translation[key] : product[key]);
   // Fresh fruit already has reviewed names in every locale.
   const knownName = !vi && language !== "en" ? PRODUCT_NAMES[language]?.[product.id] : null;
+  // Languages without written product copy translate the English text.
+  const own = product.translations?.[language];
+  const tr = (value, name) => (own || vi || language === "en" ? value : translateCatalogText(value, language, name));
   const specs = {};
   for (const key of SPEC_KEYS) {
     if (key === "code") continue;
-    const own = product.specs?.[key];
+    const original = product.specs?.[key];
     const translated = translation.specs?.[key];
-    specs[key] = vi ? own ?? null : translated?.trim?.() ? translated : own ?? null;
+    specs[key] = vi ? original ?? null : translated?.trim?.() ? tr(translated) : original ?? null;
   }
+  const englishTitle = pick("title");
+  const title = own?.title?.trim?.() || knownName || tr(englishTitle);
+  const alt = pick("alt") || englishTitle;
   return {
     ...product,
     sourceTitle: product.title,
-    title: product.translations?.[language]?.title?.trim?.() || knownName || pick("title"),
-    short: pick("short"),
-    description: pick("description") || pick("short"),
-    alt: pick("alt") || pick("title"),
+    title,
+    short: tr(pick("short"), title),
+    description: tr(pick("description") || pick("short"), title),
+    alt: alt === englishTitle ? title : tr(alt, title),
     specs,
   };
 }

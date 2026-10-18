@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { FaLinkedinIn, FaWhatsapp, FaFacebookF, FaWeixin, FaTiktok } from "react-icons/fa6";
 import { HiOutlineEnvelope } from "react-icons/hi2";
-import { SiZalo } from "react-icons/si";
+import { ZaloIcon } from "./components/ZaloIcon";
 import { productSrcSet } from "./product-images";
 import DeferredContent from "./components/DeferredContent";
 import ContentProtection from "./components/ContentProtection";
@@ -55,6 +55,7 @@ import "./vr5.css";
 import "./mobile-polish.css";
 import "./catalog-v6.css";
 import "./release-v7.css";
+import "./release-v8.css";
 import { mergeText } from "./cms/content-overrides";
 import SocialChannels from "./components/SocialChannels";
 import { SOCIAL_DEFAULTS, configuredSocial, configuredSocialQr } from "./social-config";
@@ -91,7 +92,7 @@ const SOCIAL_LINKS = [
   { label: "Facebook", href: SOCIAL_DEFAULTS.facebook, icon: FaFacebookF, external: true },
   { label: "WeChat", href: SOCIAL_DEFAULTS.wechat, icon: FaWeixin, external: true },
   { label: "TikTok", href: "", icon: FaTiktok, external: true },
-  { label: "Zalo", href: "https://zalo.me/84962284872", icon: SiZalo, external: true },
+  { label: "Zalo", href: "https://zalo.me/84962284872", icon: ZaloIcon, external: true },
 ];
 
 
@@ -402,7 +403,9 @@ function Header({ language, onLanguage, theme, onThemeChange, copy, catalogCopy,
     window.addEventListener("rosic:content-ready", observeSections);
     return () => { observer.disconnect(); window.removeEventListener("rosic:content-ready", observeSections); };
   }, [onHome]);
-  const current = onHome ? active : "products";
+  // Only one item is marked at a time: an open product menu takes the
+  // indicator from the section being read (review item 2).
+  const current = productsOpen || !onHome ? "products" : active;
   const isCurrent = (item) => current === item.href.slice(1) || (item.key === "products" && current === "export-catalog");
   const link = (item) => (
     <a key={item.key} href={href(item.href)} aria-current={isCurrent(item) ? "location" : undefined}>
@@ -693,8 +696,8 @@ function Journey({ copy, language, images, text }) {
               <Motion.div
                 key={step}
                 className="journey-photo"
-                initial={{ opacity: 0, scale: 1.025 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.45 }}
               >
@@ -818,15 +821,14 @@ function Footer({ onPolicy, language, onLanguage, theme, onThemeChange, copy, ca
           <SocialChannels links={socialLinks} qr={socialQr} language={language} className="footer-social" />
         </div>
         <div className="footer-column">
-          <h3>{copy.footer.explore}</h3>
+          <h3><a href={href("#home")}>{copy.nav.home}</a></h3>
           {NAV.filter((item) => item.href !== "#home").map((item) => (
             <a key={item.key} href={href(item.href)}>
               {navLabel(copy, item)}
             </a>
           ))}
         </div>
-        <div className="footer-column">
-          <h3>{copy.footer.products}</h3>
+        <div className="footer-column footer-column--groups" aria-label={copy.footer.products}>
           {groups.map((group) => (
             <a key={group.id} href={groupPath(group.id)}>{group.title}</a>
           ))}
@@ -840,7 +842,7 @@ function Footer({ onPolicy, language, onLanguage, theme, onThemeChange, copy, ca
         </div>
       </div>
       <div className="container footer-bottom">
-        <span className="footer-copyright">Copyright © HONG TAM ROSIC GLOBAL JSC. All rights reserved.</span>
+        <p className="footer-copyright"><span>Copyright © HONG TAM ROSIC GLOBAL JSC.</span> <span>All rights reserved.</span></p>
         <div className="footer-bottom-actions">
           <button onClick={onPolicy}>{copy.footer.privacy}</button>
         </div>
