@@ -20,6 +20,7 @@ for (const width of [1440, 390, 320]) {
     await expect(page.locator('.v6-finder .pcard')).toHaveCount(1);
     await page.locator('.v6-finder .pcard__link').click();
     await expect(page.locator('h1')).toHaveText('Cà phê nhân xanh size 13 – Clean');
+    await page.locator('.related .finder-more button').click();
     await page.locator('.related .pcard__link', { hasText: 'Cà phê rang xay' }).click();
     await expect(page.locator('.spec-table')).toContainText('ROS-108');
     await page.locator('.product-detail').screenshot({ path: `artifacts/vr5/product-${width}.png` });
@@ -45,8 +46,10 @@ for (const width of [1440, 390, 320]) {
 
 test('VR5 group pages list variants, search fallback, themes and linked channels only', async ({ page }) => {
   await page.goto('/san-pham/ca-phe');
+  await page.locator('.group-products .finder-more button').click();
   await expect(page.locator('.group-products .pcard')).toHaveCount(8);
   await page.goto('/san-pham/hat-dieu');
+  await page.locator('.group-products .finder-more button').click();
   await expect(page.locator('.group-products .pcard')).toHaveCount(9);
   await page.screenshot({ path: 'artifacts/vr5/cashew-variants.png' });
   await page.locator('.topbar .theme-cell').click();
@@ -58,7 +61,8 @@ test('VR5 group pages list variants, search fallback, themes and linked channels
   await search.press('Enter');
   await expect(page.locator('.v6-finder .v6-empty')).toBeVisible();
   await page.locator('.v6-finder .v6-empty button').click();
-  expect(await page.locator('.v6-finder .pcard').count()).toBeGreaterThan(10);
+  // "All" opens with one product from each of the eight listed groups.
+  expect(await page.locator('.v6-finder .pcard').count()).toBeGreaterThanOrEqual(8);
   // TikTok has no link yet, so it is hidden; the other six channels stay.
   await expect(page.locator('.footer-social .social-icon')).toHaveCount(6);
   await expect(page.locator('.contact-intro .social-icon')).toHaveCount(6);

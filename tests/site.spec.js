@@ -46,7 +46,8 @@ test('group chips, accent-insensitive submitted search, empty state and reset wo
   for (const group of GROUPS.filter(item => DEFAULT_PRODUCTS.some(product => product.category === item.id))) {
     await finder.locator('.chip', { hasText: GROUP_NAMES.vi[group.id] }).click()
     const expected = DEFAULT_PRODUCTS.filter(product => product.category === group.id).length
-    if (expected) await expect(finder.locator('.pcard')).toHaveCount(expected)
+    // A chosen group opens with four products; the rest are behind "show more".
+    if (expected) await expect(finder.locator('.pcard')).toHaveCount(Math.min(expected, 4))
     else await expect(finder.locator('.v6-empty')).toBeVisible()
     await expect(finder.locator('.chip[aria-pressed="true"]')).toContainText(GROUP_NAMES.vi[group.id])
   }
@@ -111,6 +112,8 @@ test('header product menu and footer product links open the group pages', async 
   await page.locator('.mega-menu a', { hasText: 'Hạt tiêu' }).click()
   await expect(page).toHaveURL(/\/san-pham\/ho-tieu$/)
   await expect(page.locator('.mega-menu')).toBeHidden()
+  await expect(page.locator('.group-products .pcard')).toHaveCount(4)
+  await page.locator('.group-products .finder-more button').click()
   await expect(page.locator('.group-products .pcard')).toHaveCount(6)
   await page.locator('.site-footer').getByRole('link', { name: 'Cơm dừa', exact: true }).click()
   await expect(page).toHaveURL(/\/san-pham\/com-dua$/)

@@ -202,6 +202,8 @@ test("Group strip: image (with the product watermark) and name only; no CTA, no 
   await cards.filter({ hasText: "Quế" }).locator("a").click();
   await expect(page).toHaveURL(/\/san-pham\/que$/);
   await expect(page.locator(".group-hero img").first()).toBeVisible();
+  await expect(page.locator(".group-products .pcard")).toHaveCount(4);
+  await page.locator(".group-products .finder-more button").click();
   await expect(page.locator(".group-products .pcard")).toHaveCount(9);
 });
 
@@ -257,6 +259,8 @@ test("Product page: full specs, quote CTA opens the form in place, related produ
   await expect(page).toHaveURL(/\/san-pham\/que\/que-thanh$/);
   await expect(field(page.locator(".quote-dialog"), "product")).toHaveValue("que-thanh");
   await page.keyboard.press("Escape");
+  await expect(page.locator(".related .pcard")).toHaveCount(4);
+  await page.locator(".related .finder-more button").click();
   const related = await page.locator(".related .pcard__link").evaluateAll((links) => links.map((link) => link.getAttribute("href")));
   expect(related.length).toBe(8);
   for (const href of related) expect(href).toMatch(/^\/san-pham\/que\//);
@@ -264,6 +268,7 @@ test("Product page: full specs, quote CTA opens the form in place, related produ
 
 test("Coffee: size 13/16/18 in Clean and non-clean, then broken and roasted (item 36)", async ({ page }) => {
   await page.goto("/san-pham/ca-phe");
+  await page.locator(".group-products .finder-more button").click();
   await expect(page.locator(".group-products .pcard__title")).toHaveText([
     "Cà phê nhân xanh size 13 – Clean", "Cà phê nhân xanh size 13 – Không clean",
     "Cà phê nhân xanh size 16 – Clean", "Cà phê nhân xanh size 16 – Không clean",
@@ -374,4 +379,33 @@ test("Brand naming: page copy and older CMS text say ROSIC, not Hồng Tâm (rev
     const text = await page.evaluate(() => document.body.innerText.normalize("NFC"));
     expect(text.match(/.{0,40}(Hồng Tâm|HỒNG TÂM).{0,40}/gu) ?? [], language).toEqual([]);
   }
+});
+
+test("Review 20/10: CTAs without arrows, four products per group, Back keeps the chosen group, footer rows line up", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#products");
+  const finder = page.locator(".v6-finder");
+  await finder.locator(".chip", { hasText: "Hạt tiêu" }).click();
+  await expect(finder.locator(".pcard")).toHaveCount(4);
+  await finder.locator(".finder-more button").click();
+  await expect(finder.locator(".pcard")).toHaveCount(6);
+  // No arrow inside any call-to-action, and labels stay inside their frame.
+  for (const cta of await page.locator(".pcard__cta, .button").all()) {
+    if (!(await cta.isVisible())) continue;
+    expect(await cta.locator("svg[class*='arrow']").evaluateAll((icons) => icons.filter((icon) => icon.getBoundingClientRect().width > 0).length)).toBe(0);
+    expect(await cta.evaluate((node) => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
+  }
+  await finder.locator(".pcard__link").nth(5).click();
+  await expect(page).toHaveURL(/\/san-pham\/ho-tieu\//);
+  await page.goBack();
+  await expect(finder.locator(".chip", { hasText: "Hạt tiêu" })).toHaveAttribute("aria-pressed", "true");
+  await expect(finder.locator(".pcard")).toHaveCount(6);
+  // Footer: Home is a plain link; both lists start on the same row.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const columns = page.locator(".site-footer .footer-column");
+  await expect(columns.first().locator("h3")).toHaveCount(0);
+  const tops = await columns.evaluateAll((cols) => cols.map((col) => Math.round(col.querySelector("a").getBoundingClientRect().top)));
+  expect(tops[0]).toBe(tops[1]);
+  // Brand letters and product codes are not run through page translators.
+  await expect(page.locator(".rosic-letter").first()).toHaveAttribute("translate", "no");
 });

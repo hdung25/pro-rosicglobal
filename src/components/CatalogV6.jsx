@@ -7,8 +7,11 @@ import { productSrcSet } from "../product-images";
 import { safeSocialLink, whatsappQuoteLink } from "../social-config";
 import { ProductImageBrand } from "./ProductImageBrand";
 import Lightbox from "./Lightbox";
+import { useHistoryState } from "../router";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 8;
+/** Products shown per group before "show more" (customer review 20/10). */
+const GROUP_SIZE = 4;
 
 export function GroupIcon({ group, size = 20, className }) {
   return createElement(CATEGORY_ICONS[categoryIconKey(group)], { size, className, strokeWidth: 1.5, "aria-hidden": true });
@@ -30,7 +33,7 @@ export function ProductCard({ product, copy, groupTitle, onOpen }) {
       <a className="pcard__link" href={productPath(product)} onClick={onOpen}>
         <ProductMedia src={product.image} alt={product.alt} watermarked={product.imageAsset?.watermarked} />
         <span className="pcard__body">
-          <span className="pcard__meta"><span>{copy.card.code}</span><strong>{product.code}</strong></span>
+          <span className="pcard__meta"><span>{copy.card.code}</span><strong translate="no">{product.code}</strong></span>
           <span className="pcard__title" dir="auto">{product.title}</span>
           {groupTitle && <span className="pcard__group">{groupTitle}</span>}
           <span className="pcard__cta">{copy.card.view}<ArrowUpRight size={15} aria-hidden="true" /></span>
@@ -84,11 +87,36 @@ export function GroupsSection({ groups, copy }) {
 /* Home: product finder (chips = header menu, submitted search)         */
 /* ------------------------------------------------------------------ */
 
+/**
+ * A list that opens with GROUP_SIZE cards and a "show more" button for the
+ * rest (customer review 20/10, item 7). The expanded state lives in the
+ * history entry so Back returns to the same list (item 9).
+ */
+function CollapsibleGrid({ items, copy, stateKey, groupTitles }) {
+  const [expanded, setExpanded] = useHistoryState(stateKey, false);
+  const shown = expanded ? items : items.slice(0, GROUP_SIZE);
+  return (
+    <>
+      <div className="product-grid-v6 product-grid-v6--rows4">
+        {shown.map((product) => <ProductCard key={product.id} product={product} copy={copy} groupTitle={groupTitles?.[product.category]} />)}
+      </div>
+      {shown.length < items.length && (
+        <div className="finder-more">
+          <button type="button" className="button button-outline" onClick={() => setExpanded(true)}>
+            {copy.finder.more(items.length - shown.length)}
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
 export function ProductFinder({ groups, products, copy, heading }) {
-  const [group, setGroup] = useState("all");
-  const [draft, setDraft] = useState("");
-  const [query, setQuery] = useState("");
-  const [limit, setLimit] = useState(PAGE_SIZE);
+  // Chosen chip, search and "show more" survive Back from a product (item 9).
+  const [group, setGroup] = useHistoryState("finderGroup", "all");
+  const [query, setQuery] = useHistoryState("finderQuery", "");
+  const [draft, setDraft] = useState(query);
+  const [limit, setLimit] = useHistoryState("finderLimit", PAGE_SIZE);
   const groupTitles = useMemo(() => Object.fromEntries(groups.map((item) => [item.id, item.title])), [groups]);
   // "All" interleaves the groups so the first rows show the whole range.
   const mixed = useMemo(() => {
@@ -151,7 +179,10 @@ export function ProductFinder({ groups, products, copy, heading }) {
           ))}
         </div>
         <p className="finder-count" role="status">{copy.finder.results(visible.length, query)}</p>
-        {visible.length ? (
+        {visible.length && group !== "all" && !query ? (
+          // One group chosen: its first products, the rest behind "show more".
+          <CollapsibleGrid key={group} items={visible} copy={copy} stateKey={`finderMore:${group}`} />
+        ) : visible.length ? (
           <div className="product-grid-v6">
             {paged.map((product) => <ProductCard key={product.id} product={product} copy={copy} groupTitle={groupTitles[product.category]} />)}
           </div>
@@ -246,7 +277,7 @@ export function GroupPage({ group, groups, products, copy, language, onQuote }) 
       <section id="group-products" className="container group-products" aria-labelledby="group-products-title">
         <h2 id="group-products-title" className="v6-subtitle">{copy.group.listTitle}</h2>
         {items.length ? (
-          <div className="product-grid-v6">{items.map((product) => <ProductCard key={product.id} product={product} copy={copy} />)}</div>
+          <CollapsibleGrid items={items} copy={copy} stateKey={`groupMore:${group.id}`} />
         ) : (
           <div className="v6-empty v6-empty--block">
             <PackageSearch size={30} aria-hidden="true" />
@@ -313,7 +344,7 @@ function StickyQuote({ product, copy, ctaRef, onQuote }) {
     <div className={`quote-bar${visible ? " is-visible" : ""}`} aria-hidden={!visible}>
       <div className="container quote-bar__inner">
         <ProductMedia src={product.image} alt="" watermarked className="quote-bar__thumb" sizes="56px" />
-        <span className="quote-bar__text"><strong dir="auto">{product.title}</strong><small>{product.code}</small></span>
+        <span className="quote-bar__text"><strong dir="auto">{product.title}</strong><small translate="no">{product.code}</small></span>
         <button type="button" className="button button-primary" tabIndex={visible ? 0 : -1} onClick={() => onQuote(product.id)}>{copy.form.sticky}<ArrowUpRight size={17} aria-hidden="true" /></button>
       </div>
     </div>
@@ -334,7 +365,7 @@ export function ProductPage({ product, group, related, copy, language, onQuote, 
         <div className="product-detail__info">
           <a className="product-detail__group" href={groupPath(group.id)}><GroupIcon group={group} size={16} />{group.title}</a>
           <h1 id="product-title" dir="auto">{product.title}</h1>
-          <p className="product-detail__code">{copy.card.code}: <strong>{product.code}</strong></p>
+          <p className="product-detail__code">{copy.card.code}: <strong translate="no">{product.code}</strong></p>
           <p className="product-detail__lead" dir="auto">{product.description}</p>
           <div className="product-detail__actions" ref={ctaRef}>
             <button type="button" className="button button-primary" onClick={() => onQuote(product.id)}>{copy.product.quote}<ArrowUpRight size={18} aria-hidden="true" /></button>
@@ -354,7 +385,7 @@ export function ProductPage({ product, group, related, copy, language, onQuote, 
             </div>
             <a className="text-link" href={groupPath(group.id)}>{group.title}<ArrowUpRight size={16} aria-hidden="true" /></a>
           </div>
-          <div className="product-grid-v6">{related.map((item) => <ProductCard key={item.id} product={item} copy={copy} />)}</div>
+          <CollapsibleGrid items={related} copy={copy} stateKey={`relatedMore:${product.id}`} />
         </section>
       )}
       <StickyQuote product={product} copy={copy} ctaRef={ctaRef} onQuote={onQuote} />

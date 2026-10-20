@@ -58,6 +58,22 @@ export function seedHistory() {
   window.history.pushState({ scrollY: 0 }, "", here);
 }
 
+/**
+ * useState whose value is also kept in the current history entry, so Back
+ * to this page restores it (the chosen product group, "show more" — customer
+ * review 20/10, item 9). A new visit to the page starts from `initial`.
+ */
+export function useHistoryState(key, initial) {
+  const [value, setValue] = useState(() => {
+    const stored = typeof window === "undefined" ? undefined : window.history.state?.[key];
+    return stored === undefined ? initial : stored;
+  });
+  useEffect(() => {
+    window.history.replaceState({ ...(window.history.state || {}), [key]: value }, "");
+  }, [key, value]);
+  return [value, setValue];
+}
+
 function rememberScroll() {
   window.history.replaceState({ ...(window.history.state || {}), scrollY: window.scrollY }, "");
 }

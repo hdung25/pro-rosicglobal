@@ -40,6 +40,17 @@
         } catch {
           /* Keep the light brand presentation when storage is unavailable. */
         }
+        try {
+          // Declare the visitor's chosen language before the first paint, so
+          // the browser's own translator knows what the page is written in.
+          const language = localStorage.getItem("rosic-language");
+          if (/^(vi|en|zh|ko|ja|ar|fr|de)$/.test(language || "")) {
+            document.documentElement.lang = language;
+            document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+          }
+        } catch {
+          /* Vietnamese stays declared. */
+        }
       })();
     </script>
     <meta

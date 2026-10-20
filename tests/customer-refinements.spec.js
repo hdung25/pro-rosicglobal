@@ -23,7 +23,11 @@ test("product menu lists every group, stays open while scrolling and closes on s
     await expect(panel).toBeHidden();
     await expect(page).toHaveURL(new RegExp(`/san-pham/${group.slug}$`));
     const expected = DEFAULT_PRODUCTS.filter(item => item.category === group.id).length;
-    await expect(page.locator(".group-products .pcard")).toHaveCount(expected);
+    await expect(page.locator(".group-products .pcard")).toHaveCount(Math.min(expected, 4));
+    if (expected > 4) {
+      await page.locator(".group-products .finder-more button").click();
+      await expect(page.locator(".group-products .pcard")).toHaveCount(expected);
+    }
   }
   await trigger.click();
   await page.mouse.wheel(0, 300);

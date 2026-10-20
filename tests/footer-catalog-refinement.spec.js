@@ -5,6 +5,9 @@ for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await page.route('**/api/content', route => route.fulfill({ json: { ok: true, data: null } }));
     await page.goto('/san-pham/hat-dieu');
+    // A group opens with four products; the rest are behind "show more".
+    await expect(page.locator('.group-products .pcard')).toHaveCount(4);
+    await page.locator('.group-products .finder-more button').click();
     await expect(page.locator('.group-products .pcard')).toHaveCount(9);
     const target = page.locator('.group-products .pcard').filter({ hasText: 'ROS-030' });
     await expect(target.locator('.pcard__meta strong')).toBeVisible();

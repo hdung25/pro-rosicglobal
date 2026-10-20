@@ -56,6 +56,7 @@ import "./mobile-polish.css";
 import "./catalog-v6.css";
 import "./release-v7.css";
 import "./release-v8.css";
+import "./release-v9.css";
 import { mergeText } from "./cms/content-overrides";
 import SocialChannels from "./components/SocialChannels";
 import { SOCIAL_DEFAULTS, configuredSocial, configuredSocialQr } from "./social-config";
@@ -200,7 +201,7 @@ function Brand({ footer = false, copy, home = true }) {
         width="445"
         height="159"
       />
-      <span className="brand-name">ROSIC</span>
+      <span className="brand-name" translate="no">ROSIC</span>
     </a>
   );
 }
@@ -569,7 +570,7 @@ function RosicValues({ story, language, values = ROSIC_VALUES }) {
         <ul className="rosic-values" dir="ltr">
           {values.map((value) => (
             <li key={value.letter}>
-              <span className="rosic-letter">{value.letter}</span>
+              <span className="rosic-letter" translate="no">{value.letter}</span>
               {createElement(icons[value.icon] ?? Globe2, { size: 23, strokeWidth: 1.2, "aria-hidden": true })}
               <span className="rosic-word">{value.word}</span>
               <span className="rosic-explanation">{rosicExplanation(value, language)}</span>
@@ -580,7 +581,7 @@ function RosicValues({ story, language, values = ROSIC_VALUES }) {
         <dl className="rosic-legend">
           {values.map((value) => (
             <div key={value.letter}>
-              <dt><span dir="ltr">{value.letter} – {value.word}</span></dt>
+              <dt><span dir="ltr"><span translate="no">{value.letter}</span> – {value.word}</span></dt>
               <dd>{rosicExplanation(value, language)}</dd>
             </div>
           ))}
@@ -817,11 +818,13 @@ function Footer({ onPolicy, language, onLanguage, theme, onThemeChange, copy, ca
         <div className="footer-brand">
           <Brand footer copy={copy} language={language} home={onHome} />
           {/* The official slogan, identical to the logo lock-up. */}
-          <p className="footer-tagline">{BRAND_SLOGAN}</p>
+          <p className="footer-tagline" translate="no">{BRAND_SLOGAN}</p>
           <SocialChannels links={socialLinks} qr={socialQr} language={language} className="footer-social" />
         </div>
         <div className="footer-column">
-          <h3><a href={href("#home")}>{copy.nav.home}</a></h3>
+          {/* Home is the first link of the list, same type and row height as
+              the others, so this column and the product groups line up. */}
+          <a href={href("#home")}>{copy.nav.home}</a>
           {NAV.filter((item) => item.href !== "#home").map((item) => (
             <a key={item.key} href={href(item.href)}>
               {navLabel(copy, item)}
@@ -842,7 +845,7 @@ function Footer({ onPolicy, language, onLanguage, theme, onThemeChange, copy, ca
         </div>
       </div>
       <div className="container footer-bottom">
-        <p className="footer-copyright"><span>Copyright © HONG TAM ROSIC GLOBAL JSC.</span> <span>All rights reserved.</span></p>
+        <p className="footer-copyright" translate="no"><span>Copyright © HONG TAM ROSIC GLOBAL JSC.</span> <span>All rights reserved.</span></p>
         <div className="footer-bottom-actions">
           <button onClick={onPolicy}>{copy.footer.privacy}</button>
         </div>

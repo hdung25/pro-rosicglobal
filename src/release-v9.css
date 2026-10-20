@@ -1,0 +1,52 @@
+/* =====================================================================
+   Release v9 — customer review (20 Oct 2026). Loaded last.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Items 4, 10 — CTA buttons carry text only. The arrow made translated
+   labels ("Xem chi tiết", "Details ansehen", …) overflow narrow product
+   cards on phones, so it is removed from every call-to-action, and long
+   labels wrap inside the button instead of spilling over its frame.
+   --------------------------------------------------------------------- */
+html[data-theme] :is(.site-app, .detail-dialog, .quote-dialog, .social-qr-dialog, .mobile-menu) :is(
+  .button, .text-link, .pcard__cta, .footer-cta, .hero-about-button, .social-popup__open, .finder-search__submit
+) :is(.lucide-arrow-up-right, .lucide-arrow-right, .lucide-move-up-right) {
+  display: none !important;
+}
+html[data-theme] .site-app .pcard__cta {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-width: 760px) {
+  html[data-theme] .site-app .pcard__cta { padding: 8px 10px !important; font-size: 13px !important; line-height: 1.25 !important; }
+}
+
+/* ---------------------------------------------------------------------
+   Item 14 — footer. "Home" is an ordinary link in the site column (same
+   face, size and row height as the others), and the product-group column
+   starts on the same line so both lists run row for row.
+   --------------------------------------------------------------------- */
+html[data-theme] .site-app .footer-column--groups { padding-top: 0; }
+html[data-theme] .site-app :is(.footer-column, .footer-column--groups) { align-content: start; justify-content: start; }
+
+/* ---------------------------------------------------------------------
+   Item 5 — the phone menu is the site's largest list of titles, so its
+   entries use the logo face too (the 01–08 numbers stay in the text face).
+   Desktop grids with a collapsed group list keep whole rows of four.
+   --------------------------------------------------------------------- */
+html[data-theme] .mobile-menu .mobile-nav__item {
+  font-family: var(--logo-font) !important;
+  font-weight: 600 !important;
+  font-size: clamp(22px, 6vw, 26px) !important;
+  letter-spacing: 0.005em;
+}
+html[data-theme] .mobile-menu .mobile-nav__item > span { font-family: "Be Vietnam Pro", sans-serif; font-weight: 500; letter-spacing: 0.04em; }
+/* Arrows line up at the row end in both directions (Arabic showed them
+   floating mid-row: an older rule set margin-left: auto). */
+html[data-theme] .mobile-menu .mobile-nav__item > svg { flex: 0 0 auto; margin-inline: auto 0 !important; }
+@media (min-width: 1000px) {
+  html[data-theme] .site-app .product-grid-v6--rows4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

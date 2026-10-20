@@ -245,3 +245,19 @@ Kiểm thử (bản build production, `vite preview`):
 Cần khách xác nhận: cách đặt tên cà phê "size 13/16/18 – Clean/Không clean"; ảnh nhóm đang dùng ảnh danh mục trong CMS; ảnh phóng to sẽ nét hơn khi tải ảnh gốc độ phân giải cao (hiện 900px); dữ liệu tự điền cũ nằm trong trình duyệt của người dùng, website không xóa được, nhưng các ô đã tắt tự điền.
 
 Kiểm thử (bản build production, `vite preview`): Playwright 169/169 đạt (gồm `customer-feedback-oct.spec.js` 23 test cho từng mục và PWA), `test:quote-api` 8/8, `eslint` sạch, rà tràn ngang 8 ngôn ngữ × 280/320/390/768/1440px × trang chủ/nhóm/sản phẩm không lỗi.
+
+## Phản hồi khách 20/10/2026 — rà soát lần 2
+
+| Mục | Xử lý | Vị trí trong mã |
+| --- | --- | --- |
+| 1. Bản dịch | Các ảnh "R CÁI S TÔI C", "CHÚNG TA / VÀ / CỦA" ở bộ chọn ngôn ngữ, chữ "kiểm tra chi tiết" viết thường, tên hàng Hàn/Trung hiện bằng tiếng Việt… là do **Chrome tự dịch trang**, không phải nội dung site. Site đã đánh dấu `translate="no"` cho chữ ROSIC, 5 chữ cái R-O-S-I-C, mã ngôn ngữ, mã sản phẩm, slogan và dòng bản quyền; khai báo ngôn ngữ trang ngay từ lần vẽ đầu để trình duyệt nhận đúng ngôn ngữ đang xem. "Tiêu đen FAQ" là tên cấp hạt tiêu (Fair Average Quality), không phải lỗi. | `index.html`, `App.jsx`, `LanguagePicker.jsx`, `CatalogV6.jsx` |
+| 4, 10. Nút CTA | Bỏ mũi tên ở mọi nút CTA; chữ dài tự xuống dòng trong khung nút, không tràn ra ngoài. | `src/release-v9.css` |
+| 5. Font tiêu đề | Tiêu đề trang, thẻ sản phẩm, nhóm đã dùng Cormorant Garamond (font logo); bổ sung danh sách menu điện thoại (mục lớn nhất còn dùng font chữ thường). Mũi tên menu tiếng Ả Rập thẳng hàng cuối dòng. | `src/release-v9.css` |
+| 7. Nhóm sản phẩm | Mỗi nhóm (chip ở trang chủ, trang nhóm, "sản phẩm cùng nhóm") hiện 4 SP, còn lại sau nút "Xem thêm N sản phẩm". "Tất cả" mở với 8 SP (mỗi nhóm một). Tên SP con sửa được trong Admin → Sản phẩm → "Tên sản phẩm" và "Bản dịch sản phẩm". | `CollapsibleGrid` trong `CatalogV6.jsx` |
+| 9. Back | Nhóm đang chọn, ô tìm kiếm và trạng thái "Xem thêm" lưu trong lịch sử trình duyệt; Back từ SP con về đúng nhóm và đúng vị trí cuộn. | `useHistoryState` trong `src/router.js` |
+| 14. Chân trang | "Trang chủ" là link thường cùng font, cỡ chữ với các mục khác; cột nhóm sản phẩm bắt đầu cùng hàng, hai cột thẳng hàng từng dòng. | `Footer` trong `App.jsx`, `release-v9.css` |
+| 16. Training | Không thuộc mã nguồn — xếp lịch hướng dẫn Admin khi nghiệm thu. | — |
+
+Cần khách cung cấp: tên đúng cho 9 mã hạt điều (ROS-025–033, hiện "10 xanh / 16 / 18 × nguyên / cánh / vỡ" theo danh sách cũ) và, nếu cần đổi, tên cà phê (ROS-101–108). Có thể tự sửa trong Admin.
+
+Kiểm thử: `eslint` sạch, `vite build` đạt, Playwright toàn bộ đạt (thêm 1 test cho rà soát 20/10), `test:quote-api` đạt.
